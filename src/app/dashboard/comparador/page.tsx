@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { Button } from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase/client'
 import { CompanyComparison } from '@/types'
 import { Plus, Edit, Trash2, Eye, EyeOff, ArrowLeft, GitCompare, Search } from 'lucide-react'
