@@ -170,8 +170,8 @@ export default function NovaAvaliacao() {
               <div>
                 <label className="block text-sm font-medium mb-2">Nota (1-5 estrelas)</label>
                 <StarRating
-                  rating={formData.rating}
-                  onRatingChange={(rating) => setFormData({ ...formData, rating })}
+                  value={formData.rating}
+                  onChange={(rating) => setFormData({ ...formData, rating })}
                 />
               </div>
 
