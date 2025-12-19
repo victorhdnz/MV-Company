@@ -272,9 +272,11 @@ export default function NovoService() {
                 <div>
                   <label className="block text-sm font-medium mb-2">Galeria de Imagens</label>
                   <ArrayImageManager
-                    images={formData.images}
+                    value={formData.images || []}
                     onChange={(images) => setFormData({ ...formData, images })}
-                    folder="services"
+                    cropType="square"
+                    aspectRatio={1}
+                    recommendedDimensions="800x800px"
                   />
                 </div>
 
