@@ -29,7 +29,7 @@ export function ServiceBenefits({ content }: ServiceBenefitsProps) {
           </div>
         ) : (
           <div className="space-y-6">
-            {content.benefits_items.map((item, index) => {
+            {(content.benefits_items || []).map((item, index) => {
             // Cores de destaque estratégicas baseadas no índice
             const accentColors = [
               'bg-orange-500/20 border-orange-500/30 text-orange-400', // Laranja
@@ -63,7 +63,7 @@ export function ServiceBenefits({ content }: ServiceBenefitsProps) {
                       <span className="text-2xl">✓</span>
                     )}
                   </div>
-                  {index < content.benefits_items!.length - 1 && (
+                  {index < (content.benefits_items || []).length - 1 && (
                     <div className="w-0.5 h-full bg-gray-600/50 mt-2" />
                   )}
                 </div>

@@ -29,7 +29,7 @@ export function ServiceGifts({ content }: ServiceGiftsProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {content.gifts_items.map((item, index) => {
+            {(content.gifts_items || []).map((item, index) => {
             // Cores de destaque estratégicas para badges
             const badgeColors = [
               'bg-gray-800/90 border-orange-500/40 text-orange-300', // Laranja
