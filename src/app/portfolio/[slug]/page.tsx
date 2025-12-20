@@ -164,7 +164,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
   }
 
   return (
-    <ServicePageTracker pageId={service.id} pageSlug={service.slug}>
+    <ServicePageTracker serviceId={service.id} serviceSlug={service.slug}>
       <div className="min-h-screen bg-black">
         {/* Renderizar seções na ordem configurada */}
         {sectionOrder.map((sectionId: string) => {
