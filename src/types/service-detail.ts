@@ -43,10 +43,13 @@ export interface ServiceDetailContent {
   cta_description?: string
   cta_whatsapp_enabled?: boolean
   cta_whatsapp_number?: string
+  cta_whatsapp_text?: string
   cta_email_enabled?: boolean
   cta_email_address?: string
+  cta_email_text?: string
   cta_instagram_enabled?: boolean
   cta_instagram_url?: string
+  cta_instagram_text?: string
 
   // Ordem e visibilidade
   section_order?: string[]
