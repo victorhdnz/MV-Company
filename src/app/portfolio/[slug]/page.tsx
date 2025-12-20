@@ -86,13 +86,13 @@ async function getRelatedServices(currentServiceId: string, category?: string): 
   }
 }
 
-async function getServiceDetailLayout(): Promise<ServiceDetailContent | null> {
+async function getServiceDetailLayout(serviceId: string): Promise<ServiceDetailContent | null> {
   try {
     const supabase = createServerClient()
     const { data, error } = await supabase
-      .from('site_settings')
-      .select('service_detail_layout')
-      .eq('key', 'general')
+      .from('services')
+      .select('detail_layout')
+      .eq('id', serviceId)
       .maybeSingle()
 
     if (error) {
@@ -100,7 +100,7 @@ async function getServiceDetailLayout(): Promise<ServiceDetailContent | null> {
       return null
     }
 
-    return data?.service_detail_layout || null
+    return data?.detail_layout || null
   } catch (error) {
     console.error('Erro ao buscar layout de detalhes:', error)
     return null
@@ -116,8 +116,15 @@ export default async function ServicePage({ params }: { params: { slug: string }
 
   const [testimonials, layoutContent] = await Promise.all([
     getTestimonials(service.id),
-    getServiceDetailLayout(),
+    getServiceDetailLayout(service.id),
   ])
+
+  console.log('📄 Layout carregado para serviço:', {
+    serviceId: service.id,
+    serviceSlug: service.slug,
+    hasLayout: !!layoutContent,
+    layoutContent,
+  })
 
   // Usar layout padrão se não houver configuração
   const content: ServiceDetailContent = layoutContent || {

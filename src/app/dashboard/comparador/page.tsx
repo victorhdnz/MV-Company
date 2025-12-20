@@ -77,9 +77,24 @@ export default function ComparadorDashboardPage() {
     instagram_text: 'Instagram',
   })
   
+  // Função auxiliar para gerar UUID válido
+  const generateUUID = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0
+      const v = c === 'x' ? r : (r & 0x3 | 0x8)
+      return v.toString(16)
+    })
+  }
+
+  // Função auxiliar para verificar se é UUID válido
+  const isValidUUID = (str: string): boolean => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    return uuidRegex.test(str)
+  }
+
   const [companies, setCompanies] = useState<CompetitorCompany[]>([
     {
-      id: 'competitor-1',
+      id: generateUUID(),
       name: '',
       logo: '',
       description: '',
@@ -87,7 +102,7 @@ export default function ComparadorDashboardPage() {
       is_active: true,
     },
     {
-      id: 'competitor-2',
+      id: generateUUID(),
       name: '',
       logo: '',
       description: '',
@@ -174,8 +189,14 @@ export default function ComparadorDashboardPage() {
             })
           }
           
+          // Garantir que o ID seja um UUID válido
+          let companyId = company.id
+          if (!isValidUUID(companyId)) {
+            companyId = generateUUID()
+          }
+          
           updatedCompanies[index] = {
-            id: company.id,
+            id: companyId,
             name: company.name,
             logo: company.logo || '',
             description: company.description || '',
@@ -304,73 +325,131 @@ export default function ComparadorDashboardPage() {
     }
   }
 
-  const handleSaveCompany = async (index: number) => {
+  const handleSaveAll = async () => {
     try {
       setSaving(true)
-      const company = companies[index]
 
-      if (!company.name.trim()) {
-        toast.error('Nome da empresa é obrigatório')
+      // 1. Salvar tópicos globais
+      if (globalTopics.length > 0) {
+        const { success: topicsSuccess, error: topicsError } = await saveSiteSettings({
+          fieldsToUpdate: {
+            comparison_topics: globalTopics,
+          },
+        })
+
+        if (!topicsSuccess) {
+          toast.error(topicsError?.message || 'Erro ao salvar tópicos')
+          return
+        }
+      }
+
+      // 2. Salvar MV Company
+      const { success: mvSuccess, error: mvError } = await saveSiteSettings({
+        fieldsToUpdate: {
+          mv_company: mvCompany,
+        },
+      })
+
+      if (!mvSuccess) {
+        toast.error(mvError?.message || 'Erro ao salvar MV Company')
         return
       }
 
-      const slug = company.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-
-      const { data: existing } = await supabase
-        .from('company_comparisons')
-        .select('id')
-        .eq('id', company.id)
-        .maybeSingle()
-
-      // Converter topic_values de volta para comparison_topics (compatibilidade)
-      const comparison_topics = globalTopics.map(topic => {
-        const topicValue = company.topic_values.find(tv => tv.topic_id === topic.id)
-        return {
-          id: topic.id,
-          name: topic.name,
-          mv_company: mvCompany.topic_values.find(tv => tv.topic_id === topic.id)?.has_feature || false,
-          competitor: topicValue?.has_feature || false,
+      // 3. Salvar empresas concorrentes
+      for (let index = 0; index < companies.length; index++) {
+        let company = companies[index]
+        
+        // Se a empresa não tem nome, pular (não salvar empresas vazias)
+        if (!company.name.trim()) {
+          continue
         }
-      })
 
-      if (existing) {
-        const { error } = await supabase
-          .from('company_comparisons')
-          .update({
-            name: company.name,
-            slug: slug,
-            logo: company.logo,
-            description: company.description,
-            comparison_topics: comparison_topics,
-            is_active: company.is_active,
-            updated_at: new Date().toISOString(),
+        const slug = company.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+
+        // Verificar se o ID é um UUID válido, se não for, gerar um novo
+        let companyId = company.id
+        if (!isValidUUID(companyId)) {
+          companyId = generateUUID()
+          // Atualizar o ID no estado e na variável local
+          company = { ...company, id: companyId }
+          setCompanies(prev => {
+            const updated = [...prev]
+            updated[index] = company
+            return updated
           })
-          .eq('id', company.id)
+        }
 
-        if (error) throw error
-        toast.success('Empresa atualizada com sucesso!')
-      } else {
-        const { error } = await supabase
+        // Verificar se já existe uma empresa com este ID
+        const { data: existing } = await supabase
           .from('company_comparisons')
-          .insert({
-            id: company.id,
-            name: company.name,
-            slug: slug,
-            logo: company.logo,
-            description: company.description,
-            comparison_topics: comparison_topics,
-            is_active: company.is_active,
-          })
+          .select('id')
+          .eq('id', companyId)
+          .maybeSingle()
 
-        if (error) throw error
-        toast.success('Empresa salva com sucesso!')
+        // Converter topic_values de volta para comparison_topics (compatibilidade)
+        const comparison_topics = globalTopics.map(topic => {
+          const topicValue = company.topic_values.find(tv => tv.topic_id === topic.id)
+          return {
+            id: topic.id,
+            name: topic.name,
+            mv_company: mvCompany.topic_values.find(tv => tv.topic_id === topic.id)?.has_feature || false,
+            competitor: topicValue?.has_feature || false,
+          }
+        })
+
+        if (existing) {
+          // Atualizar empresa existente
+          const { error } = await supabase
+            .from('company_comparisons')
+            .update({
+              name: company.name,
+              slug: slug,
+              logo: company.logo,
+              description: company.description,
+              comparison_topics: comparison_topics,
+              is_active: company.is_active,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', companyId)
+
+          if (error) throw error
+        } else {
+          // Criar nova empresa
+          const { error } = await supabase
+            .from('company_comparisons')
+            .insert({
+              id: companyId,
+              name: company.name,
+              slug: slug,
+              logo: company.logo,
+              description: company.description,
+              comparison_topics: comparison_topics,
+              is_active: company.is_active,
+            })
+
+          if (error) throw error
+        }
       }
 
+      // 4. Salvar rodapé
+      const { success: footerSuccess, error: footerError } = await saveSiteSettings({
+        fieldsToUpdate: {
+          comparison_footer: footerContent,
+        },
+      })
+
+      if (!footerSuccess) {
+        toast.error(footerError?.message || 'Erro ao salvar rodapé')
+        return
+      }
+
+      toast.success('Todas as alterações foram salvas com sucesso!')
+      setEditingMVCompany(false)
       setEditingCompany(null)
       loadCompanies()
     } catch (error: any) {
-      console.error('Erro ao salvar empresa:', error)
-      toast.error(error?.message || 'Erro ao salvar empresa')
+      console.error('Erro ao salvar tudo:', error)
+      toast.error(error?.message || 'Erro ao salvar alterações')
     } finally {
       setSaving(false)
     }
@@ -540,10 +619,6 @@ export default function ComparadorDashboardPage() {
                   <Plus size={18} className="mr-2" />
                   Adicionar Tópico
                 </Button>
-                <Button onClick={handleSaveTopics} isLoading={saving}>
-                  <Save size={18} className="mr-2" />
-                  Salvar Tópicos
-                </Button>
               </div>
             </div>
           )}
@@ -663,12 +738,6 @@ export default function ComparadorDashboardPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-4 border-t border-gray-200">
-                <Button onClick={handleSaveFooter} isLoading={savingFooter}>
-                  <Save size={18} className="mr-2" />
-                  Salvar Rodapé
-                </Button>
-              </div>
             </div>
           )}
         </div>
@@ -767,13 +836,6 @@ export default function ComparadorDashboardPage() {
                     onClick={() => setEditingMVCompany(false)}
                   >
                     Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleSaveMVCompany}
-                    isLoading={saving}
-                  >
-                    <Save size={18} className="mr-2" />
-                    Salvar MV Company
                   </Button>
                 </div>
               </div>
@@ -907,13 +969,6 @@ export default function ComparadorDashboardPage() {
                     >
                       Cancelar
                     </Button>
-                    <Button
-                      onClick={() => handleSaveCompany(index)}
-                      isLoading={saving}
-                    >
-                      <Save size={18} className="mr-2" />
-                      Salvar Empresa
-                    </Button>
                   </div>
                 </div>
               ) : (
@@ -944,6 +999,26 @@ export default function ComparadorDashboardPage() {
               )}
             </div>
           ))}
+        </div>
+
+        {/* Botão Salvar Tudo */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">Salvar Todas as Alterações</h3>
+              <p className="text-sm text-gray-500">
+                Salva tópicos globais, MV Company, empresas concorrentes e rodapé de uma vez
+              </p>
+            </div>
+            <Button
+              onClick={handleSaveAll}
+              isLoading={saving}
+              className="min-w-[200px]"
+            >
+              <Save size={18} className="mr-2" />
+              Salvar Tudo
+            </Button>
+          </div>
         </div>
       </div>
     </div>

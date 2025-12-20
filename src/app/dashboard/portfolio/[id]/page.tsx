@@ -309,7 +309,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
       if (error) throw error
 
       toast.success('Serviço atualizado com sucesso!')
-      router.push('/dashboard/portfolio')
+      // Não redirecionar - manter no editor
     } catch (error: any) {
       console.error('Erro ao atualizar serviço:', error)
       toast.error(error.message || 'Erro ao atualizar serviço')
@@ -880,13 +880,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h3 className="font-bold mb-4">Ações</h3>
-              <Button onClick={handleSave} isLoading={saving} className="w-full">
-                <Save size={18} className="mr-2" />
-                Salvar Alterações
-              </Button>
-            </div>
+            {/* Sidebar removida - botão já está no header */}
           </div>
         </div>
       </div>

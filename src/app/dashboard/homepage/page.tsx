@@ -148,14 +148,32 @@ export default function HomepageEditorPage() {
         })
         
         // Fazer merge preservando arrays (especialmente services_cards)
-        setFormData(prev => ({
-          ...prev,
-          ...content,
-          // Garantir que services_cards seja sempre um array
-          services_cards: Array.isArray(content.services_cards) && content.services_cards.length > 0 
-            ? content.services_cards 
-            : (Array.isArray(prev.services_cards) ? prev.services_cards : [])
-        }))
+        setFormData(prev => {
+          // Sempre usar o array do banco se existir, mesmo que vazio
+          // Isso garante que cards salvos sejam sempre carregados
+          let servicesCards: ServiceCard[] = []
+          
+          if (Array.isArray(content.services_cards)) {
+            // Se é um array válido do banco, usar ele (mesmo que vazio)
+            servicesCards = content.services_cards
+          } else if (Array.isArray(prev.services_cards) && prev.services_cards.length > 0) {
+            // Se não existe no banco mas existe no estado anterior, manter
+            servicesCards = prev.services_cards
+          }
+          
+          console.log('📋 services_cards processado:', {
+            original: content.services_cards,
+            isArray: Array.isArray(content.services_cards),
+            length: servicesCards.length,
+            processed: servicesCards,
+          })
+          
+          return {
+            ...prev,
+            ...content,
+            services_cards: servicesCards,
+          }
+        })
         
         // Carregar ordem e visibilidade se existirem
         if (content.section_order) {
@@ -336,7 +354,10 @@ export default function HomepageEditorPage() {
                 <div className="border-t border-gray-200 pt-4 mt-4">
                   <ServiceCardsManager
                     value={formData.services_cards || []}
-                    onChange={(cards) => setFormData({ ...formData, services_cards: cards })}
+                    onChange={(cards) => {
+                      console.log('🔄 Cards atualizados no ServiceCardsManager:', cards)
+                      setFormData({ ...formData, services_cards: cards })
+                    }}
                     label="Cards de Serviços"
                   />
                 </div>

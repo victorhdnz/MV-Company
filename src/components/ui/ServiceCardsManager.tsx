@@ -34,6 +34,13 @@ export function ServiceCardsManager({
   className = '',
 }: ServiceCardsManagerProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  
+  // Log de debug para verificar se os cards estão sendo recebidos
+  console.log('🎴 ServiceCardsManager recebeu:', {
+    value,
+    isArray: Array.isArray(value),
+    length: value?.length || 0,
+  })
 
   const generateId = () => `card_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
 
