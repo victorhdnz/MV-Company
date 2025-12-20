@@ -148,7 +148,6 @@ export default function LoadingLogoPage() {
                   cropType="square"
                   aspectRatio={1}
                   recommendedDimensions="200x200px"
-                  folder="loading"
                 />
                 {loadingLogo && (
                   <button
