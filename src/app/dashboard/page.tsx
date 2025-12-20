@@ -246,11 +246,25 @@ function DashboardContent() {
       icon: Layers,
       items: [
         {
-          title: 'Homepage e Serviços',
-          description: 'Edite a homepage e gerencie serviços em um único lugar',
-          href: '/dashboard/paginas',
+          title: 'Editar Homepage',
+          description: 'Personalize textos, imagens e seções da página inicial',
+          href: '/dashboard/homepage',
           icon: Palette,
           color: 'bg-indigo-500',
+        },
+        {
+          title: 'Gerenciar Serviços',
+          description: 'Criar, editar e organizar serviços do portfolio',
+          href: '/dashboard/portfolio',
+          icon: Package,
+          color: 'bg-blue-500',
+        },
+        {
+          title: 'Layout de Página Detalhada',
+          description: 'Configure o layout e seções das páginas de detalhes dos serviços',
+          href: '/dashboard/portfolio/layout',
+          icon: Layers,
+          color: 'bg-purple-500',
         },
       ],
     },
@@ -281,12 +295,6 @@ function DashboardContent() {
           color: 'bg-green-500',
         },
       ],
-    },
-    {
-      title: 'Configurações',
-      description: 'Ajustes gerais do site e sistema',
-      icon: Layers,
-      items: [],
     },
   ]
 
@@ -382,6 +390,20 @@ function DashboardContent() {
 // Componente Principal com Lógica de Autenticação
 export default function DashboardPage() {
   const { isAuthenticated, isEditor, loading, profile } = useAuth()
+  const [profileLoadingTimeout, setProfileLoadingTimeout] = useState(false)
+
+  // Timeout de segurança: se após 1 segundo o profile ainda não carregou, permitir acesso
+  // Isso evita loading infinito se houver algum problema ao carregar o profile
+  useEffect(() => {
+    if (isAuthenticated && profile === null && !loading) {
+      const timeout = setTimeout(() => {
+        setProfileLoadingTimeout(true)
+      }, 1000) // Reduzido para 1 segundo
+      return () => clearTimeout(timeout)
+    } else {
+      setProfileLoadingTimeout(false)
+    }
+  }, [isAuthenticated, profile, loading])
 
   // Loading - aguardar até que o profile seja carregado completamente
   // Isso evita mostrar "Access Denied" antes do profile ser carregado
@@ -399,15 +421,22 @@ export default function DashboardPage() {
   }
 
   // Se está autenticado mas ainda não temos profile carregado, aguardar
-  // Isso evita o flash de "Access Denied" durante o carregamento inicial
-  // Só mostrar "Access Denied" se tivermos certeza que o profile foi carregado e não tem permissão
-  if (isAuthenticated && profile === null) {
+  // Mas com timeout de segurança para não ficar infinito
+  if (isAuthenticated && profile === null && !profileLoadingTimeout) {
     // Profile ainda não foi carregado, aguardar um pouco mais
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <LoadingSpinner size="md" />
       </div>
     )
+  }
+
+  // Se passou do timeout e ainda não tem profile, tentar carregar o dashboard mesmo assim
+  // (pode ser que o profile seja criado depois ou haja algum problema temporário)
+  if (isAuthenticated && profile === null && profileLoadingTimeout) {
+    // Tentar mostrar o dashboard mesmo sem profile (pode ser que seja criado depois)
+    // O DashboardContent vai verificar permissões internamente
+    return <DashboardContent />
   }
 
   // Autenticado mas não é admin/editor - mostrar acesso negado

@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { DashboardNavigation } from '@/components/dashboard/DashboardNavigation'
 import { getSiteSettings, saveSiteSettings } from '@/lib/supabase/site-settings-helper'
 import { SectionWrapper } from '@/components/editor/section-wrapper'
+import { ServiceCardsManager, ServiceCard } from '@/components/ui/ServiceCardsManager'
 
 interface HomepageSettings {
   hero_enabled?: boolean
@@ -26,6 +27,7 @@ interface HomepageSettings {
   services_enabled?: boolean
   services_title?: string
   services_description?: string
+  services_cards?: ServiceCard[]
 
   comparison_cta_enabled?: boolean
   comparison_cta_title?: string
@@ -100,6 +102,7 @@ export default function HomepageEditorPage() {
     services_enabled: true,
     services_title: 'Nossos Serviços',
     services_description: 'Soluções completas para impulsionar seu negócio no mundo digital',
+    services_cards: [],
 
     comparison_cta_enabled: true,
     comparison_cta_title: 'Compare a MV Company',
@@ -307,9 +310,13 @@ export default function HomepageEditorPage() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <p className="text-sm text-gray-500">
-                  Os serviços são gerenciados na aba "Gerenciar Serviços" do dashboard.
-                </p>
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <ServiceCardsManager
+                    value={formData.services_cards || []}
+                    onChange={(cards) => setFormData({ ...formData, services_cards: cards })}
+                    label="Cards de Serviços"
+                  />
+                </div>
               </>
             )}
           </div>

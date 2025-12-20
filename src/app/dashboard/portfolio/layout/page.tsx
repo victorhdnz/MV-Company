@@ -6,6 +6,11 @@ import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Switch } from '@/components/ui/Switch'
+import { ImageUploader } from '@/components/ui/ImageUploader'
+import { VideoUploader } from '@/components/ui/VideoUploader'
+import { BenefitsManager } from '@/components/ui/BenefitsManager'
+import { GiftsManager } from '@/components/ui/GiftsManager'
+import { AlternateContentManager } from '@/components/ui/AlternateContentManager'
 import { createClient } from '@/lib/supabase/client'
 import { Save, Eye } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -13,59 +18,27 @@ import Link from 'next/link'
 import { DashboardNavigation } from '@/components/dashboard/DashboardNavigation'
 import { getSiteSettings, saveSiteSettings } from '@/lib/supabase/site-settings-helper'
 import { SectionWrapper } from '@/components/editor/section-wrapper'
-
-interface ServiceDetailLayout {
-  hero_enabled?: boolean
-  hero_title_template?: string
-  hero_subtitle_template?: string
-  
-  description_enabled?: boolean
-  description_title?: string
-  
-  video_enabled?: boolean
-  video_title?: string
-  
-  gallery_enabled?: boolean
-  gallery_title?: string
-  
-  testimonials_enabled?: boolean
-  testimonials_title?: string
-  
-  pricing_enabled?: boolean
-  pricing_title?: string
-  
-  related_services_enabled?: boolean
-  related_services_title?: string
-  
-  cta_enabled?: boolean
-  cta_title?: string
-  cta_description?: string
-  
-  section_order?: string[]
-  section_visibility?: Record<string, boolean>
-}
+import { ServiceDetailContent } from '@/types/service-detail'
 
 // Mapeamento de seções
 const sectionIcons: Record<string, string> = {
-  hero: '🎯',
-  description: '📝',
-  video: '🎥',
-  gallery: '🖼️',
+  hero: '🎥',
+  benefits: '📋',
+  gifts: '🎁',
+  alternate: '🔄',
+  about: '👥',
   testimonials: '💬',
-  pricing: '💰',
-  related_services: '🔗',
-  cta: '🚀',
+  cta: '📞',
 }
 
 const sectionLabels: Record<string, string> = {
-  hero: 'Hero (Principal)',
-  description: 'Descrição Detalhada',
-  video: 'Vídeo Explicativo',
-  gallery: 'Galeria de Projetos',
+  hero: 'Hero com Vídeo',
+  benefits: 'O que você receberá',
+  gifts: 'Ganhe esses presentes',
+  alternate: 'Conteúdo Alternado',
+  about: 'Quem somos nós',
   testimonials: 'Depoimentos',
-  pricing: 'Preços/Investimento',
-  related_services: 'Serviços Relacionados',
-  cta: 'Call to Action',
+  cta: 'CTA Final',
 }
 
 export default function ServiceDetailLayoutPage() {
@@ -78,50 +51,60 @@ export default function ServiceDetailLayoutPage() {
   const [expandedSection, setExpandedSection] = useState<string | null>('hero')
   const [sectionOrder, setSectionOrder] = useState<string[]>([
     'hero',
-    'description',
-    'video',
-    'gallery',
+    'benefits',
+    'gifts',
+    'alternate',
+    'about',
     'testimonials',
-    'pricing',
-    'related_services',
     'cta',
   ])
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
     hero: true,
-    description: true,
-    video: true,
-    gallery: true,
+    benefits: true,
+    gifts: true,
+    alternate: true,
+    about: true,
     testimonials: true,
-    pricing: true,
-    related_services: true,
     cta: true,
   })
-  const [formData, setFormData] = useState<ServiceDetailLayout>({
+  const [formData, setFormData] = useState<ServiceDetailContent>({
     hero_enabled: true,
-    hero_title_template: '{service_name}',
-    hero_subtitle_template: '{service_description}',
-    
-    description_enabled: true,
-    description_title: 'Sobre este serviço',
-    
-    video_enabled: true,
-    video_title: 'Vídeo Explicativo',
-    
-    gallery_enabled: true,
-    gallery_title: 'Galeria de Projetos',
-    
+    hero_video_url: '',
+    hero_video_autoplay: false,
+    hero_title: '',
+    hero_title_highlight: '',
+    hero_title_highlight_color: '#00D9FF',
+    hero_subtitle: '',
+
+    benefits_enabled: true,
+    benefits_title: 'O que você receberá dentro da MV Company',
+    benefits_items: [],
+
+    gifts_enabled: true,
+    gifts_title: 'Ganhe esses presentes entrando agora',
+    gifts_items: [],
+
+    alternate_content_enabled: true,
+    alternate_content_items: [],
+
+    about_enabled: true,
+    about_title: 'Quem somos nós',
+    about_image: '',
+    about_text: '',
+
     testimonials_enabled: true,
-    testimonials_title: 'O que nossos clientes dizem',
-    
-    pricing_enabled: true,
-    pricing_title: 'Investimento',
-    
-    related_services_enabled: true,
-    related_services_title: 'Outros Serviços',
-    
+    testimonials_title: 'Todos os dias recebemos esse tipo de depoimentos',
+    testimonials_stats: 'Mais de 60 clientes satisfeitos',
+
     cta_enabled: true,
-    cta_title: 'Pronto para começar?',
-    cta_description: 'Entre em contato e solicite um orçamento personalizado',
+    cta_title: 'Entenda mais e entre em contato conosco',
+    cta_description: 'Inicie seu planejamento hoje mesmo',
+    cta_whatsapp_enabled: true,
+    cta_whatsapp_number: '',
+    cta_email_enabled: true,
+    cta_email_address: '',
+    cta_instagram_enabled: true,
+    cta_instagram_url: '',
   })
 
   useEffect(() => {
@@ -144,7 +127,7 @@ export default function ServiceDetailLayoutPage() {
       }
 
       if (data?.service_detail_layout) {
-        const layout = data.service_detail_layout
+        const layout = data.service_detail_layout as ServiceDetailContent
         setFormData(prev => ({ ...prev, ...layout }))
         
         // Carregar ordem e visibilidade se existirem
@@ -185,7 +168,7 @@ export default function ServiceDetailLayoutPage() {
     }))
     
     // Atualizar também o enabled do formData
-    const enabledKey = `${section}_enabled` as keyof ServiceDetailLayout
+    const enabledKey = `${section}_enabled` as keyof ServiceDetailContent
     setFormData(prev => ({
       ...prev,
       [enabledKey]: !sectionVisibility[section]
@@ -203,7 +186,7 @@ export default function ServiceDetailLayoutPage() {
             ...formData,
             section_order: sectionOrder,
             section_visibility: sectionVisibility,
-          }
+          } as ServiceDetailContent
         },
       })
 
@@ -228,82 +211,173 @@ export default function ServiceDetailLayoutPage() {
         return (
           <div className="space-y-4">
             <Switch
-              label="Habilitar Seção Hero"
+              label="Habilitar Seção Hero com Vídeo"
               checked={formData.hero_enabled ?? true}
               onCheckedChange={(checked) => setFormData({ ...formData, hero_enabled: checked })}
             />
             {formData.hero_enabled && (
               <>
-                <Input
-                  label="Template do Título (use {service_name} para nome do serviço)"
-                  value={formData.hero_title_template || ''}
-                  onChange={(e) => setFormData({ ...formData, hero_title_template: e.target.value })}
-                  placeholder="Ex: {service_name}"
+                <div>
+                  <label className="block text-sm font-medium mb-2">URL do Vídeo</label>
+                  <VideoUploader
+                    value={formData.hero_video_url || ''}
+                    onChange={(url) => setFormData({ ...formData, hero_video_url: url })}
+                    placeholder="URL do vídeo ou upload"
+                  />
+                </div>
+                <Switch
+                  label="Auto-play do vídeo (reproduzir automaticamente)"
+                  checked={formData.hero_video_autoplay ?? false}
+                  onCheckedChange={(checked) => setFormData({ ...formData, hero_video_autoplay: checked })}
                 />
                 <Input
-                  label="Template do Subtítulo (use {service_description} para descrição)"
-                  value={formData.hero_subtitle_template || ''}
-                  onChange={(e) => setFormData({ ...formData, hero_subtitle_template: e.target.value })}
-                  placeholder="Ex: {service_description}"
+                  label="Título Principal"
+                  value={formData.hero_title || ''}
+                  onChange={(e) => setFormData({ ...formData, hero_title: e.target.value })}
+                  placeholder="Ex: Aprenda esses 2 ajustes..."
+                />
+                <Input
+                  label="Palavra para Destacar (dentro do título)"
+                  value={formData.hero_title_highlight || ''}
+                  onChange={(e) => setFormData({ ...formData, hero_title_highlight: e.target.value })}
+                  placeholder="Ex: preguiçosos"
+                />
+                <div className="flex items-center gap-4">
+                  <Input
+                    label="Cor da Palavra Destacada"
+                    value={formData.hero_title_highlight_color || '#00D9FF'}
+                    onChange={(e) => setFormData({ ...formData, hero_title_highlight_color: e.target.value })}
+                    type="color"
+                    className="w-24 h-12"
+                  />
+                  <div className="flex-1">
+                    <Input
+                      label=""
+                      value={formData.hero_title_highlight_color || '#00D9FF'}
+                      onChange={(e) => setFormData({ ...formData, hero_title_highlight_color: e.target.value })}
+                      placeholder="#00D9FF"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Subtítulo</label>
+                  <textarea
+                    value={formData.hero_subtitle || ''}
+                    onChange={(e) => setFormData({ ...formData, hero_subtitle: e.target.value })}
+                    placeholder="Subtítulo descritivo..."
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        )
+
+      case 'benefits':
+        return (
+          <div className="space-y-4">
+            <Switch
+              label="Habilitar Seção 'O que você receberá'"
+              checked={formData.benefits_enabled ?? true}
+              onCheckedChange={(checked) => setFormData({ ...formData, benefits_enabled: checked })}
+            />
+            {formData.benefits_enabled && (
+              <>
+                <Input
+                  label="Título da Seção"
+                  value={formData.benefits_title || ''}
+                  onChange={(e) => setFormData({ ...formData, benefits_title: e.target.value })}
+                  placeholder="Ex: O que você receberá dentro da MV Company"
+                />
+                <BenefitsManager
+                  value={formData.benefits_items || []}
+                  onChange={(items) => setFormData({ ...formData, benefits_items: items })}
                 />
               </>
             )}
           </div>
         )
 
-      case 'description':
+      case 'gifts':
         return (
           <div className="space-y-4">
             <Switch
-              label="Habilitar Seção Descrição"
-              checked={formData.description_enabled ?? true}
-              onCheckedChange={(checked) => setFormData({ ...formData, description_enabled: checked })}
+              label="Habilitar Seção 'Ganhe esses presentes'"
+              checked={formData.gifts_enabled ?? true}
+              onCheckedChange={(checked) => setFormData({ ...formData, gifts_enabled: checked })}
             />
-            {formData.description_enabled && (
-              <Input
-                label="Título da Seção"
-                value={formData.description_title || ''}
-                onChange={(e) => setFormData({ ...formData, description_title: e.target.value })}
-                placeholder="Ex: Sobre este serviço"
+            {formData.gifts_enabled && (
+              <>
+                <Input
+                  label="Título da Seção"
+                  value={formData.gifts_title || ''}
+                  onChange={(e) => setFormData({ ...formData, gifts_title: e.target.value })}
+                  placeholder="Ex: Ganhe esses presentes entrando agora"
+                />
+                <GiftsManager
+                  value={formData.gifts_items || []}
+                  onChange={(items) => setFormData({ ...formData, gifts_items: items })}
+                />
+              </>
+            )}
+          </div>
+        )
+
+      case 'alternate':
+        return (
+          <div className="space-y-4">
+            <Switch
+              label="Habilitar Conteúdo Alternado"
+              checked={formData.alternate_content_enabled ?? true}
+              onCheckedChange={(checked) => setFormData({ ...formData, alternate_content_enabled: checked })}
+            />
+            {formData.alternate_content_enabled && (
+              <AlternateContentManager
+                value={formData.alternate_content_items || []}
+                onChange={(items) => setFormData({ ...formData, alternate_content_items: items })}
               />
             )}
           </div>
         )
 
-      case 'video':
+      case 'about':
         return (
           <div className="space-y-4">
             <Switch
-              label="Habilitar Seção Vídeo"
-              checked={formData.video_enabled ?? true}
-              onCheckedChange={(checked) => setFormData({ ...formData, video_enabled: checked })}
+              label="Habilitar Seção 'Quem somos nós'"
+              checked={formData.about_enabled ?? true}
+              onCheckedChange={(checked) => setFormData({ ...formData, about_enabled: checked })}
             />
-            {formData.video_enabled && (
-              <Input
-                label="Título da Seção"
-                value={formData.video_title || ''}
-                onChange={(e) => setFormData({ ...formData, video_title: e.target.value })}
-                placeholder="Ex: Vídeo Explicativo"
-              />
-            )}
-          </div>
-        )
-
-      case 'gallery':
-        return (
-          <div className="space-y-4">
-            <Switch
-              label="Habilitar Seção Galeria"
-              checked={formData.gallery_enabled ?? true}
-              onCheckedChange={(checked) => setFormData({ ...formData, gallery_enabled: checked })}
-            />
-            {formData.gallery_enabled && (
-              <Input
-                label="Título da Seção"
-                value={formData.gallery_title || ''}
-                onChange={(e) => setFormData({ ...formData, gallery_title: e.target.value })}
-                placeholder="Ex: Galeria de Projetos"
-              />
+            {formData.about_enabled && (
+              <>
+                <Input
+                  label="Título da Seção"
+                  value={formData.about_title || ''}
+                  onChange={(e) => setFormData({ ...formData, about_title: e.target.value })}
+                  placeholder="Ex: Quem somos nós"
+                />
+                <div>
+                  <label className="block text-sm font-medium mb-2">Foto dos Donos (PNG transparente recomendado)</label>
+                  <ImageUploader
+                    value={formData.about_image || ''}
+                    onChange={(url) => setFormData({ ...formData, about_image: url })}
+                    placeholder="Upload de foto"
+                    cropType="square"
+                    aspectRatio={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Texto sobre a empresa</label>
+                  <textarea
+                    value={formData.about_text || ''}
+                    onChange={(e) => setFormData({ ...formData, about_text: e.target.value })}
+                    placeholder="Texto sobre a empresa..."
+                    rows={6}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </>
             )}
           </div>
         )
@@ -317,50 +391,23 @@ export default function ServiceDetailLayoutPage() {
               onCheckedChange={(checked) => setFormData({ ...formData, testimonials_enabled: checked })}
             />
             {formData.testimonials_enabled && (
-              <Input
-                label="Título da Seção"
-                value={formData.testimonials_title || ''}
-                onChange={(e) => setFormData({ ...formData, testimonials_title: e.target.value })}
-                placeholder="Ex: O que nossos clientes dizem"
-              />
-            )}
-          </div>
-        )
-
-      case 'pricing':
-        return (
-          <div className="space-y-4">
-            <Switch
-              label="Habilitar Seção Preços"
-              checked={formData.pricing_enabled ?? true}
-              onCheckedChange={(checked) => setFormData({ ...formData, pricing_enabled: checked })}
-            />
-            {formData.pricing_enabled && (
-              <Input
-                label="Título da Seção"
-                value={formData.pricing_title || ''}
-                onChange={(e) => setFormData({ ...formData, pricing_title: e.target.value })}
-                placeholder="Ex: Investimento"
-              />
-            )}
-          </div>
-        )
-
-      case 'related_services':
-        return (
-          <div className="space-y-4">
-            <Switch
-              label="Habilitar Seção Serviços Relacionados"
-              checked={formData.related_services_enabled ?? true}
-              onCheckedChange={(checked) => setFormData({ ...formData, related_services_enabled: checked })}
-            />
-            {formData.related_services_enabled && (
-              <Input
-                label="Título da Seção"
-                value={formData.related_services_title || ''}
-                onChange={(e) => setFormData({ ...formData, related_services_title: e.target.value })}
-                placeholder="Ex: Outros Serviços"
-              />
+              <>
+                <Input
+                  label="Título da Seção"
+                  value={formData.testimonials_title || ''}
+                  onChange={(e) => setFormData({ ...formData, testimonials_title: e.target.value })}
+                  placeholder="Ex: Todos os dias recebemos esse tipo de depoimentos"
+                />
+                <Input
+                  label="Estatística (ex: Mais de 60 clientes satisfeitos)"
+                  value={formData.testimonials_stats || ''}
+                  onChange={(e) => setFormData({ ...formData, testimonials_stats: e.target.value })}
+                  placeholder="Ex: Mais de 60 clientes satisfeitos"
+                />
+                <p className="text-sm text-gray-500">
+                  Os depoimentos são gerenciados na seção "Avaliações" do dashboard.
+                </p>
+              </>
             )}
           </div>
         )
@@ -369,7 +416,7 @@ export default function ServiceDetailLayoutPage() {
         return (
           <div className="space-y-4">
             <Switch
-              label="Habilitar Seção CTA Final"
+              label="Habilitar CTA Final"
               checked={formData.cta_enabled ?? true}
               onCheckedChange={(checked) => setFormData({ ...formData, cta_enabled: checked })}
             />
@@ -379,14 +426,60 @@ export default function ServiceDetailLayoutPage() {
                   label="Título do CTA"
                   value={formData.cta_title || ''}
                   onChange={(e) => setFormData({ ...formData, cta_title: e.target.value })}
-                  placeholder="Ex: Pronto para começar?"
+                  placeholder="Ex: Entenda mais e entre em contato conosco"
                 />
-                <Input
-                  label="Descrição do CTA"
-                  value={formData.cta_description || ''}
-                  onChange={(e) => setFormData({ ...formData, cta_description: e.target.value })}
-                  placeholder="Ex: Entre em contato e solicite um orçamento"
-                />
+                <div>
+                  <label className="block text-sm font-medium mb-2">Descrição</label>
+                  <textarea
+                    value={formData.cta_description || ''}
+                    onChange={(e) => setFormData({ ...formData, cta_description: e.target.value })}
+                    placeholder="Ex: Inicie seu planejamento hoje mesmo"
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="border-t border-gray-200 pt-4 mt-4 space-y-4">
+                  <h3 className="font-semibold">Contatos</h3>
+                  <Switch
+                    label="Habilitar WhatsApp"
+                    checked={formData.cta_whatsapp_enabled ?? true}
+                    onCheckedChange={(checked) => setFormData({ ...formData, cta_whatsapp_enabled: checked })}
+                  />
+                  {formData.cta_whatsapp_enabled && (
+                    <Input
+                      label="Número do WhatsApp (com DDD, ex: 5534984136291)"
+                      value={formData.cta_whatsapp_number || ''}
+                      onChange={(e) => setFormData({ ...formData, cta_whatsapp_number: e.target.value })}
+                      placeholder="Ex: 5534984136291"
+                    />
+                  )}
+                  <Switch
+                    label="Habilitar E-mail"
+                    checked={formData.cta_email_enabled ?? true}
+                    onCheckedChange={(checked) => setFormData({ ...formData, cta_email_enabled: checked })}
+                  />
+                  {formData.cta_email_enabled && (
+                    <Input
+                      label="Endereço de E-mail"
+                      value={formData.cta_email_address || ''}
+                      onChange={(e) => setFormData({ ...formData, cta_email_address: e.target.value })}
+                      placeholder="Ex: contato@mvcompany.com.br"
+                    />
+                  )}
+                  <Switch
+                    label="Habilitar Instagram"
+                    checked={formData.cta_instagram_enabled ?? true}
+                    onCheckedChange={(checked) => setFormData({ ...formData, cta_instagram_enabled: checked })}
+                  />
+                  {formData.cta_instagram_enabled && (
+                    <Input
+                      label="URL do Instagram"
+                      value={formData.cta_instagram_url || ''}
+                      onChange={(e) => setFormData({ ...formData, cta_instagram_url: e.target.value })}
+                      placeholder="Ex: https://instagram.com/mvcompany"
+                    />
+                  )}
+                </div>
               </>
             )}
           </div>

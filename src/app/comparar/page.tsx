@@ -5,11 +5,15 @@ import { createClient } from '@/lib/supabase/client'
 import { CompanyComparison } from '@/types'
 import Image from 'next/image'
 import { GitCompare } from 'lucide-react'
+import { ComparisonFooter } from '@/components/comparador/ComparisonFooter'
+import { useSearchParams } from 'next/navigation'
 
 export default function CompararPage() {
   const supabase = createClient()
   const [companies, setCompanies] = useState<CompanyComparison[]>([])
   const [loading, setLoading] = useState(true)
+  const searchParams = useSearchParams()
+  const isPreview = searchParams.get('preview') === 'true'
 
   useEffect(() => {
     loadCompanies()
@@ -38,7 +42,12 @@ export default function CompararPage() {
   }
 
   // Sempre mostrar a tabela de comparação com MV Company + empresas do banco
-  return <ComparisonTable companies={companies} loading={loading} />
+  return (
+    <>
+      <ComparisonTable companies={companies} loading={loading} />
+      {!isPreview && <ComparisonFooter />}
+    </>
+  )
 }
 
 // Componente de Tabela de Comparação

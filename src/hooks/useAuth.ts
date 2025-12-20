@@ -115,12 +115,21 @@ export const useAuth = () => {
 
           // Iniciar busca do profile e aguardar antes de finalizar loading
           // Isso garante que isEditor seja calculado corretamente
+          // Mas com timeout para não travar se o profile não carregar
+          const profileTimeout = new Promise<void>((resolve) => {
+            setTimeout(() => {
+              if (mounted) {
+                resolve()
+              }
+            }, 2000) // Timeout de 2 segundos para carregar profile
+          })
+
           try {
-            await loadProfileAsync()
+            await Promise.race([loadProfileAsync(), profileTimeout])
           } catch (error) {
             console.error('Erro ao carregar profile:', error)
           } finally {
-            // Só finalizar loading após o profile ser carregado (ou erro confirmado)
+            // Sempre finalizar loading, mesmo se o profile não carregou
             if (mounted && timeoutId) {
               clearTimeout(timeoutId)
               timeoutId = null
