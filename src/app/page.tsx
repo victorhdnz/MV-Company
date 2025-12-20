@@ -8,7 +8,7 @@ import Image from 'next/image'
 import { GitCompare } from 'lucide-react'
 import { HomepageTracker } from '@/components/analytics/HomepageTracker'
 import { SocialButton } from '@/components/ui/SocialButton'
-import { FadeInSection } from '@/components/ui/FadeInSection'
+import { FadeInSectionWrapper } from '@/components/ui/FadeInSectionWrapper'
 
 async function getServices(): Promise<Service[]> {
   try {
@@ -81,7 +81,7 @@ export default async function Home() {
     if (homepageContent.hero_enabled === false || sectionVisibility.hero === false) return null
     
     return (
-      <FadeInSection>
+      <FadeInSectionWrapper>
         <section className="relative bg-black text-white py-16 md:py-24 px-4 overflow-hidden">
         {homepageContent.hero_background_image && (
           <div className="absolute inset-0 z-0 opacity-20">
@@ -132,7 +132,7 @@ export default async function Home() {
     if (homepageContent.services_enabled === false || sectionVisibility.services === false) return null
     
     return (
-      <FadeInSection>
+      <FadeInSectionWrapper>
         <section id="servicos" className="py-16 md:py-24 px-4">
         <div className="container mx-auto max-w-7xl">
           {homepageContent.services_title && (
@@ -169,7 +169,7 @@ export default async function Home() {
           )}
         </div>
       </section>
-      </FadeInSection>
+      </FadeInSectionWrapper>
     )
   }
 
@@ -178,7 +178,7 @@ export default async function Home() {
     if (homepageContent.comparison_cta_enabled === false || sectionVisibility.comparison === false) return null
     
     return (
-      <FadeInSection>
+      <FadeInSectionWrapper>
         <section className="py-16 md:py-24 px-4">
         <div className="container mx-auto max-w-4xl">
           <Link href={homepageContent.comparison_cta_link || "/comparar"}>
@@ -202,7 +202,7 @@ export default async function Home() {
           </Link>
         </div>
       </section>
-      </FadeInSection>
+      </FadeInSectionWrapper>
     )
   }
 
@@ -211,7 +211,7 @@ export default async function Home() {
     if (homepageContent.contact_enabled === false || sectionVisibility.contact === false) return null
     
     return (
-      <FadeInSection>
+      <FadeInSectionWrapper>
         <section className="py-16 md:py-24 px-4 bg-gray-900/50">
           <div className="container mx-auto max-w-4xl text-center">
             <h2 className="text-3xl md:text-5xl font-semibold text-white mb-4 tracking-tight">
@@ -244,10 +244,10 @@ export default async function Home() {
                   text={homepageContent.contact_instagram_text || 'Instagram'}
                 />
               )}
-            </div>
           </div>
-        </section>
-      </FadeInSection>
+        </div>
+      </section>
+      </FadeInSectionWrapper>
     )
   }
 
