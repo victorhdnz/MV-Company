@@ -459,18 +459,21 @@ export default function ComparadorDashboardPage() {
                     }}
                     placeholder="Ex: Empresa Concorrente"
                   />
-                  <ImageUploader
-                    label="Logo da Empresa"
-                    value={company.logo || ''}
-                    onChange={(url) => {
-                      const updated = [...companies]
-                      updated[index].logo = url
-                      setCompanies(updated)
-                    }}
-                    cropType="square"
-                    aspectRatio={1}
-                    targetSize={{ width: 200, height: 200 }}
-                  />
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Logo da Empresa</label>
+                    <ImageUploader
+                      value={company.logo || ''}
+                      onChange={(url) => {
+                        const updated = [...companies]
+                        updated[index].logo = url
+                        setCompanies(updated)
+                      }}
+                      cropType="square"
+                      aspectRatio={1}
+                      targetSize={{ width: 200, height: 200 }}
+                      placeholder="Clique para fazer upload do logo"
+                    />
+                  </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Descrição</label>
                     <textarea
