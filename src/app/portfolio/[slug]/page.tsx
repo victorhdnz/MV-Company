@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowRight, Star, Clock, DollarSign, MessageCircle } from 'lucide-react'
 import { ServiceCard } from '@/components/portfolio/ServiceCard'
+import { ServicePageTracker } from '@/components/analytics/ServicePageTracker'
 
 async function getService(slug: string): Promise<Service | null> {
   try {
@@ -92,7 +93,8 @@ export default async function ServicePage({ params }: { params: { slug: string }
   ])
 
   return (
-    <div className="min-h-screen bg-white">
+    <ServicePageTracker serviceId={service.id} serviceSlug={service.slug}>
+      <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-black via-gray-900 to-black text-white py-20 px-4">
         <div className="container mx-auto max-w-6xl">
@@ -308,7 +310,8 @@ export default async function ServicePage({ params }: { params: { slug: string }
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </ServicePageTracker>
   )
 }
 

@@ -115,7 +115,12 @@ export const useAuth = () => {
 
           // Iniciar busca do profile e aguardar antes de finalizar loading
           // Isso garante que isEditor seja calculado corretamente
-          loadProfileAsync().finally(() => {
+          try {
+            await loadProfileAsync()
+          } catch (error) {
+            console.error('Erro ao carregar profile:', error)
+          } finally {
+            // Só finalizar loading após o profile ser carregado (ou erro confirmado)
             if (mounted && timeoutId) {
               clearTimeout(timeoutId)
               timeoutId = null
@@ -123,7 +128,7 @@ export const useAuth = () => {
             if (mounted) {
               setLoading(false)
             }
-          })
+          }
         } else {
           // Não há sessão
           if (mounted && timeoutId) {

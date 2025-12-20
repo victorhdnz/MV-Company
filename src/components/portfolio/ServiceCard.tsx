@@ -3,14 +3,29 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Service } from '@/types'
+import { trackClick } from '@/lib/utils/analytics'
 
 interface ServiceCardProps {
   service: Service
 }
 
 export const ServiceCard = ({ service }: ServiceCardProps) => {
+  const handleClick = () => {
+    trackClick({
+      pageType: 'homepage',
+      pageSlug: '/',
+      element: 'service-card',
+      text: service.name,
+      url: `/portfolio/${service.slug}`,
+    })
+  }
+
   return (
-    <Link href={`/portfolio/${service.slug}`} className="block group">
+    <Link 
+      href={`/portfolio/${service.slug}`} 
+      className="block group"
+      onClick={handleClick}
+    >
       <div className="relative h-[300px] md:h-[350px] rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 hover:border-gray-700 transition-all duration-300">
         {/* Background Image - Blurred by default, sharp on hover */}
         {service.cover_image ? (

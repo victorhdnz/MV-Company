@@ -8,13 +8,13 @@ import {
   GitCompare,
   Layers,
   Eye,
-  MousePointer,
   Palette,
   Package,
   LogOut,
   Lock,
   Plus,
   ArrowRight,
+  BarChart3,
 } from 'lucide-react'
 import Link from 'next/link'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -22,10 +22,7 @@ import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
 interface DashboardStats {
-  totalViews: number
-  totalClicks: number
   totalServices: number
-  totalComparisons: number
 }
 
 // Componente de Login
@@ -197,10 +194,7 @@ function AccessDenied() {
 function DashboardContent() {
   const { profile } = useAuth()
   const [stats, setStats] = useState<DashboardStats>({
-    totalViews: 0,
-    totalClicks: 0,
     totalServices: 0,
-    totalComparisons: 0,
   })
   const [loadingData, setLoadingData] = useState(true)
   const supabase = createClient()
@@ -215,20 +209,13 @@ function DashboardContent() {
     try {
       setLoadingData(true)
 
-      const [analyticsResult, servicesResult, comparisonsResult] = await Promise.all([
-        supabase.from('portfolio_analytics').select('event_type').gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
-        supabase.from('services').select('id', { count: 'exact' }).eq('is_active', true),
-        supabase.from('company_comparisons').select('id', { count: 'exact' }).eq('is_active', true),
-      ])
-
-      const views = analyticsResult.data?.filter(a => a.event_type === 'page_view').length || 0
-      const clicks = analyticsResult.data?.filter(a => a.event_type === 'click').length || 0
+      const { count } = await supabase
+        .from('services')
+        .select('id', { count: 'exact' })
+        .eq('is_active', true)
 
       setStats({
-        totalViews: views,
-        totalClicks: clicks,
-        totalServices: servicesResult.count || 0,
-        totalComparisons: comparisonsResult.count || 0,
+        totalServices: count || 0,
       })
     } catch (error) {
       console.error('Erro ao carregar dados do dashboard:', error)
@@ -249,27 +236,6 @@ function DashboardContent() {
       icon: Package,
       color: 'bg-blue-500',
       description: 'Serviços ativos',
-    },
-    {
-      title: 'Comparações',
-      value: stats.totalComparisons.toString(),
-      icon: GitCompare,
-      color: 'bg-orange-500',
-      description: 'Comparações ativas',
-    },
-    {
-      title: 'Views (30d)',
-      value: stats.totalViews.toLocaleString(),
-      icon: Eye,
-      color: 'bg-teal-500',
-      description: 'Visualizações',
-    },
-    {
-      title: 'Cliques (30d)',
-      value: stats.totalClicks.toLocaleString(),
-      icon: MousePointer,
-      color: 'bg-green-500',
-      description: 'Interações',
     },
   ]
 
@@ -325,6 +291,20 @@ function DashboardContent() {
       ],
     },
     {
+      title: 'Analytics',
+      description: 'Acompanhe o desempenho das suas páginas',
+      icon: BarChart3,
+      items: [
+        {
+          title: 'Ver Analytics',
+          description: 'Visualizações, cliques, scroll e métricas detalhadas',
+          href: '/dashboard/analytics',
+          icon: BarChart3,
+          color: 'bg-green-500',
+        },
+      ],
+    },
+    {
       title: 'Configurações',
       description: 'Ajustes gerais do site e sistema',
       icon: Layers,
@@ -361,14 +341,14 @@ function DashboardContent() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="mb-8">
           {statsCards.map((stat, index) => (
             <motion.div
               key={stat.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-5"
+              className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 max-w-xs"
             >
               <div className="flex items-center justify-between mb-3">
                 <div className={`${stat.color} w-10 h-10 rounded-lg flex items-center justify-center text-white`}>
@@ -431,9 +411,10 @@ function DashboardContent() {
 
 // Componente Principal com Lógica de Autenticação
 export default function DashboardPage() {
-  const { isAuthenticated, isEditor, loading } = useAuth()
+  const { isAuthenticated, isEditor, loading, profile } = useAuth()
 
-  // Loading
+  // Loading - aguardar até que o profile seja carregado completamente
+  // Isso evita mostrar "Access Denied" antes do profile ser carregado
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -447,8 +428,21 @@ export default function DashboardPage() {
     return <LoginForm />
   }
 
+  // Se está autenticado mas ainda não temos profile carregado, aguardar
+  // Isso evita o flash de "Access Denied" durante o carregamento inicial
+  // Só mostrar "Access Denied" se tivermos certeza que o profile foi carregado e não tem permissão
+  if (isAuthenticated && profile === null) {
+    // Profile ainda não foi carregado, aguardar um pouco mais
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <LoadingSpinner size="md" />
+      </div>
+    )
+  }
+
   // Autenticado mas não é admin/editor - mostrar acesso negado
-  if (!isEditor) {
+  // Só mostrar isso se tivermos certeza que o profile foi carregado e não tem permissão
+  if (!isEditor && profile !== null) {
     return <AccessDenied />
   }
 

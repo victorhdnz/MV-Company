@@ -4,6 +4,7 @@ import { Service } from '@/types'
 import Link from 'next/link'
 import Image from 'next/image'
 import { GitCompare } from 'lucide-react'
+import { HomepageTracker } from '@/components/analytics/HomepageTracker'
 
 async function getServices(): Promise<Service[]> {
   try {
@@ -53,7 +54,8 @@ export default async function Home() {
   const homepageContent = siteSettings?.homepage_content || {}
 
   return (
-    <div className="min-h-screen bg-black">
+    <HomepageTracker>
+      <div className="min-h-screen bg-black">
       {/* Hero Section - Minimalist */}
       {homepageContent.hero_enabled !== false && (
         <section className="relative bg-black text-white py-16 md:py-24 px-4 overflow-hidden">
@@ -208,6 +210,7 @@ export default async function Home() {
           </div>
         </section>
       )}
-    </div>
+      </div>
+    </HomepageTracker>
   )
 }
