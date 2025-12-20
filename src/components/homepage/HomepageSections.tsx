@@ -85,11 +85,18 @@ export function HomepageSections({
       <FadeInSection>
         <section id="servicos" className="py-16 md:py-24 px-4">
           <div className="container mx-auto max-w-7xl">
-            {homepageContent.services_title && (
+            {(homepageContent.services_title || homepageContent.services_description) && (
               <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-5xl font-semibold text-white mb-4 tracking-tight">
-                  {homepageContent.services_title}
-                </h2>
+                {homepageContent.services_title && (
+                  <h2 className="text-3xl md:text-5xl font-semibold text-white mb-4 tracking-tight">
+                    {homepageContent.services_title}
+                  </h2>
+                )}
+                {homepageContent.services_description && (
+                  <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+                    {homepageContent.services_description}
+                  </p>
+                )}
               </div>
             )}
 

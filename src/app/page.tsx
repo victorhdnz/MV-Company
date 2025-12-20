@@ -40,14 +40,19 @@ async function getSiteSettings() {
     }
     
     // Garantir que homepage_content seja um objeto válido
+    let homepageContent = {}
     if (data && data.homepage_content && typeof data.homepage_content === 'object') {
-      return data
+      homepageContent = data.homepage_content
     }
     
-    // Se homepage_content não existe ou é null, retornar objeto com homepage_content vazio
+    // Garantir que services_cards seja sempre um array
+    if (homepageContent && !Array.isArray(homepageContent.services_cards)) {
+      homepageContent.services_cards = []
+    }
+    
     return {
       ...data,
-      homepage_content: data?.homepage_content || {}
+      homepage_content: homepageContent
     }
   } catch (error) {
     console.error('Error fetching site settings:', error)

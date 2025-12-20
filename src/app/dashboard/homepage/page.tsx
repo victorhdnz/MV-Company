@@ -141,7 +141,21 @@ export default function HomepageEditorPage() {
 
       if (data?.homepage_content) {
         const content = data.homepage_content
-        setFormData(prev => ({ ...prev, ...content }))
+        console.log('📥 Carregando homepage_content:', {
+          services_cards_count: content.services_cards?.length || 0,
+          services_cards: content.services_cards,
+          services_cards_isArray: Array.isArray(content.services_cards),
+        })
+        
+        // Fazer merge preservando arrays (especialmente services_cards)
+        setFormData(prev => ({
+          ...prev,
+          ...content,
+          // Garantir que services_cards seja sempre um array
+          services_cards: Array.isArray(content.services_cards) && content.services_cards.length > 0 
+            ? content.services_cards 
+            : (Array.isArray(prev.services_cards) ? prev.services_cards : [])
+        }))
         
         // Carregar ordem e visibilidade se existirem
         if (content.section_order) {
@@ -162,13 +176,22 @@ export default function HomepageEditorPage() {
   const handleSave = async () => {
     setSaving(true)
     try {
+      // Garantir que services_cards seja sempre um array
+      const contentToSave = {
+        ...formData,
+        services_cards: Array.isArray(formData.services_cards) ? formData.services_cards : [],
+        section_order: sectionOrder,
+        section_visibility: sectionVisibility,
+      }
+      
+      console.log('💾 Salvando homepage_content:', {
+        services_cards_count: contentToSave.services_cards?.length || 0,
+        services_cards: contentToSave.services_cards,
+      })
+      
       const { success, error } = await saveSiteSettings({
         fieldsToUpdate: {
-          homepage_content: {
-            ...formData,
-            section_order: sectionOrder,
-            section_visibility: sectionVisibility,
-          }
+          homepage_content: contentToSave
         },
       })
 
