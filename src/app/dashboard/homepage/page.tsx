@@ -487,34 +487,6 @@ export default function HomepageEditorPage() {
                     </>
                   )}
                 </div>
-                <div className="border-t border-gray-200 pt-4 mt-4">
-                  <h3 className="text-lg font-semibold mb-3">Botão Flutuante do WhatsApp</h3>
-                  <Switch
-                    label="Habilitar Botão Flutuante"
-                    checked={formData.whatsapp_float_enabled ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, whatsapp_float_enabled: checked })}
-                  />
-                  {formData.whatsapp_float_enabled && (
-                    <>
-                      <Input
-                        label="Número do WhatsApp (com DDD, ex: 5534984136291)"
-                        value={formData.whatsapp_float_number || ''}
-                        onChange={(e) => setFormData({ ...formData, whatsapp_float_number: e.target.value })}
-                        placeholder="Ex: 5534984136291"
-                      />
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Mensagem Inicial</label>
-                        <textarea
-                          value={formData.whatsapp_float_message || ''}
-                          onChange={(e) => setFormData({ ...formData, whatsapp_float_message: e.target.value })}
-                          placeholder="Ex: Olá! Gostaria de saber mais sobre os serviços."
-                          rows={2}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
               </>
             )}
           </div>
@@ -596,9 +568,45 @@ export default function HomepageEditorPage() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
+            {/* Configuração do WhatsApp Flutuante */}
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <span>💬</span>
+                WhatsApp Flutuante
+              </h3>
+              <div className="space-y-4">
+                <Switch
+                  label="Habilitar Botão Flutuante"
+                  checked={formData.whatsapp_float_enabled ?? true}
+                  onCheckedChange={(checked) => setFormData({ ...formData, whatsapp_float_enabled: checked })}
+                />
+                {formData.whatsapp_float_enabled && (
+                  <>
+                    <Input
+                      label="Número do WhatsApp"
+                      value={formData.whatsapp_float_number || ''}
+                      onChange={(e) => setFormData({ ...formData, whatsapp_float_number: e.target.value })}
+                      placeholder="Ex: 5534984136291"
+                    />
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">Mensagem Inicial</label>
+                      <textarea
+                        value={formData.whatsapp_float_message || ''}
+                        onChange={(e) => setFormData({ ...formData, whatsapp_float_message: e.target.value })}
+                        placeholder="Ex: Olá! Gostaria de saber mais sobre os serviços."
+                        rows={3}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Prévia Rápida */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-bold mb-4">Prévia Rápida</h2>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 mb-4 text-sm">
                 As alterações são salvas no banco de dados. Use o botão "Ver Preview" para visualizar a homepage completa.
               </p>
             </div>

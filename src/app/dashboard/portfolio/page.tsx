@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Modal } from '@/components/ui/Modal'
 import { createClient } from '@/lib/supabase/client'
 import { Service } from '@/types'
 import { Plus, Edit, Trash2, Eye, EyeOff, Search, Filter, Copy, Check } from 'lucide-react'
@@ -23,24 +25,31 @@ export default function DashboardPortfolioPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
   const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [newServiceName, setNewServiceName] = useState('')
+  const [creating, setCreating] = useState(false)
+  const hasCheckedAuth = useRef(false)
 
   const supabase = createClient()
 
   useEffect(() => {
-    let mounted = true
+    // Aguardar o carregamento da autenticação terminar
+    if (authLoading) return
 
-    if (!authLoading) {
-      if (!isAuthenticated || !isEditor) {
-        router.push('/dashboard')
-      } else if (mounted) {
-        loadServices()
-      }
+    // Evitar múltiplas verificações
+    if (hasCheckedAuth.current) return
+    hasCheckedAuth.current = true
+
+    // Verificar autenticação
+    if (!isAuthenticated || !isEditor) {
+      router.push('/dashboard')
+      return
     }
 
-    return () => {
-      mounted = false
-    }
-  }, [isAuthenticated, isEditor, authLoading, router])
+    // Carregar serviços
+    loadServices()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, isAuthenticated, isEditor])
 
   const loadServices = async () => {
     try {
@@ -144,6 +153,49 @@ export default function DashboardPortfolioPage() {
     }
   }
 
+  const handleCreateService = async () => {
+    if (!newServiceName.trim()) {
+      toast.error('Digite o nome do serviço')
+      return
+    }
+
+    try {
+      setCreating(true)
+
+      // Gerar slug automaticamente
+      const slug = newServiceName
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+
+      const { data, error } = await supabase
+        .from('services')
+        .insert({
+          name: newServiceName.trim(),
+          slug,
+          is_active: true,
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      toast.success('Serviço criado com sucesso!')
+      setShowCreateModal(false)
+      setNewServiceName('')
+      
+      // Redirecionar para o editor do serviço recém-criado
+      router.push(`/dashboard/portfolio/${data.id}`)
+    } catch (error: any) {
+      console.error('Erro ao criar serviço:', error)
+      toast.error(error.message || 'Erro ao criar serviço')
+    } finally {
+      setCreating(false)
+    }
+  }
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -162,12 +214,13 @@ export default function DashboardPortfolioPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Gerenciar Serviços</h1>
             <p className="text-gray-600">Crie, edite e configure o layout das páginas de serviços</p>
           </div>
-          <Link href="/dashboard/portfolio/novo">
-            <Button className="flex items-center gap-2">
-              <Plus size={20} />
-              Novo Serviço
-            </Button>
-          </Link>
+          <Button 
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Novo Serviço
+          </Button>
         </div>
 
         {/* Filters */}
@@ -207,12 +260,13 @@ export default function DashboardPortfolioPage() {
                 : 'Nenhum serviço cadastrado ainda'}
             </p>
             {!searchTerm && statusFilter === 'all' && (
-              <Link href="/dashboard/portfolio/novo">
-                <Button className="mt-4">
-                  <Plus size={20} className="mr-2" />
-                  Criar Primeiro Serviço
-                </Button>
-              </Link>
+              <Button 
+                onClick={() => setShowCreateModal(true)}
+                className="mt-4"
+              >
+                <Plus size={20} className="mr-2" />
+                Criar Primeiro Serviço
+              </Button>
             )}
           </div>
         ) : (
@@ -359,6 +413,52 @@ export default function DashboardPortfolioPage() {
             )}
           </>
         )}
+
+        {/* Modal de Criação de Serviço */}
+        <Modal
+          isOpen={showCreateModal}
+          onClose={() => {
+            setShowCreateModal(false)
+            setNewServiceName('')
+          }}
+          title="Criar Novo Serviço"
+          size="md"
+        >
+          <div className="space-y-4">
+            <p className="text-gray-600 text-sm">
+              Digite o nome do serviço. Após criar, você poderá editar o layout completo.
+            </p>
+            <Input
+              label="Nome do Serviço *"
+              value={newServiceName}
+              onChange={(e) => setNewServiceName(e.target.value)}
+              placeholder="Ex: Criação de Sites Responsivos"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && newServiceName.trim()) {
+                  handleCreateService()
+                }
+              }}
+            />
+            <div className="flex gap-3 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCreateModal(false)
+                  setNewServiceName('')
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleCreateService}
+                isLoading={creating}
+                disabled={!newServiceName.trim()}
+              >
+                Criar e Editar
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   )

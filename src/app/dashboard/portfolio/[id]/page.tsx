@@ -333,182 +333,9 @@ export default function EditServicePage({ params }: EditServicePageProps) {
               onChange={(e) => handleNameChange(e.target.value)}
               placeholder="Ex: Criação de Sites Responsivos"
             />
-
-            <Input
-              label="Slug (URL) *"
-              value={basicData.slug}
-              onChange={(e) => setBasicData({ ...basicData, slug: e.target.value })}
-              placeholder="criacao-de-sites-responsivos"
-            />
-            <p className="text-xs text-gray-500 -mt-2">
-              URL amigável do serviço. Gerado automaticamente a partir do nome.
+            <p className="text-sm text-gray-500">
+              O slug (URL) é gerado automaticamente a partir do nome. Você pode editar o layout completo nas seções abaixo.
             </p>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Categoria</label>
-              <div className="flex gap-2">
-                <select
-                  value={basicData.category}
-                  onChange={(e) => setBasicData({ ...basicData, category: e.target.value })}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                >
-                  <option value="">Selecione uma categoria</option>
-                  {existingCategories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-                <Input
-                  value={basicData.category}
-                  onChange={(e) => setBasicData({ ...basicData, category: e.target.value })}
-                  placeholder="Ou digite uma nova"
-                  className="flex-1"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Descrição Curta</label>
-              <textarea
-                value={basicData.short_description}
-                onChange={(e) => setBasicData({ ...basicData, short_description: e.target.value })}
-                placeholder="Breve descrição do serviço (2-3 linhas)"
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Descrição Completa</label>
-              <textarea
-                value={basicData.full_description}
-                onChange={(e) => setBasicData({ ...basicData, full_description: e.target.value })}
-                placeholder="Descrição detalhada do serviço"
-                rows={8}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Tags</label>
-              <div className="flex gap-2 mb-2">
-                <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                  placeholder="Digite uma tag e pressione Enter"
-                />
-                <Button onClick={addTag} type="button">Adicionar</Button>
-              </div>
-              {basicData.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {basicData.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm"
-                    >
-                      {tag}
-                      <button
-                        onClick={() => removeTag(tag)}
-                        className="text-gray-600 hover:text-red-600"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Imagem de Capa</label>
-              <ImageUploader
-                value={basicData.cover_image}
-                onChange={(url) => setBasicData({ ...basicData, cover_image: url })}
-                cropType="banner"
-                recommendedDimensions="1920x1080px (16:9)"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Galeria de Imagens</label>
-              <ArrayImageManager
-                value={basicData.images || []}
-                onChange={(images) => setBasicData({ ...basicData, images })}
-                cropType="square"
-                aspectRatio={1}
-                recommendedDimensions="800x800px"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Vídeo Explicativo (URL)</label>
-              <VideoUploader
-                value={basicData.video_url}
-                onChange={(url) => setBasicData({ ...basicData, video_url: url })}
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                URL do vídeo (YouTube, Vimeo, etc.) ou faça upload
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Investimento</label>
-                <Input
-                  value={basicData.price_range}
-                  onChange={(e) => setBasicData({ ...basicData, price_range: e.target.value })}
-                  placeholder="Ex: A partir de R$ 1.500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Tempo de Entrega</label>
-                <Input
-                  value={basicData.delivery_time}
-                  onChange={(e) => setBasicData({ ...basicData, delivery_time: e.target.value })}
-                  placeholder="Ex: 15-30 dias"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Meta Title (SEO)</label>
-                <Input
-                  value={basicData.meta_title}
-                  onChange={(e) => setBasicData({ ...basicData, meta_title: e.target.value })}
-                  placeholder="Título para SEO (máx. 60 caracteres)"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Meta Description (SEO)</label>
-                <textarea
-                  value={basicData.meta_description}
-                  onChange={(e) => setBasicData({ ...basicData, meta_description: e.target.value })}
-                  placeholder="Descrição para SEO (máx. 160 caracteres)"
-                  rows={2}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="is_active"
-                  checked={basicData.is_active}
-                  onChange={(e) => setBasicData({ ...basicData, is_active: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <label htmlFor="is_active" className="text-sm font-medium">
-                  Serviço ativo
-                </label>
-              </div>
-            </div>
           </div>
         )
 
@@ -785,34 +612,6 @@ export default function EditServicePage({ params }: EditServicePageProps) {
                     />
                   )}
                 </div>
-                <div className="border-t border-gray-200 pt-4 mt-4">
-                  <h3 className="text-lg font-semibold mb-3">Botão Flutuante do WhatsApp</h3>
-                  <Switch
-                    label="Habilitar Botão Flutuante"
-                    checked={layoutData.whatsapp_float_enabled ?? true}
-                    onCheckedChange={(checked) => setLayoutData({ ...layoutData, whatsapp_float_enabled: checked })}
-                  />
-                  {layoutData.whatsapp_float_enabled && (
-                    <>
-                      <Input
-                        label="Número do WhatsApp (com DDD, ex: 5534984136291)"
-                        value={layoutData.whatsapp_float_number || ''}
-                        onChange={(e) => setLayoutData({ ...layoutData, whatsapp_float_number: e.target.value })}
-                        placeholder="Ex: 5534984136291"
-                      />
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Mensagem Inicial</label>
-                        <textarea
-                          value={layoutData.whatsapp_float_message || ''}
-                          onChange={(e) => setLayoutData({ ...layoutData, whatsapp_float_message: e.target.value })}
-                          placeholder="Ex: Olá! Gostaria de saber mais sobre este serviço."
-                          rows={2}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
               </> 
             )}
           </div>
@@ -899,7 +698,48 @@ export default function EditServicePage({ params }: EditServicePageProps) {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Sidebar removida - botão já está no header */}
+            {/* Configuração do WhatsApp Flutuante */}
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <span>💬</span>
+                WhatsApp Flutuante
+              </h3>
+              <div className="space-y-4">
+                <Switch
+                  label="Habilitar Botão Flutuante"
+                  checked={layoutData.whatsapp_float_enabled ?? true}
+                  onCheckedChange={(checked) => setLayoutData({ ...layoutData, whatsapp_float_enabled: checked })}
+                />
+                {layoutData.whatsapp_float_enabled && (
+                  <>
+                    <Input
+                      label="Número do WhatsApp"
+                      value={layoutData.whatsapp_float_number || ''}
+                      onChange={(e) => setLayoutData({ ...layoutData, whatsapp_float_number: e.target.value })}
+                      placeholder="Ex: 5534984136291"
+                    />
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">Mensagem Inicial</label>
+                      <textarea
+                        value={layoutData.whatsapp_float_message || ''}
+                        onChange={(e) => setLayoutData({ ...layoutData, whatsapp_float_message: e.target.value })}
+                        placeholder="Ex: Olá! Gostaria de saber mais sobre este serviço."
+                        rows={3}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Prévia Rápida */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-bold mb-4">Prévia Rápida</h2>
+              <p className="text-gray-600 mb-4 text-sm">
+                As alterações são salvas no banco de dados. Use o botão "Ver Preview" para visualizar o serviço completo.
+              </p>
+            </div>
           </div>
         </div>
       </div>
