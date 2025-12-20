@@ -3,7 +3,7 @@ import { ServiceCard } from '@/components/portfolio/ServiceCard'
 import { Service } from '@/types'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, GitCompare } from 'lucide-react'
+import { GitCompare } from 'lucide-react'
 
 async function getServices(): Promise<Service[]> {
   try {
@@ -27,188 +27,175 @@ async function getServices(): Promise<Service[]> {
   }
 }
 
-async function getHomepageSettings() {
+async function getSiteSettings() {
   try {
     const supabase = createServerClient()
     const { data, error } = await supabase
       .from('site_settings')
-      .select('value')
+      .select('site_name, site_description, contact_email, contact_whatsapp, instagram_url, site_logo, homepage_content')
       .eq('key', 'general')
       .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Erro ao buscar configurações:', error)
+    if (error) {
+      console.error('Error fetching site settings:', error)
+      return null
     }
-
-    return data?.value?.homepage || null
+    return data
   } catch (error) {
-    console.error('Erro ao buscar configurações:', error)
+    console.error('Error fetching site settings:', error)
     return null
   }
 }
 
 export default async function Home() {
   const services = await getServices()
-  const homepageSettings = await getHomepageSettings()
-  
-  // Valores padrão
-  const hero = {
-    title: homepageSettings?.hero_title || 'MV Company',
-    subtitle: homepageSettings?.hero_subtitle || 'Transformamos sua presença digital com serviços de alta qualidade',
-    description: homepageSettings?.hero_description || 'Criação de sites, tráfego pago, criação de conteúdo e gestão de redes sociais',
-    buttonText: homepageSettings?.hero_button_text || 'Ver Serviços',
-    backgroundImage: homepageSettings?.hero_background_image || '',
-  }
-  
-  const servicesSection = {
-    title: homepageSettings?.services_title || 'Nossos Serviços',
-    description: homepageSettings?.services_description || 'Soluções completas para impulsionar seu negócio no mundo digital',
-  }
-  
-  const comparison = {
-    title: homepageSettings?.comparison_title || 'Compare a MV Company com outras empresas',
-    description: homepageSettings?.comparison_description || 'Veja por que somos a melhor escolha para transformar sua presença digital',
-    buttonText: homepageSettings?.comparison_button_text || 'Comparar Agora',
-  }
-  
-  const contact = {
-    title: homepageSettings?.contact_title || 'Pronto para transformar seu negócio?',
-    description: homepageSettings?.contact_description || 'Entre em contato e descubra como podemos ajudar você',
-    whatsapp: homepageSettings?.contact_whatsapp || '5534999999999',
-    instagram: homepageSettings?.contact_instagram || 'https://instagram.com/mvcompany',
-  }
+  const siteSettings = await getSiteSettings()
+  const homepageContent = siteSettings?.homepage_content || {}
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-black via-gray-900 to-black text-white py-20 px-4 overflow-hidden">
-        {hero.backgroundImage && (
-          <div className="absolute inset-0 z-0 opacity-20">
-            <Image
-              src={hero.backgroundImage}
-              alt="Background"
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-        )}
-        <div className="container mx-auto max-w-6xl relative z-10">
-          <div className="text-center space-y-6">
-            <h1 className="text-4xl md:text-6xl font-bold">
-              {hero.title}
+    <div className="min-h-screen bg-black">
+      {/* Hero Section - Minimalist */}
+      {homepageContent.hero_enabled !== false && (
+        <section className="relative bg-black text-white py-20 md:py-32 px-4">
+          <div className="container mx-auto max-w-6xl text-center">
+            <h1 className="text-5xl md:text-7xl font-semibold mb-6 tracking-tight">
+              {homepageContent.hero_title || siteSettings?.site_name || 'MV Company'}
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">
-              {hero.subtitle}
-            </p>
-            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-              {hero.description}
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center pt-4">
-              <a
-                href="#servicos"
-                className="bg-white text-black px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-              >
-                {hero.buttonText}
-              </a>
-              <Link
-                href="/comparar"
-                className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-black transition-colors flex items-center gap-2"
-              >
-                <GitCompare size={20} />
-                Comparar Agora
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Grid */}
-      <section id="servicos" className="py-16 px-4">
-        <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {servicesSection.title}
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              {servicesSection.description}
-            </p>
-          </div>
-
-          {services.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {services.map((service) => (
-                <ServiceCard key={service.id} service={service} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">
-                Nenhum serviço disponível no momento.
+            {homepageContent.hero_subtitle && (
+              <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light mb-8">
+                {homepageContent.hero_subtitle}
               </p>
-              <p className="text-gray-400 text-sm mt-2">
-                Os serviços serão exibidos aqui quando forem adicionados.
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Comparison Card */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="container mx-auto max-w-4xl">
-          <div className="bg-gradient-to-r from-black to-gray-800 rounded-2xl p-8 md:p-12 text-white text-center">
-            <div className="space-y-6">
-              <div className="inline-block bg-white/10 rounded-full p-3">
-                <GitCompare size={32} className="text-white" />
+            )}
+            {homepageContent.hero_button_1_enabled !== false && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href={homepageContent.hero_button_1_link || "#servicos"}
+                  className="px-8 py-4 bg-white text-black rounded-full font-medium hover:bg-gray-100 transition-all duration-200 text-center"
+                >
+                  {homepageContent.hero_button_1_text || 'Ver Serviços'}
+                </Link>
+                {homepageContent.hero_button_2_enabled !== false && (
+                  <Link
+                    href={homepageContent.hero_button_2_link || "/comparar"}
+                    className="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full font-medium hover:bg-white/20 transition-all duration-200 text-center"
+                  >
+                    {homepageContent.hero_button_2_text || 'Comparar Empresas'}
+                  </Link>
+                )}
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold">
-                {comparison.title}
-              </h2>
-              <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-                {comparison.description}
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Services Grid - Dark Theme Cards */}
+      {homepageContent.services_enabled !== false && (
+        <section id="servicos" className="py-16 md:py-24 px-4">
+          <div className="container mx-auto max-w-7xl">
+            {homepageContent.services_title && (
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-5xl font-semibold text-white mb-4 tracking-tight">
+                  {homepageContent.services_title}
+                </h2>
+              </div>
+            )}
+
+            {services.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {services.map((service) => (
+                  <ServiceCard key={service.id} service={service} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <div className="inline-block bg-gray-900 rounded-full p-6 mb-4">
+                  <span className="text-5xl">🚀</span>
+                </div>
+                <h2 className="text-2xl font-semibold text-white mb-2">Nenhum serviço disponível</h2>
+                <p className="text-gray-400">
+                  Os serviços serão exibidos aqui quando forem adicionados.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Comparison Card - Dark Theme */}
+      {homepageContent.comparison_cta_enabled !== false && (
+        <section className="py-16 md:py-24 px-4">
+          <div className="container mx-auto max-w-4xl">
+            <Link href={homepageContent.comparison_cta_link || "/comparar"}>
+              <div className="relative h-[300px] md:h-[400px] rounded-3xl overflow-hidden bg-gray-900 border border-gray-800 hover:border-gray-700 transition-all duration-300 group">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_50%)]" />
+
+                {/* Content */}
+                <div className="relative h-full flex flex-col justify-center items-center p-8 text-center">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <GitCompare size={40} className="text-white" />
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-semibold text-white mb-4 tracking-tight">
+                    {homepageContent.comparison_cta_title || 'Compare a MV Company'}
+                  </h2>
+                  {homepageContent.comparison_cta_description && (
+                    <p className="text-white/80 text-lg md:text-xl font-light max-w-2xl">
+                      {homepageContent.comparison_cta_description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* Contact Section - Dark Theme */}
+      {homepageContent.contact_enabled !== false && (
+        <section className="py-16 md:py-24 px-4 bg-gray-900/50">
+          <div className="container mx-auto max-w-4xl text-center">
+            <h2 className="text-3xl md:text-5xl font-semibold text-white mb-4 tracking-tight">
+              {homepageContent.contact_title || 'Fale Conosco'}
+            </h2>
+            {homepageContent.contact_description && (
+              <p className="text-gray-400 text-lg md:text-xl mb-12 font-light max-w-2xl mx-auto">
+                {homepageContent.contact_description}
               </p>
-              <Link
-                href="/comparar"
-                className="inline-flex items-center gap-2 bg-white text-black px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-              >
-                {comparison.buttonText}
-                <ArrowRight size={20} />
-              </Link>
+            )}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              {siteSettings?.contact_whatsapp && homepageContent.contact_whatsapp_enabled !== false && (
+                <a
+                  href={`https://wa.me/${siteSettings.contact_whatsapp.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto min-w-[200px] bg-[#25D366] text-white px-8 py-4 rounded-full font-medium hover:bg-[#20BA5A] transition-all duration-200 text-center"
+                >
+                  {homepageContent.contact_whatsapp_text || 'WhatsApp'}
+                </a>
+              )}
+              {siteSettings?.contact_email && homepageContent.contact_email_enabled !== false && (
+                <a
+                  href={`mailto:${siteSettings.contact_email}`}
+                  className="w-full sm:w-auto min-w-[200px] bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 py-4 rounded-full font-medium hover:bg-white/20 transition-all duration-200 text-center"
+                >
+                  {homepageContent.contact_email_text || 'E-mail'}
+                </a>
+              )}
+              {siteSettings?.instagram_url && homepageContent.contact_instagram_enabled !== false && (
+                <a
+                  href={siteSettings.instagram_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto min-w-[200px] bg-[#E4405F] text-white px-8 py-4 rounded-full font-medium hover:bg-[#D32E4A] transition-all duration-200 text-center"
+                >
+                  {homepageContent.contact_instagram_text || 'Instagram'}
+                </a>
+              )}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {contact.title}
-          </h2>
-          <p className="text-gray-600 text-lg mb-8">
-            {contact.description}
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <a
-              href={`https://wa.me/${contact.whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors"
-            >
-              WhatsApp
-            </a>
-            <a
-              href={contact.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
-            >
-              Instagram
-            </a>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   )
 }

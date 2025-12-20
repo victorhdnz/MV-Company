@@ -286,13 +286,6 @@ function DashboardContent() {
           icon: Palette,
           color: 'bg-indigo-500',
         },
-      ],
-    },
-    {
-      title: 'Portfolio de Serviços',
-      description: 'Gerencie os serviços digitais da MV Company',
-      icon: Package,
-      items: [
         {
           title: 'Gerenciar Serviços',
           description: 'Criar, editar e organizar serviços do portfolio',
@@ -300,6 +293,13 @@ function DashboardContent() {
           icon: Package,
           color: 'bg-blue-500',
         },
+      ],
+    },
+    {
+      title: 'Portfolio de Serviços',
+      description: 'Gerencie os serviços digitais da MV Company',
+      icon: Package,
+      items: [
         {
           title: 'Layout de Página Detalhada',
           description: 'Edite o layout e template das páginas de detalhes dos serviços',

@@ -214,7 +214,7 @@ export default function HomepageEditorPage() {
                 />
               </div>
               <p className="text-sm text-gray-500">
-                Os serviços são gerenciados em <Link href="/dashboard/portfolio" className="text-blue-600 underline">Gerenciar Serviços</Link>
+                Os serviços são gerenciados na aba "Gerenciar Serviços" do dashboard.
               </p>
             </div>
           </div>
