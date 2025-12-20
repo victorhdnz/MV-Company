@@ -224,13 +224,12 @@ export default function HomepageEditorPage() {
                     recommendedDimensions="200x100px"
                   />
                   {formData.hero_logo && (
-                    <Button
-                      variant="destructive"
+                    <button
                       onClick={() => setFormData({ ...formData, hero_logo: null })}
-                      className="mt-4"
+                      className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
                     >
-                      <Trash2 size={18} className="mr-2" /> Remover Logo
-                    </Button>
+                      <Trash2 size={18} /> Remover Logo
+                    </button>
                   )}
                   <p className="text-sm text-gray-500 mt-2">
                     Se uma logo for enviada, ela substituirá o título principal.
