@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import Image from 'next/image'
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg'
@@ -10,37 +11,48 @@ interface LoadingSpinnerProps {
 }
 
 export function LoadingSpinner({ size = 'md', showText = false, className = '' }: LoadingSpinnerProps) {
+  const [loadingLogo, setLoadingLogo] = useState<string | null>(null)
   const [loadingEmoji, setLoadingEmoji] = useState('⌚')
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const loadEmoji = async () => {
+    const loadSettings = async () => {
       try {
         const supabase = createClient()
         const { data } = await supabase
           .from('site_settings')
-          .select('loading_emoji')
-          .order('updated_at', { ascending: false })
-          .limit(1)
+          .select('loading_logo, loading_emoji')
+          .eq('key', 'general')
           .maybeSingle()
 
-        if (data?.loading_emoji) {
-          setLoadingEmoji(data.loading_emoji)
+        if (data) {
+          // Priorizar logo, se não tiver usa emoji
+          if (data.loading_logo) {
+            setLoadingLogo(data.loading_logo)
+          } else if (data.loading_emoji) {
+            setLoadingEmoji(data.loading_emoji)
+          }
         }
       } catch (error) {
-        console.error('Erro ao carregar emoji de loading:', error)
+        console.error('Erro ao carregar configurações de loading:', error)
       } finally {
         setIsLoading(false)
       }
     }
 
-    loadEmoji()
+    loadSettings()
   }, [])
 
   const sizeClasses = {
     sm: 'h-8 w-8 border-t-2 border-b-2',
     md: 'h-12 w-12 border-t-2 border-b-2',
     lg: 'h-20 w-20 border-t-4 border-b-4',
+  }
+
+  const logoSizes = {
+    sm: 'w-5 h-5',
+    md: 'w-7 h-7',
+    lg: 'w-12 h-12',
   }
 
   const emojiSizes = {
@@ -55,7 +67,20 @@ export function LoadingSpinner({ size = 'md', showText = false, className = '' }
         <div className={`animate-spin rounded-full ${sizeClasses[size]} border-black`}></div>
         {!isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className={emojiSizes[size]}>{loadingEmoji}</span>
+            {loadingLogo ? (
+              <div className={`${logoSizes[size]} flex items-center justify-center`}>
+                <Image
+                  src={loadingLogo}
+                  alt="Loading"
+                  width={size === 'sm' ? 20 : size === 'md' ? 28 : 48}
+                  height={size === 'sm' ? 20 : size === 'md' ? 28 : 48}
+                  className="object-contain w-full h-full"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <span className={emojiSizes[size]}>{loadingEmoji}</span>
+            )}
           </div>
         )}
       </div>

@@ -13,10 +13,9 @@ import Link from 'next/link'
 import { DashboardNavigation } from '@/components/dashboard/DashboardNavigation'
 
 interface HomepageSettings {
-  hero_title: string
+  hero_logo?: string
   hero_subtitle: string
   hero_description: string
-  hero_button_text: string
   hero_background_image?: string
   
   services_title: string
@@ -40,10 +39,9 @@ export default function HomepageEditorPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [settings, setSettings] = useState<HomepageSettings>({
-    hero_title: 'MV Company',
+    hero_logo: '',
     hero_subtitle: 'Transformamos sua presença digital com serviços de alta qualidade',
     hero_description: 'Criação de sites, tráfego pago, criação de conteúdo e gestão de redes sociais',
-    hero_button_text: 'Ver Serviços',
     hero_background_image: '',
     
     services_title: 'Nossos Serviços',
@@ -72,7 +70,7 @@ export default function HomepageEditorPage() {
       setLoading(true)
       const { data, error } = await supabase
         .from('site_settings')
-        .select('value')
+        .select('homepage_content, value')
         .eq('key', 'general')
         .maybeSingle()
 
@@ -80,8 +78,10 @@ export default function HomepageEditorPage() {
         console.error('Erro ao carregar configurações:', error)
       }
 
-      if (data?.value?.homepage) {
-        setSettings({ ...settings, ...data.value.homepage })
+      // Priorizar homepage_content (coluna direta), depois value.homepage (JSONB)
+      const homepageData = data?.homepage_content || data?.value?.homepage || {}
+      if (Object.keys(homepageData).length > 0) {
+        setSettings({ ...settings, ...homepageData })
       }
     } catch (error) {
       console.error('Erro ao carregar configurações:', error)
@@ -93,13 +93,12 @@ export default function HomepageEditorPage() {
   const handleSave = async () => {
     setSaving(true)
     try {
+      // Salvar em homepage_content (coluna direta JSONB) para garantir que apareça na página pública
       const { error } = await supabase
         .from('site_settings')
         .upsert({
           key: 'general',
-          value: {
-            homepage: settings
-          }
+          homepage_content: settings
         }, {
           onConflict: 'key'
         })
@@ -152,12 +151,20 @@ export default function HomepageEditorPage() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-bold mb-6">Seção Hero (Principal)</h2>
             <div className="space-y-4">
-              <Input
-                label="Título Principal"
-                value={settings.hero_title}
-                onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })}
-                placeholder="Ex: MV Company"
-              />
+              <div>
+                <label className="block text-sm font-medium mb-2">Logo da Empresa</label>
+                <ImageUploader
+                  value={settings.hero_logo || ''}
+                  onChange={(url) => setSettings({ ...settings, hero_logo: url })}
+                  placeholder="Upload da logo da empresa (PNG transparente recomendado)"
+                  cropType="square"
+                  aspectRatio={1}
+                  recommendedDimensions="300x300px"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  A logo será exibida no lugar do nome da empresa
+                </p>
+              </div>
               <Input
                 label="Subtítulo"
                 value={settings.hero_subtitle}
@@ -174,12 +181,6 @@ export default function HomepageEditorPage() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <Input
-                label="Texto do Botão"
-                value={settings.hero_button_text}
-                onChange={(e) => setSettings({ ...settings, hero_button_text: e.target.value })}
-                placeholder="Ex: Ver Serviços"
-              />
               <div>
                 <label className="block text-sm font-medium mb-2">Imagem de Fundo (Opcional)</label>
                 <ImageUploader
@@ -188,6 +189,7 @@ export default function HomepageEditorPage() {
                   placeholder="Upload de imagem de fundo"
                   cropType="banner"
                   aspectRatio={16 / 9}
+                  recommendedDimensions="1920x1080px"
                 />
               </div>
             </div>

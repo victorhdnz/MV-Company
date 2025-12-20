@@ -11,6 +11,7 @@ import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { DashboardNavigation } from '@/components/dashboard/DashboardNavigation'
 import { getSiteSettings, saveSiteSettings } from '@/lib/supabase/site-settings-helper'
+import { SectionWrapper } from '@/components/editor/section-wrapper'
 
 interface ServiceDetailLayout {
   hero_enabled?: boolean
@@ -38,6 +39,32 @@ interface ServiceDetailLayout {
   cta_enabled?: boolean
   cta_title?: string
   cta_description?: string
+  
+  section_order?: string[]
+  section_visibility?: Record<string, boolean>
+}
+
+// Mapeamento de seções
+const sectionIcons: Record<string, string> = {
+  hero: '🎯',
+  description: '📝',
+  video: '🎥',
+  gallery: '🖼️',
+  testimonials: '💬',
+  pricing: '💰',
+  related_services: '🔗',
+  cta: '🚀',
+}
+
+const sectionLabels: Record<string, string> = {
+  hero: 'Hero (Principal)',
+  description: 'Descrição Detalhada',
+  video: 'Vídeo Explicativo',
+  gallery: 'Galeria de Projetos',
+  testimonials: 'Depoimentos',
+  pricing: 'Preços/Investimento',
+  related_services: 'Serviços Relacionados',
+  cta: 'Call to Action',
 }
 
 export default function ServiceDetailLayoutPage() {
@@ -47,6 +74,27 @@ export default function ServiceDetailLayoutPage() {
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [expandedSection, setExpandedSection] = useState<string | null>('hero')
+  const [sectionOrder, setSectionOrder] = useState<string[]>([
+    'hero',
+    'description',
+    'video',
+    'gallery',
+    'testimonials',
+    'pricing',
+    'related_services',
+    'cta',
+  ])
+  const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
+    hero: true,
+    description: true,
+    video: true,
+    gallery: true,
+    testimonials: true,
+    pricing: true,
+    related_services: true,
+    cta: true,
+  })
   const [formData, setFormData] = useState<ServiceDetailLayout>({
     hero_enabled: true,
     hero_title_template: '{service_name}',
@@ -95,7 +143,16 @@ export default function ServiceDetailLayoutPage() {
       }
 
       if (data?.service_detail_layout) {
-        setFormData(prev => ({ ...prev, ...data.service_detail_layout }))
+        const layout = data.service_detail_layout
+        setFormData(prev => ({ ...prev, ...layout }))
+        
+        // Carregar ordem e visibilidade se existirem
+        if (layout.section_order) {
+          setSectionOrder(layout.section_order)
+        }
+        if (layout.section_visibility) {
+          setSectionVisibility(layout.section_visibility)
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar configurações do layout:', error)
@@ -105,11 +162,48 @@ export default function ServiceDetailLayoutPage() {
     }
   }
 
+  const moveSection = (sectionId: string, direction: 'up' | 'down') => {
+    const currentIndex = sectionOrder.indexOf(sectionId)
+    if (currentIndex === -1) return
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+    if (newIndex < 0 || newIndex >= sectionOrder.length) return
+
+    const newOrder = [...sectionOrder]
+    const [removed] = newOrder.splice(currentIndex, 1)
+    newOrder.splice(newIndex, 0, removed)
+    
+    setSectionOrder(newOrder)
+    toast.success(`Seção movida ${direction === 'up' ? 'para cima' : 'para baixo'}!`)
+  }
+
+  const toggleSectionVisibility = (section: string) => {
+    setSectionVisibility(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }))
+    
+    // Atualizar também o enabled do formData
+    const enabledKey = `${section}_enabled` as keyof ServiceDetailLayout
+    setFormData(prev => ({
+      ...prev,
+      [enabledKey]: !sectionVisibility[section]
+    }))
+    
+    toast.success(`Seção ${sectionVisibility[section] ? 'oculta' : 'visível'}!`)
+  }
+
   const handleSave = async () => {
     setSaving(true)
     try {
       const { success, error } = await saveSiteSettings({
-        fieldsToUpdate: { service_detail_layout: formData },
+        fieldsToUpdate: { 
+          service_detail_layout: {
+            ...formData,
+            section_order: sectionOrder,
+            section_visibility: sectionVisibility,
+          }
+        },
       })
 
       if (!success) {
@@ -124,6 +218,213 @@ export default function ServiceDetailLayoutPage() {
       toast.error('Erro ao salvar configurações do layout.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const renderSectionContent = (sectionId: string) => {
+    switch (sectionId) {
+      case 'hero':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Habilitar Seção Hero</label>
+              <input
+                type="checkbox"
+                checked={formData.hero_enabled ?? true}
+                onChange={(e) => setFormData({ ...formData, hero_enabled: e.target.checked })}
+                className="w-4 h-4"
+              />
+            </div>
+            {formData.hero_enabled && (
+              <>
+                <Input
+                  label="Template do Título (use {service_name} para nome do serviço)"
+                  value={formData.hero_title_template || ''}
+                  onChange={(e) => setFormData({ ...formData, hero_title_template: e.target.value })}
+                  placeholder="Ex: {service_name}"
+                />
+                <Input
+                  label="Template do Subtítulo (use {service_description} para descrição)"
+                  value={formData.hero_subtitle_template || ''}
+                  onChange={(e) => setFormData({ ...formData, hero_subtitle_template: e.target.value })}
+                  placeholder="Ex: {service_description}"
+                />
+              </>
+            )}
+          </div>
+        )
+
+      case 'description':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Habilitar Seção Descrição</label>
+              <input
+                type="checkbox"
+                checked={formData.description_enabled ?? true}
+                onChange={(e) => setFormData({ ...formData, description_enabled: e.target.checked })}
+                className="w-4 h-4"
+              />
+            </div>
+            {formData.description_enabled && (
+              <Input
+                label="Título da Seção"
+                value={formData.description_title || ''}
+                onChange={(e) => setFormData({ ...formData, description_title: e.target.value })}
+                placeholder="Ex: Sobre este serviço"
+              />
+            )}
+          </div>
+        )
+
+      case 'video':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Habilitar Seção Vídeo</label>
+              <input
+                type="checkbox"
+                checked={formData.video_enabled ?? true}
+                onChange={(e) => setFormData({ ...formData, video_enabled: e.target.checked })}
+                className="w-4 h-4"
+              />
+            </div>
+            {formData.video_enabled && (
+              <Input
+                label="Título da Seção"
+                value={formData.video_title || ''}
+                onChange={(e) => setFormData({ ...formData, video_title: e.target.value })}
+                placeholder="Ex: Vídeo Explicativo"
+              />
+            )}
+          </div>
+        )
+
+      case 'gallery':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Habilitar Seção Galeria</label>
+              <input
+                type="checkbox"
+                checked={formData.gallery_enabled ?? true}
+                onChange={(e) => setFormData({ ...formData, gallery_enabled: e.target.checked })}
+                className="w-4 h-4"
+              />
+            </div>
+            {formData.gallery_enabled && (
+              <Input
+                label="Título da Seção"
+                value={formData.gallery_title || ''}
+                onChange={(e) => setFormData({ ...formData, gallery_title: e.target.value })}
+                placeholder="Ex: Galeria de Projetos"
+              />
+            )}
+          </div>
+        )
+
+      case 'testimonials':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Habilitar Seção Depoimentos</label>
+              <input
+                type="checkbox"
+                checked={formData.testimonials_enabled ?? true}
+                onChange={(e) => setFormData({ ...formData, testimonials_enabled: e.target.checked })}
+                className="w-4 h-4"
+              />
+            </div>
+            {formData.testimonials_enabled && (
+              <Input
+                label="Título da Seção"
+                value={formData.testimonials_title || ''}
+                onChange={(e) => setFormData({ ...formData, testimonials_title: e.target.value })}
+                placeholder="Ex: O que nossos clientes dizem"
+              />
+            )}
+          </div>
+        )
+
+      case 'pricing':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Habilitar Seção Preços</label>
+              <input
+                type="checkbox"
+                checked={formData.pricing_enabled ?? true}
+                onChange={(e) => setFormData({ ...formData, pricing_enabled: e.target.checked })}
+                className="w-4 h-4"
+              />
+            </div>
+            {formData.pricing_enabled && (
+              <Input
+                label="Título da Seção"
+                value={formData.pricing_title || ''}
+                onChange={(e) => setFormData({ ...formData, pricing_title: e.target.value })}
+                placeholder="Ex: Investimento"
+              />
+            )}
+          </div>
+        )
+
+      case 'related_services':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Habilitar Seção Serviços Relacionados</label>
+              <input
+                type="checkbox"
+                checked={formData.related_services_enabled ?? true}
+                onChange={(e) => setFormData({ ...formData, related_services_enabled: e.target.checked })}
+                className="w-4 h-4"
+              />
+            </div>
+            {formData.related_services_enabled && (
+              <Input
+                label="Título da Seção"
+                value={formData.related_services_title || ''}
+                onChange={(e) => setFormData({ ...formData, related_services_title: e.target.value })}
+                placeholder="Ex: Outros Serviços"
+              />
+            )}
+          </div>
+        )
+
+      case 'cta':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Habilitar Seção CTA</label>
+              <input
+                type="checkbox"
+                checked={formData.cta_enabled ?? true}
+                onChange={(e) => setFormData({ ...formData, cta_enabled: e.target.checked })}
+                className="w-4 h-4"
+              />
+            </div>
+            {formData.cta_enabled && (
+              <>
+                <Input
+                  label="Título do CTA"
+                  value={formData.cta_title || ''}
+                  onChange={(e) => setFormData({ ...formData, cta_title: e.target.value })}
+                  placeholder="Ex: Pronto para começar?"
+                />
+                <Input
+                  label="Descrição do CTA"
+                  value={formData.cta_description || ''}
+                  onChange={(e) => setFormData({ ...formData, cta_description: e.target.value })}
+                  placeholder="Ex: Entre em contato e solicite um orçamento"
+                />
+              </>
+            )}
+          </div>
+        )
+
+      default:
+        return <div className="text-gray-500 text-center py-4">Conteúdo da seção {sectionId}</div>
     }
   }
 
@@ -159,212 +460,52 @@ export default function ServiceDetailLayoutPage() {
           }
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-          {/* Hero Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4">Seção Hero</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Habilitar Seção Hero</label>
-                <input
-                  type="checkbox"
-                  checked={formData.hero_enabled}
-                  onChange={(e) => setFormData({ ...formData, hero_enabled: e.target.checked })}
-                  className="w-4 h-4"
-                />
+        <div className="grid lg:grid-cols-3 gap-6 mt-8">
+          {/* Editor Principal */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold">Seções da Página</h2>
               </div>
-              {formData.hero_enabled && (
-                <>
-                  <Input
-                    label="Template do Título (use {service_name} para nome do serviço)"
-                    value={formData.hero_title_template || ''}
-                    onChange={(e) => setFormData({ ...formData, hero_title_template: e.target.value })}
-                    placeholder="Ex: {service_name}"
-                  />
-                  <Input
-                    label="Template do Subtítulo (use {service_description} para descrição)"
-                    value={formData.hero_subtitle_template || ''}
-                    onChange={(e) => setFormData({ ...formData, hero_subtitle_template: e.target.value })}
-                    placeholder="Ex: {service_description}"
-                  />
-                </>
-              )}
+              
+              {/* Dica */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-blue-800">
+                  <strong>💡 Dica:</strong> Use as setas ↑↓ para reordenar. 
+                  Clique no 👁️ para ocultar/mostrar. 
+                  Clique na seção para expandir e editar.
+                </p>
+              </div>
+
+              {/* Seções */}
+              {sectionOrder.map((sectionId, index) => (
+                <SectionWrapper
+                  key={sectionId}
+                  section={sectionId}
+                  icon={sectionIcons[sectionId] || '📄'}
+                  title={sectionLabels[sectionId] || sectionId}
+                  expandedSection={expandedSection}
+                  setExpandedSection={setExpandedSection}
+                  index={index}
+                  toggleSectionVisibility={toggleSectionVisibility}
+                  isVisible={sectionVisibility[sectionId] ?? true}
+                  moveSection={moveSection}
+                  sectionOrder={sectionOrder}
+                >
+                  {renderSectionContent(sectionId)}
+                </SectionWrapper>
+              ))}
             </div>
           </div>
 
-          {/* Description Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4">Seção Descrição</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Habilitar Seção Descrição</label>
-                <input
-                  type="checkbox"
-                  checked={formData.description_enabled}
-                  onChange={(e) => setFormData({ ...formData, description_enabled: e.target.checked })}
-                  className="w-4 h-4"
-                />
-              </div>
-              {formData.description_enabled && (
-                <Input
-                  label="Título da Seção"
-                  value={formData.description_title || ''}
-                  onChange={(e) => setFormData({ ...formData, description_title: e.target.value })}
-                  placeholder="Ex: Sobre este serviço"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Video Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4">Seção Vídeo</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Habilitar Seção Vídeo</label>
-                <input
-                  type="checkbox"
-                  checked={formData.video_enabled}
-                  onChange={(e) => setFormData({ ...formData, video_enabled: e.target.checked })}
-                  className="w-4 h-4"
-                />
-              </div>
-              {formData.video_enabled && (
-                <Input
-                  label="Título da Seção"
-                  value={formData.video_title || ''}
-                  onChange={(e) => setFormData({ ...formData, video_title: e.target.value })}
-                  placeholder="Ex: Vídeo Explicativo"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Gallery Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4">Seção Galeria</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Habilitar Seção Galeria</label>
-                <input
-                  type="checkbox"
-                  checked={formData.gallery_enabled}
-                  onChange={(e) => setFormData({ ...formData, gallery_enabled: e.target.checked })}
-                  className="w-4 h-4"
-                />
-              </div>
-              {formData.gallery_enabled && (
-                <Input
-                  label="Título da Seção"
-                  value={formData.gallery_title || ''}
-                  onChange={(e) => setFormData({ ...formData, gallery_title: e.target.value })}
-                  placeholder="Ex: Galeria de Projetos"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Testimonials Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4">Seção Depoimentos</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Habilitar Seção Depoimentos</label>
-                <input
-                  type="checkbox"
-                  checked={formData.testimonials_enabled}
-                  onChange={(e) => setFormData({ ...formData, testimonials_enabled: e.target.checked })}
-                  className="w-4 h-4"
-                />
-              </div>
-              {formData.testimonials_enabled && (
-                <Input
-                  label="Título da Seção"
-                  value={formData.testimonials_title || ''}
-                  onChange={(e) => setFormData({ ...formData, testimonials_title: e.target.value })}
-                  placeholder="Ex: O que nossos clientes dizem"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Pricing Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4">Seção Preços</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Habilitar Seção Preços</label>
-                <input
-                  type="checkbox"
-                  checked={formData.pricing_enabled}
-                  onChange={(e) => setFormData({ ...formData, pricing_enabled: e.target.checked })}
-                  className="w-4 h-4"
-                />
-              </div>
-              {formData.pricing_enabled && (
-                <Input
-                  label="Título da Seção"
-                  value={formData.pricing_title || ''}
-                  onChange={(e) => setFormData({ ...formData, pricing_title: e.target.value })}
-                  placeholder="Ex: Investimento"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Related Services Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4">Seção Serviços Relacionados</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Habilitar Seção Serviços Relacionados</label>
-                <input
-                  type="checkbox"
-                  checked={formData.related_services_enabled}
-                  onChange={(e) => setFormData({ ...formData, related_services_enabled: e.target.checked })}
-                  className="w-4 h-4"
-                />
-              </div>
-              {formData.related_services_enabled && (
-                <Input
-                  label="Título da Seção"
-                  value={formData.related_services_title || ''}
-                  onChange={(e) => setFormData({ ...formData, related_services_title: e.target.value })}
-                  placeholder="Ex: Outros Serviços"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* CTA Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4">Seção CTA Final</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Habilitar Seção CTA</label>
-                <input
-                  type="checkbox"
-                  checked={formData.cta_enabled}
-                  onChange={(e) => setFormData({ ...formData, cta_enabled: e.target.checked })}
-                  className="w-4 h-4"
-                />
-              </div>
-              {formData.cta_enabled && (
-                <>
-                  <Input
-                    label="Título do CTA"
-                    value={formData.cta_title || ''}
-                    onChange={(e) => setFormData({ ...formData, cta_title: e.target.value })}
-                    placeholder="Ex: Pronto para começar?"
-                  />
-                  <Input
-                    label="Descrição do CTA"
-                    value={formData.cta_description || ''}
-                    onChange={(e) => setFormData({ ...formData, cta_description: e.target.value })}
-                    placeholder="Ex: Entre em contato e solicite um orçamento"
-                  />
-                </>
-              )}
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 className="font-bold mb-4">Ações</h3>
+              <Button onClick={handleSave} isLoading={saving} className="w-full">
+                <Save size={18} className="mr-2" />
+                Salvar Alterações
+              </Button>
             </div>
           </div>
         </div>
@@ -372,4 +513,3 @@ export default function ServiceDetailLayoutPage() {
     </div>
   )
 }
-

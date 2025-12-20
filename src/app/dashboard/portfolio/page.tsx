@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase/client'
 import { Service } from '@/types'
-import { Plus, Edit, Trash2, Eye, EyeOff, Search, Filter, Star } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, EyeOff, Search, Filter, Star, Copy, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { BackButton } from '@/components/ui/BackButton'
@@ -22,6 +22,7 @@ export default function DashboardPortfolioPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
+  const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null)
 
   const supabase = createClient()
 
@@ -106,6 +107,18 @@ export default function DashboardPortfolioPage() {
       loadServices()
     } catch (error) {
       toast.error('Erro ao excluir serviço')
+    }
+  }
+
+  const copyServiceLink = async (service: Service) => {
+    const link = `${window.location.origin}/portfolio/${service.slug}`
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopiedLinkId(service.id)
+      toast.success('Link copiado para a área de transferência!')
+      setTimeout(() => setCopiedLinkId(null), 2000)
+    } catch (error) {
+      toast.error('Erro ao copiar link')
     }
   }
 
@@ -304,14 +317,26 @@ export default function DashboardPortfolioPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => copyServiceLink(service)}
+                              className="text-gray-600 hover:text-gray-900 p-2 hover:bg-gray-50 rounded"
+                              title="Copiar link do serviço"
+                            >
+                              {copiedLinkId === service.id ? (
+                                <Check size={18} className="text-green-600" />
+                              ) : (
+                                <Copy size={18} />
+                              )}
+                            </button>
                             <Link href={`/dashboard/portfolio/${service.id}`}>
-                              <button className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded">
+                              <button className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded" title="Editar serviço">
                                 <Edit size={18} />
                               </button>
                             </Link>
                             <button
                               onClick={() => deleteService(service.id)}
                               className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded"
+                              title="Excluir serviço"
                             >
                               <Trash2 size={18} />
                             </button>

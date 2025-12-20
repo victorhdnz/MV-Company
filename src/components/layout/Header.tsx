@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { Menu, X, GitCompare } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { useProductComparison } from '@/hooks/useProductComparison'
+import { useCompanyComparison } from '@/hooks/useCompanyComparison'
 import { AuthDebug } from './AuthDebug'
 import { createClient } from '@/lib/supabase/client'
 
@@ -15,8 +15,8 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [siteName, setSiteName] = useState<string>('MV Company')
   const [siteLogo, setSiteLogo] = useState<string | undefined>(undefined)
-  const { products } = useProductComparison()
-  const comparisonCount = products.length
+  const { companies } = useCompanyComparison()
+  const comparisonCount = companies.length
 
   // Carregar logo e nome do site
   useEffect(() => {
@@ -66,9 +66,8 @@ export const Header = () => {
 
   const navigation = [
     { name: 'Início', href: '/' },
-    { name: 'Produtos', href: '/produtos' },
-    { name: 'Sobre', href: '#about-us' },
-    { name: 'Termos', href: '/termos' },
+    { name: 'Serviços', href: '/#servicos' },
+    { name: 'Comparar', href: '/comparar' },
     { name: 'Contato', href: '#contato' },
   ]
 
@@ -107,8 +106,8 @@ export const Header = () => {
     }
   }, [pathname])
 
-  // Ocultar header em landing pages, página principal, dashboard, comparador, catálogos e suporte
-  if (pathname?.startsWith('/lp/') || pathname === '/' || pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/comparar') || pathname?.startsWith('/catalogo') || pathname?.startsWith('/suporte')) {
+  // Ocultar header em landing pages, página principal, dashboard, comparador e portfolio
+  if (pathname?.startsWith('/lp/') || pathname === '/' || pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/comparar') || pathname?.startsWith('/portfolio')) {
     return null
   }
 

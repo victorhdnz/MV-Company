@@ -56,33 +56,45 @@ export default async function Home() {
     <div className="min-h-screen bg-black">
       {/* Hero Section - Minimalist */}
       {homepageContent.hero_enabled !== false && (
-        <section className="relative bg-black text-white py-20 md:py-32 px-4">
-          <div className="container mx-auto max-w-6xl text-center">
-            <h1 className="text-5xl md:text-7xl font-semibold mb-6 tracking-tight">
-              {homepageContent.hero_title || siteSettings?.site_name || 'MV Company'}
-            </h1>
+        <section className="relative bg-black text-white py-16 md:py-24 px-4 overflow-hidden">
+          {homepageContent.hero_background_image && (
+            <div className="absolute inset-0 z-0 opacity-20">
+              <Image
+                src={homepageContent.hero_background_image}
+                alt="Background"
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
+          <div className="container mx-auto max-w-6xl text-center relative z-10">
+            {homepageContent.hero_logo ? (
+              <div className="flex justify-center mb-8">
+                <div className="relative w-32 h-32 md:w-40 md:h-40">
+                  <Image
+                    src={homepageContent.hero_logo}
+                    alt={siteSettings?.site_name || 'MV Company'}
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              </div>
+            ) : (
+              <h1 className="text-4xl md:text-6xl font-semibold mb-6 tracking-tight">
+                {siteSettings?.site_name || 'MV Company'}
+              </h1>
+            )}
             {homepageContent.hero_subtitle && (
-              <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light mb-8">
+              <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto font-light mb-4">
                 {homepageContent.hero_subtitle}
               </p>
             )}
-            {homepageContent.hero_button_1_enabled !== false && (
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href={homepageContent.hero_button_1_link || "#servicos"}
-                  className="px-8 py-4 bg-white text-black rounded-full font-medium hover:bg-gray-100 transition-all duration-200 text-center"
-                >
-                  {homepageContent.hero_button_1_text || 'Ver Serviços'}
-                </Link>
-                {homepageContent.hero_button_2_enabled !== false && (
-                  <Link
-                    href={homepageContent.hero_button_2_link || "/comparar"}
-                    className="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full font-medium hover:bg-white/20 transition-all duration-200 text-center"
-                  >
-                    {homepageContent.hero_button_2_text || 'Comparar Empresas'}
-                  </Link>
-                )}
-              </div>
+            {homepageContent.hero_description && (
+              <p className="text-base md:text-lg text-gray-500 max-w-2xl mx-auto font-light">
+                {homepageContent.hero_description}
+              </p>
             )}
           </div>
         </section>
@@ -101,7 +113,7 @@ export default async function Home() {
             )}
 
             {services.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {services.map((service) => (
                   <ServiceCard key={service.id} service={service} />
                 ))}
