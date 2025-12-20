@@ -5,9 +5,11 @@ import { Instagram, Facebook, Mail, Phone } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useNotFound } from '@/contexts/NotFoundContext'
 
 export const Footer = () => {
   const pathname = usePathname()
+  const { isNotFound } = useNotFound()
   const currentYear = new Date().getFullYear()
   const [siteSettings, setSiteSettings] = useState<{
     site_name?: string
@@ -62,8 +64,8 @@ export const Footer = () => {
     loadSiteSettings()
   }, [])
 
-  // Ocultar footer em landing pages, página principal, dashboard, comparador, catálogos, suporte e páginas de serviço
-  if (pathname?.startsWith('/lp/') || pathname === '/' || pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/comparar') || pathname?.startsWith('/catalogo') || pathname?.startsWith('/suporte') || pathname?.startsWith('/portfolio/')) {
+  // Ocultar footer em landing pages, página principal, dashboard, comparador, catálogos, suporte, páginas de serviço e páginas 404
+  if (pathname?.startsWith('/lp/') || pathname === '/' || pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/comparar') || pathname?.startsWith('/catalogo') || pathname?.startsWith('/suporte') || pathname?.startsWith('/portfolio/') || isNotFound) {
     return null
   }
 

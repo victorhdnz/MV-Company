@@ -1,8 +1,21 @@
+'use client'
+
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
-import { Home, Search } from 'lucide-react'
+import { Home } from 'lucide-react'
+import { useNotFound } from '@/contexts/NotFoundContext'
 
 export default function NotFound() {
+  const { setIsNotFound } = useNotFound()
+
+  useEffect(() => {
+    setIsNotFound(true)
+    return () => {
+      setIsNotFound(false)
+    }
+  }, [setIsNotFound])
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
       <div className="text-center">
@@ -16,17 +29,11 @@ export default function NotFound() {
           Desculpe, não conseguimos encontrar a página que você está procurando.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/">
+        <div className="flex justify-center">
+          <Link href="/" prefetch={true}>
             <Button size="lg">
               <Home size={20} className="mr-2" />
               Voltar ao Início
-            </Button>
-          </Link>
-          <Link href="/produtos">
-            <Button variant="outline" size="lg">
-              <Search size={20} className="mr-2" />
-              Ver Produtos
             </Button>
           </Link>
         </div>

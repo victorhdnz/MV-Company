@@ -8,10 +8,12 @@ import Image from 'next/image'
 import { useCompanyComparison } from '@/hooks/useCompanyComparison'
 import { AuthDebug } from './AuthDebug'
 import { createClient } from '@/lib/supabase/client'
+import { useNotFound } from '@/contexts/NotFoundContext'
 
 export const Header = () => {
   const router = useRouter()
   const pathname = usePathname()
+  const { isNotFound } = useNotFound()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [siteName, setSiteName] = useState<string>('MV Company')
   const [siteLogo, setSiteLogo] = useState<string | undefined>(undefined)
@@ -106,8 +108,8 @@ export const Header = () => {
     }
   }, [pathname])
 
-  // Ocultar header em landing pages, página principal, dashboard, comparador e portfolio
-  if (pathname?.startsWith('/lp/') || pathname === '/' || pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/comparar') || pathname?.startsWith('/portfolio')) {
+  // Ocultar header em landing pages, página principal, dashboard, comparador, portfolio e páginas 404
+  if (pathname?.startsWith('/lp/') || pathname === '/' || pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/comparar') || pathname?.startsWith('/portfolio') || isNotFound) {
     return null
   }
 
