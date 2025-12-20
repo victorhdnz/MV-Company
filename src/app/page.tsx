@@ -40,7 +40,7 @@ async function getSiteSettings() {
     }
     
     // Garantir que homepage_content seja um objeto válido
-    let homepageContent = {}
+    let homepageContent: any = {}
     if (data && data.homepage_content && typeof data.homepage_content === 'object') {
       homepageContent = data.homepage_content
     }
