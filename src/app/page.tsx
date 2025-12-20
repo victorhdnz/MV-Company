@@ -242,7 +242,7 @@ export default async function Home() {
     <HomepageTracker>
       <div className="min-h-screen bg-black">
         {/* Renderizar seções na ordem configurada */}
-        {sectionOrder.map((sectionId) => {
+        {sectionOrder.map((sectionId: string) => {
           const renderer = sectionRenderers[sectionId]
           return renderer ? renderer() : null
         })}
