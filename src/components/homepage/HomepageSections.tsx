@@ -29,6 +29,27 @@ export function HomepageSections({
   sectionVisibility,
   sectionOrder,
 }: HomepageSectionsProps) {
+  // Função para dividir texto para aplicar diferentes efeitos
+  const splitTextForHighlights = (text: string) => {
+    // Tenta dividir por vírgula primeiro
+    if (text.includes(',')) {
+      const parts = text.split(',')
+      if (parts.length >= 2) {
+        return {
+          firstPart: parts[0].trim(),
+          secondPart: parts.slice(1).join(',').trim()
+        }
+      }
+    }
+    // Se não tiver vírgula, divide pela metade
+    const words = text.split(' ')
+    const midPoint = Math.ceil(words.length / 2)
+    return {
+      firstPart: words.slice(0, midPoint).join(' '),
+      secondPart: words.slice(midPoint).join(' ')
+    }
+  }
+
   // Função para renderizar seção Hero
   const renderHeroSection = () => {
     if (homepageContent.hero_enabled === false || sectionVisibility.hero === false) return null
@@ -61,19 +82,31 @@ export function HomepageSections({
                 </div>
               </div>
             ) : (
-              <h1 className="text-4xl md:text-6xl font-semibold mb-6 tracking-tight">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 tracking-tight text-white">
                 {homepageContent.hero_title || siteSettings?.site_name || 'MV Company'}
               </h1>
             )}
-            {homepageContent.hero_subtitle && (
-              <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto font-light mb-4">
-                <Highlighter action="underline" color="#FF9800" isView={true}>
-                  {homepageContent.hero_subtitle}
-                </Highlighter>
-              </p>
-            )}
+            {homepageContent.hero_subtitle && (() => {
+              const { firstPart, secondPart } = splitTextForHighlights(homepageContent.hero_subtitle)
+              return (
+                <p className="text-2xl md:text-3xl lg:text-4xl text-white max-w-4xl mx-auto font-bold mb-6 leading-tight">
+                  <Highlighter action="underline" color="#FF9800" isView={true}>
+                    {firstPart}
+                  </Highlighter>
+                  {secondPart && (
+                    <>
+                      {homepageContent.hero_subtitle.includes(',') ? ',' : ' '}
+                      {' '}
+                      <Highlighter action="highlight" color="#87CEFA" isView={true}>
+                        {secondPart}
+                      </Highlighter>
+                    </>
+                  )}
+                </p>
+              )
+            })()}
             {homepageContent.hero_description && (
-              <p className="text-base md:text-lg text-gray-500 max-w-2xl mx-auto font-light">
+              <p className="text-xl md:text-2xl lg:text-3xl text-white max-w-3xl mx-auto font-bold">
                 <AuroraText colors={["#0070F3", "#38bdf8", "#60a5fa", "#93c5fd", "#dbeafe"]} speed={1}>
                   {homepageContent.hero_description}
                 </AuroraText>
