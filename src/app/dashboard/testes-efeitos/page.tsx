@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { BackButton } from '@/components/ui/BackButton'
-import { Sparkles, Zap, Palette, Code, Calendar, Bell, FileText, Share2, Globe, List } from 'lucide-react'
+import { Sparkles, Zap, Palette, Code, Calendar, Bell, FileText, Share2, Globe, List, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { BentoCard, BentoGrid } from '@/components/ui/bento-grid'
 import { AnimatedListDemo } from '@/components/ui/AnimatedListDemo'
+import { Marquee3DDemo } from '@/components/ui/Marquee3DDemo'
 
 export default function TestesEfeitosPage() {
   const { isAuthenticated, isEditor, loading: authLoading } = useAuth()
@@ -39,6 +40,7 @@ export default function TestesEfeitosPage() {
     { id: 'shadcn', label: 'Shadcn UI', icon: Palette },
     { id: 'bento-grid', label: 'Bento Grid', icon: Sparkles },
     { id: 'animated-list', label: 'Animated List', icon: List },
+    { id: 'marquee-3d', label: 'Marquee 3D', icon: Star },
     { id: 'custom', label: 'Custom', icon: Code },
   ]
 
@@ -269,6 +271,36 @@ export default function TestesEfeitosPage() {
                       <div className="text-sm text-gray-500 space-y-2">
                         <p><strong>Dica:</strong> O componente <code className="bg-gray-100 px-2 py-1 rounded">AnimatedList</code> aceita qualquer conteúdo como children.</p>
                         <p>Use a prop <code className="bg-gray-100 px-2 py-1 rounded">delay</code> para controlar o tempo entre cada item (padrão: 1000ms).</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'marquee-3d' && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-bold mb-4">Marquee 3D</h2>
+                  <p className="text-gray-600 mb-4">
+                    Animação de avaliações em formato 3D com efeito de rolagem infinita
+                  </p>
+                  
+                  {/* Exemplo Marquee 3D */}
+                  <div className="bg-black rounded-lg p-8 min-h-[500px] overflow-hidden">
+                    <Marquee3DDemo />
+                  </div>
+
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-3">Área para seus testes</h3>
+                    <div className="bg-white rounded-lg p-8 border-2 border-dashed border-gray-300 min-h-[200px]">
+                      <p className="text-gray-400 text-center mb-4">
+                        Adicione suas próprias avaliações aqui
+                      </p>
+                      <div className="text-sm text-gray-500 space-y-2">
+                        <p><strong>Dica:</strong> O componente <code className="bg-gray-100 px-2 py-1 rounded">Marquee</code> aceita qualquer conteúdo como children.</p>
+                        <p>Use as props <code className="bg-gray-100 px-2 py-1 rounded">vertical</code>, <code className="bg-gray-100 px-2 py-1 rounded">reverse</code> e <code className="bg-gray-100 px-2 py-1 rounded">pauseOnHover</code> para personalizar a animação.</p>
+                        <p>Use <code className="bg-gray-100 px-2 py-1 rounded">[--duration:20s]</code> para controlar a velocidade da animação.</p>
                       </div>
                     </div>
                   </div>
