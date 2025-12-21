@@ -245,7 +245,7 @@ export default function HomepageEditorPage() {
         
         // Carregar ordem e visibilidade se existirem
         if (content.section_order && Array.isArray(content.section_order)) {
-          // Garantir que 'notifications' e 'testimonials' estejam na ordem se não estiverem
+          // Garantir que 'notifications', 'testimonials' e 'spline' estejam na ordem se não estiverem
           const order = [...content.section_order]
           if (!order.includes('notifications')) {
             // Adicionar 'notifications' antes de 'contact' se 'contact' existir, senão no final
@@ -265,16 +265,39 @@ export default function HomepageEditorPage() {
               order.push('testimonials')
             }
           }
+          if (!order.includes('spline')) {
+            // Adicionar 'spline' antes de 'contact' se 'contact' existir, senão no final
+            const contactIndex = order.indexOf('contact')
+            if (contactIndex >= 0) {
+              order.splice(contactIndex, 0, 'spline')
+            } else {
+              order.push('spline')
+            }
+          }
           setSectionOrder(order)
+        } else {
+          // Se não houver ordem salva, usar a ordem padrão
+          setSectionOrder([
+            'hero',
+            'services',
+            'comparison',
+            'notifications',
+            'testimonials',
+            'spline',
+            'contact',
+          ])
         }
         if (content.section_visibility) {
-          // Garantir que 'notifications' e 'testimonials' tenham visibilidade definida
+          // Garantir que 'notifications', 'testimonials' e 'spline' tenham visibilidade definida
           const visibility = { ...content.section_visibility }
           if (visibility.notifications === undefined) {
             visibility.notifications = true
           }
           if (visibility.testimonials === undefined) {
             visibility.testimonials = true
+          }
+          if (visibility.spline === undefined) {
+            visibility.spline = false // Desabilitado por padrão para performance
           }
           setSectionVisibility(visibility)
         }
