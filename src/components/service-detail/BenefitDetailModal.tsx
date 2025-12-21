@@ -1,7 +1,6 @@
 'use client'
 
 import { X } from 'lucide-react'
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BenefitItem } from '@/types/service-detail'
 
@@ -47,23 +46,11 @@ export function BenefitDetailModal({ isOpen, onClose, benefit }: BenefitDetailMo
               </div>
 
               {/* Content */}
-              <div className="p-6 space-y-6">
-                {/* Imagem se houver */}
-                {benefit.detail_image && (
-                  <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-800">
-                    <Image
-                      src={benefit.detail_image}
-                      alt={benefit.title}
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                )}
-
+              <div className="p-6">
                 {/* Texto detalhado */}
                 {benefit.detail_text ? (
                   <div className="prose prose-invert max-w-none">
-                    <p className="text-gray-300 leading-relaxed whitespace-pre-line">
+                    <p className="text-gray-300 leading-relaxed whitespace-pre-line text-base">
                       {benefit.detail_text}
                     </p>
                   </div>
