@@ -255,6 +255,54 @@ export default function PricingEditorPage() {
     setFormData({ ...formData, pricing_plans: newPlans })
   }
 
+  // Funções para gerenciar categorias
+  const generateCategoryId = () => {
+    return `category-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  }
+
+  const handleAddCategory = () => {
+    const newCategory: FeatureCategory = {
+      id: generateCategoryId(),
+      name: '',
+      order: featureCategories.length,
+    }
+    setFeatureCategories([...featureCategories, newCategory])
+  }
+
+  const handleRemoveCategory = (categoryId: string) => {
+    setFeatureCategories(featureCategories.filter(c => c.id !== categoryId))
+    // Remover categoria dos recursos que a usam
+    setComparisonFeatures(prev => prev.map(f => 
+      f.category === categoryId ? { ...f, category: undefined } : f
+    ))
+  }
+
+  const handleUpdateCategory = (categoryId: string, field: 'name', value: string) => {
+    setFeatureCategories(prev => prev.map(c => 
+      c.id === categoryId ? { ...c, [field]: value } : c
+    ))
+  }
+
+  const handleMoveCategory = (categoryId: string, direction: 'up' | 'down') => {
+    const currentIndex = featureCategories.findIndex(c => c.id === categoryId)
+    if (currentIndex === -1) return
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+    if (newIndex < 0 || newIndex >= featureCategories.length) return
+
+    const newCategories = [...featureCategories]
+    const [removed] = newCategories.splice(currentIndex, 1)
+    newCategories.splice(newIndex, 0, removed)
+    
+    // Atualizar ordem
+    const updatedCategories = newCategories.map((category, index) => ({
+      ...category,
+      order: index,
+    }))
+    
+    setFeatureCategories(updatedCategories)
+  }
+
   // Funções para gerenciar recursos de comparação globais
   const generateFeatureId = () => {
     return `feature-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
