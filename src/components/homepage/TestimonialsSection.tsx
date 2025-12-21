@@ -80,17 +80,23 @@ export function TestimonialsSection({
   // Se não houver depoimentos, não renderizar
   if (!testimonials || testimonials.length === 0) return null
 
-  // Dividir depoimentos em 4 grupos para as 4 colunas
-  const firstRow = testimonials.slice(0, Math.ceil(testimonials.length / 4))
-  const secondRow = testimonials.slice(
-    Math.ceil(testimonials.length / 4),
-    Math.ceil(testimonials.length / 2)
-  )
-  const thirdRow = testimonials.slice(
-    Math.ceil(testimonials.length / 2),
-    Math.ceil((testimonials.length * 3) / 4)
-  )
-  const fourthRow = testimonials.slice(Math.ceil((testimonials.length * 3) / 4))
+  // Distribuir depoimentos de forma intercalada entre as 4 colunas (round-robin)
+  // Isso garante que cada coluna tenha uma mistura variada e evita repetições consecutivas
+  const distributeTestimonials = (items: TestimonialItem[]) => {
+    const columns: TestimonialItem[][] = [[], [], [], []]
+    
+    // Embaralhar os depoimentos para maior variedade
+    const shuffled = [...items].sort(() => Math.random() - 0.5)
+    
+    // Distribuir de forma round-robin (intercalada)
+    shuffled.forEach((item, index) => {
+      columns[index % 4].push(item)
+    })
+    
+    return columns
+  }
+
+  const [firstRow, secondRow, thirdRow, fourthRow] = distributeTestimonials(testimonials)
 
   return (
     <FadeInSection>
