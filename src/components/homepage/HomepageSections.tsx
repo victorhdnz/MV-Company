@@ -258,8 +258,8 @@ export function HomepageSections({
     return (
       <SplineSection
         enabled={homepageContent.spline_enabled !== false}
-        title={homepageContent.spline_title}
-        description={homepageContent.spline_description}
+        title={homepageContent.spline_title || 'O Futuro da Sua Empresa'}
+        description={homepageContent.spline_description || 'Estamos aqui para ajudar sua empresa a evoluir e crescer no mundo digital. Com tecnologia de ponta e soluções inovadoras, transformamos sua presença online e impulsionamos seus resultados.'}
         sceneUrl={homepageContent.spline_scene_url || 'https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode'}
       />
     )

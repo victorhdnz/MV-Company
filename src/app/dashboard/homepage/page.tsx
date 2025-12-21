@@ -134,7 +134,7 @@ export default function HomepageEditorPage() {
     comparison: true,
     notifications: true,
     testimonials: true,
-    spline: true,
+    spline: false, // Desabilitado por padrão para melhor performance
     contact: true,
   })
   const [formData, setFormData] = useState<HomepageSettings>({
@@ -177,7 +177,7 @@ export default function HomepageEditorPage() {
     testimonials_items: [],
     testimonials_duration: 200,
 
-    spline_enabled: true,
+    spline_enabled: false, // Desabilitado por padrão para melhor performance
     spline_title: 'O Futuro da Sua Empresa',
     spline_description: 'Estamos aqui para ajudar sua empresa a evoluir e crescer no mundo digital. Com tecnologia de ponta e soluções inovadoras, transformamos sua presença online e impulsionamos seus resultados.',
     spline_scene_url: 'https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode',
