@@ -15,6 +15,7 @@ import { DashboardNavigation } from '@/components/dashboard/DashboardNavigation'
 import { getSiteSettings, saveSiteSettings } from '@/lib/supabase/site-settings-helper'
 import { SectionWrapper } from '@/components/editor/section-wrapper'
 import { ServiceCardsManager, ServiceCard } from '@/components/ui/ServiceCardsManager'
+import { NotificationsManager } from '@/components/ui/NotificationsManager'
 
 interface HomepageSettings {
   hero_enabled?: boolean
@@ -52,6 +53,19 @@ interface HomepageSettings {
   whatsapp_float_number?: string
   whatsapp_float_message?: string
 
+  // Seção de Notificações (Prova Social)
+  notifications_enabled?: boolean
+  notifications_title?: string
+  notifications_description?: string
+  notifications_items?: Array<{
+    id: string
+    name: string
+    description: string
+    icon: 'whatsapp' | 'email' | 'instagram' | 'like' | 'user' | 'trending' | 'check'
+    time: string
+  }>
+  notifications_delay?: number
+
   section_order?: string[]
   section_visibility?: Record<string, boolean>
 }
@@ -61,6 +75,7 @@ const sectionIcons: Record<string, string> = {
   hero: '🎯',
   services: '📦',
   comparison: '⚖️',
+  notifications: '🔔',
   contact: '📞',
 }
 
@@ -68,6 +83,7 @@ const sectionLabels: Record<string, string> = {
   hero: 'Hero (Principal)',
   services: 'Nossos Serviços',
   comparison: 'Comparação (CTA)',
+  notifications: 'Notificações (Prova Social)',
   contact: 'Contato',
 }
 
@@ -83,12 +99,14 @@ export default function HomepageEditorPage() {
     'hero',
     'services',
     'comparison',
+    'notifications',
     'contact',
   ])
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
     hero: true,
     services: true,
     comparison: true,
+    notifications: true,
     contact: true,
   })
   const [formData, setFormData] = useState<HomepageSettings>({
@@ -118,6 +136,12 @@ export default function HomepageEditorPage() {
     contact_email_text: 'E-mail',
     contact_instagram_enabled: true,
     contact_instagram_text: 'Instagram',
+
+    notifications_enabled: true,
+    notifications_title: 'Nossos resultados em tempo real',
+    notifications_description: 'Veja o sucesso da nossa consultoria através das notificações',
+    notifications_items: [],
+    notifications_delay: 1500,
   })
 
   useEffect(() => {
@@ -378,6 +402,57 @@ export default function HomepageEditorPage() {
                   onChange={(e) => setFormData({ ...formData, comparison_cta_link: e.target.value })}
                   placeholder="Ex: /comparar"
                 />
+              </>
+            )}
+          </div>
+        )
+      case 'notifications':
+        return (
+          <div className="space-y-4">
+            <Switch
+              label="Habilitar Seção de Notificações (Prova Social)"
+              checked={formData.notifications_enabled}
+              onCheckedChange={(checked) => setFormData({ ...formData, notifications_enabled: checked })}
+            />
+            {formData.notifications_enabled && (
+              <>
+                <Input
+                  label="Título da Seção"
+                  value={formData.notifications_title || ''}
+                  onChange={(e) => setFormData({ ...formData, notifications_title: e.target.value })}
+                  placeholder="Ex: Nossos resultados em tempo real"
+                />
+                <div>
+                  <label className="block text-sm font-medium mb-2">Descrição</label>
+                  <textarea
+                    value={formData.notifications_description || ''}
+                    onChange={(e) => setFormData({ ...formData, notifications_description: e.target.value })}
+                    placeholder="Ex: Veja o sucesso da nossa consultoria através das notificações"
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Delay entre notificações (ms)
+                  </label>
+                  <Input
+                    type="number"
+                    value={formData.notifications_delay || 1500}
+                    onChange={(e) => setFormData({ ...formData, notifications_delay: parseInt(e.target.value) || 1500 })}
+                    placeholder="1500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Tempo em milissegundos entre cada notificação aparecer (padrão: 1500ms)
+                  </p>
+                </div>
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <NotificationsManager
+                    value={formData.notifications_items || []}
+                    onChange={(items) => setFormData({ ...formData, notifications_items: items })}
+                    label="Notificações"
+                  />
+                </div>
               </>
             )}
           </div>

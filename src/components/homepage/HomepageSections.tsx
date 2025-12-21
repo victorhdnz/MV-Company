@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { GitCompare } from 'lucide-react'
 import { SocialButton } from '@/components/ui/SocialButton'
 import { FadeInSection } from '@/components/ui/FadeInSection'
+import { NotificationsSection } from './NotificationsSection'
 
 interface HomepageSectionsProps {
   homepageContent: any
@@ -157,6 +158,21 @@ export function HomepageSections({
     )
   }
 
+  // Função para renderizar seção de Notificações
+  const renderNotificationsSection = () => {
+    if (homepageContent.notifications_enabled === false || sectionVisibility.notifications === false) return null
+    
+    return (
+      <NotificationsSection
+        enabled={homepageContent.notifications_enabled}
+        title={homepageContent.notifications_title}
+        description={homepageContent.notifications_description}
+        notifications={homepageContent.notifications_items}
+        delay={homepageContent.notifications_delay}
+      />
+    )
+  }
+
   // Função para renderizar seção de Contato
   const renderContactSection = () => {
     if (homepageContent.contact_enabled === false || sectionVisibility.contact === false) return null
@@ -207,6 +223,7 @@ export function HomepageSections({
     hero: renderHeroSection,
     services: renderServicesSection,
     comparison: renderComparisonSection,
+    notifications: renderNotificationsSection,
     contact: renderContactSection,
   }
 
