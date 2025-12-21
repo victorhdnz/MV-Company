@@ -577,7 +577,7 @@ export default function HomepageEditorPage() {
               <div className="space-y-4">
                 <Switch
                   label="Habilitar Botão Flutuante"
-                  checked={formData.whatsapp_float_enabled ?? true}
+                  checked={formData.whatsapp_float_enabled ?? false}
                   onCheckedChange={(checked) => setFormData({ ...formData, whatsapp_float_enabled: checked })}
                 />
                 {formData.whatsapp_float_enabled && (
