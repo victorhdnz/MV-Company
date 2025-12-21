@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/Input'
 import { Switch } from '@/components/ui/Switch'
 import { createClient } from '@/lib/supabase/client'
-import { Save } from 'lucide-react'
+import { Save, Eye } from 'lucide-react'
 import toast from 'react-hot-toast'
+import Link from 'next/link'
 import { DashboardNavigation } from '@/components/dashboard/DashboardNavigation'
 import { getSiteSettings, saveSiteSettings } from '@/lib/supabase/site-settings-helper'
 import { PriceTier, Feature } from '@/components/ui/pricing-card'
@@ -231,10 +232,18 @@ export default function PricingEditorPage() {
           backUrl="/dashboard"
           backLabel="Voltar ao Dashboard"
           actions={
-            <Button onClick={handleSave} isLoading={saving} size="lg">
-              <Save size={18} className="mr-2" />
-              Salvar Alterações
-            </Button>
+            <div className="flex gap-3">
+              <Link href="/" target="_blank">
+                <Button variant="outline" size="lg">
+                  <Eye size={18} className="mr-2" />
+                  Ver Preview
+                </Button>
+              </Link>
+              <Button onClick={handleSave} isLoading={saving} size="lg">
+                <Save size={18} className="mr-2" />
+                Salvar Alterações
+              </Button>
+            </div>
           }
         />
 
