@@ -115,8 +115,6 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     cta_instagram_enabled: true,
     cta_instagram_url: '',
     cta_instagram_text: 'Instagram',
-    cta_instagram_url: '',
-    
     whatsapp_float_enabled: true,
     whatsapp_float_number: '',
     whatsapp_float_message: '',
