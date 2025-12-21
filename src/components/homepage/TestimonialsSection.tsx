@@ -216,11 +216,11 @@ export function TestimonialsSection({
               </Marquee>
             </div>
 
-            {/* Gradientes para efeito de fade infinito nas bordas */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black via-black/80 to-transparent z-10"></div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black via-black/80 to-transparent z-10"></div>
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-black via-black/60 to-transparent z-10"></div>
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-black via-black/60 to-transparent z-10"></div>
+            {/* Gradientes para efeito de fade infinito nas bordas - igual à seção de notificações */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black via-black/50 to-transparent z-[100]"></div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black via-black/50 to-transparent z-[100]"></div>
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-black to-transparent z-[100]"></div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-black to-transparent z-[100]"></div>
           </div>
         </div>
       </section>
