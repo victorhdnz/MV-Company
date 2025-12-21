@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo, memo } from 'react'
 import { cn } from '@/lib/utils'
 import { Marquee } from '@/components/ui/marquee'
 import { FadeInSection } from '@/components/ui/FadeInSection'
@@ -21,7 +22,7 @@ interface TestimonialsSectionProps {
   duration?: number
 }
 
-const ReviewCard = ({
+const ReviewCard = memo(({
   img,
   name,
   username,
@@ -55,6 +56,7 @@ const ReviewCard = ({
               alt={name}
               fill
               className="object-cover"
+              loading="lazy"
             />
           </div>
         ) : (
@@ -72,14 +74,16 @@ const ReviewCard = ({
       <blockquote className="mt-2 text-sm text-gray-300 line-clamp-3">{body}</blockquote>
     </figure>
   )
-}
+})
+
+ReviewCard.displayName = 'ReviewCard'
 
 export function TestimonialsSection({
   enabled = true,
   title,
   description,
   testimonials = [],
-  duration = 20,
+  duration = 40,
 }: TestimonialsSectionProps) {
   // Se não estiver habilitado explicitamente como false, verificar se há depoimentos
   if (enabled === false) return null
@@ -90,73 +94,73 @@ export function TestimonialsSection({
   // Se não houver depoimentos, não renderizar
   if (!validTestimonials || validTestimonials.length === 0) return null
 
-  // Criar arrays intercalados para cada coluna, garantindo que todos os depoimentos
-  // apareçam em todas as colunas, mas em ordens diferentes e intercaladas
-  // Sem repetições consecutivas
-  const createInterleavedColumns = (items: TestimonialItem[]) => {
-    if (!Array.isArray(items) || items.length === 0) return [[], [], [], []]
-    
-    // Função para embaralhar sem repetições consecutivas
-    const shuffleWithoutConsecutive = (arr: TestimonialItem[]): TestimonialItem[] => {
-      if (!Array.isArray(arr) || arr.length === 0) return []
+  // Memoizar a criação dos arrays intercalados para evitar recálculos desnecessários
+  const [firstRow, secondRow, thirdRow, fourthRow] = useMemo(() => {
+    const createInterleavedColumns = (items: TestimonialItem[]) => {
+      if (!Array.isArray(items) || items.length === 0) return [[], [], [], []]
       
-      const shuffled: TestimonialItem[] = []
-      const available = [...arr]
-      let lastItem: TestimonialItem | null = null
-      let iterations = 0
-      const maxIterations = arr.length * 10 // Proteção contra loop infinito
-      
-      while (available.length > 0 && iterations < maxIterations) {
-        iterations++
+      // Função para embaralhar sem repetições consecutivas
+      const shuffleWithoutConsecutive = (arr: TestimonialItem[]): TestimonialItem[] => {
+        if (!Array.isArray(arr) || arr.length === 0) return []
         
-        // Filtrar itens que não são iguais ao último adicionado
-        const candidates = available.filter(item => item.id !== lastItem?.id)
+        const shuffled: TestimonialItem[] = []
+        const available = [...arr]
+        let lastItem: TestimonialItem | null = null
+        let iterations = 0
+        const maxIterations = arr.length * 10 // Proteção contra loop infinito
         
-        // Se não houver candidatos (todos são iguais), usar todos
-        const pool = candidates.length > 0 ? candidates : available
-        
-        // Se o pool estiver vazio, parar
-        if (pool.length === 0) break
-        
-        // Escolher aleatoriamente
-        const randomIndex = Math.floor(Math.random() * pool.length)
-        const selected = pool[randomIndex]
-        
-        shuffled.push(selected)
-        lastItem = selected
-        
-        // Remover o item selecionado do pool disponível
-        const itemIndex = available.indexOf(selected)
-        if (itemIndex >= 0) {
-          available.splice(itemIndex, 1)
+        while (available.length > 0 && iterations < maxIterations) {
+          iterations++
+          
+          // Filtrar itens que não são iguais ao último adicionado
+          const candidates = available.filter(item => item.id !== lastItem?.id)
+          
+          // Se não houver candidatos (todos são iguais), usar todos
+          const pool = candidates.length > 0 ? candidates : available
+          
+          // Se o pool estiver vazio, parar
+          if (pool.length === 0) break
+          
+          // Escolher aleatoriamente
+          const randomIndex = Math.floor(Math.random() * pool.length)
+          const selected = pool[randomIndex]
+          
+          shuffled.push(selected)
+          lastItem = selected
+          
+          // Remover o item selecionado do pool disponível
+          const itemIndex = available.indexOf(selected)
+          if (itemIndex >= 0) {
+            available.splice(itemIndex, 1)
+          }
+          
+          // Se o array disponível ficou vazio, recarregar com todos os itens originais
+          if (available.length === 0) {
+            available.push(...arr)
+          }
         }
         
-        // Se o array disponível ficou vazio, recarregar com todos os itens originais
-        if (available.length === 0) {
-          available.push(...arr)
-        }
+        return shuffled
       }
       
-      return shuffled
+      // Reduzir de 8 para 4 sequências para melhor performance
+      const extendedItems: TestimonialItem[] = []
+      for (let i = 0; i < 4; i++) {
+        const shuffled = shuffleWithoutConsecutive(items)
+        extendedItems.push(...shuffled)
+      }
+      
+      // Distribuir de forma intercalada (round-robin) entre as 4 colunas
+      const columns: TestimonialItem[][] = [[], [], [], []]
+      extendedItems.forEach((item, index) => {
+        columns[index % 4].push(item)
+      })
+      
+      return columns
     }
-    
-    // Criar múltiplas sequências embaralhadas sem repetições consecutivas
-    const extendedItems: TestimonialItem[] = []
-    for (let i = 0; i < 8; i++) {
-      const shuffled = shuffleWithoutConsecutive(items)
-      extendedItems.push(...shuffled)
-    }
-    
-    // Distribuir de forma intercalada (round-robin) entre as 4 colunas
-    const columns: TestimonialItem[][] = [[], [], [], []]
-    extendedItems.forEach((item, index) => {
-      columns[index % 4].push(item)
-    })
-    
-    return columns
-  }
 
-  const [firstRow, secondRow, thirdRow, fourthRow] = createInterleavedColumns(validTestimonials)
+    return createInterleavedColumns(validTestimonials)
+  }, [validTestimonials])
 
   return (
     <FadeInSection>
@@ -179,7 +183,8 @@ export function TestimonialsSection({
             className="relative flex h-96 w-full flex-row items-center justify-center gap-4 overflow-hidden [perspective:300px] z-0"
             style={{
               transformStyle: 'preserve-3d',
-              willChange: 'transform'
+              willChange: 'transform',
+              contain: 'layout style paint'
             }}
           >
             <div
@@ -189,22 +194,22 @@ export function TestimonialsSection({
                   'translateX(-100px) translateY(0px) translateZ(-100px) rotateX(20deg) rotateY(-10deg) rotateZ(20deg)',
               }}
             >
-              <Marquee pauseOnHover vertical className={`[--duration:${duration}s]`}>
+              <Marquee pauseOnHover vertical repeat={2} className={`[--duration:${duration}s]`}>
                 {firstRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee reverse pauseOnHover className={`[--duration:${duration}s]`} vertical>
+              <Marquee reverse pauseOnHover vertical repeat={2} className={`[--duration:${duration}s]`}>
                 {secondRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee reverse pauseOnHover className={`[--duration:${duration}s]`} vertical>
+              <Marquee reverse pauseOnHover vertical repeat={2} className={`[--duration:${duration}s]`}>
                 {thirdRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee pauseOnHover className={`[--duration:${duration}s]`} vertical>
+              <Marquee pauseOnHover vertical repeat={2} className={`[--duration:${duration}s]`}>
                 {fourthRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
