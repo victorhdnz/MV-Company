@@ -27,7 +27,7 @@ export function ServiceAlternateContent({ content }: ServiceAlternateContentProp
           // Processar título com destaque, garantindo espaçamento adequado
           let titleParts: string[] = []
           let highlightWord = item.title_highlight || ''
-          const highlightColor = item.title_highlight_color || '#00D9FF'
+          const highlightColor = item.title_highlight_color || '#FFFFFF'
           
           if (item.title && highlightWord) {
             // Buscar a palavra destacada no título (case-insensitive)

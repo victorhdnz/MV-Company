@@ -106,7 +106,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     hero_video_autoplay: false,
     hero_title: '',
     hero_title_highlight: '',
-    hero_title_highlight_color: '#00D9FF',
+    hero_title_highlight_color: '#FFFFFF',
     hero_subtitle: '',
 
     benefits_enabled: true,
@@ -377,7 +377,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
                 <div className="flex items-center gap-4">
                   <Input
                     label="Cor da Palavra Destacada"
-                    value={layoutData.hero_title_highlight_color || '#00D9FF'}
+                    value={layoutData.hero_title_highlight_color || '#FFFFFF'}
                     onChange={(e) => setLayoutData({ ...layoutData, hero_title_highlight_color: e.target.value })}
                     type="color"
                     className="w-24 h-12"
@@ -385,9 +385,9 @@ export default function EditServicePage({ params }: EditServicePageProps) {
                   <div className="flex-1">
                     <Input
                       label=""
-                      value={layoutData.hero_title_highlight_color || '#00D9FF'}
+                      value={layoutData.hero_title_highlight_color || '#FFFFFF'}
                       onChange={(e) => setLayoutData({ ...layoutData, hero_title_highlight_color: e.target.value })}
-                      placeholder="#00D9FF"
+                      placeholder="#FFFFFF"
                     />
                   </div>
                 </div>

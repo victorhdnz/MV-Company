@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
 import { Button } from './Button'
 import { Input } from './Input'
-import { ImageUploader } from './ImageUploader'
+import { IconSelector } from './IconSelector'
 import { BenefitItem } from '@/types/service-detail'
 
 interface BenefitsManagerProps {
@@ -21,7 +21,7 @@ export function BenefitsManager({ value = [], onChange, label = 'Itens de Benef�
       id: generateId(),
       title: '',
       description: '',
-      icon: '✓',
+      icon: 'check',
     }
     onChange([...value, newItem])
   }
@@ -112,11 +112,10 @@ export function BenefitsManager({ value = [], onChange, label = 'Itens de Benef�
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <Input
-                label="Ícone (Emoji ou URL de imagem)"
-                value={item.icon || ''}
-                onChange={(e) => handleUpdate(index, 'icon', e.target.value)}
-                placeholder="Ex: ✓ ou URL da imagem"
+              <IconSelector
+                label="Ícone"
+                value={item.icon || 'check'}
+                onChange={(iconName) => handleUpdate(index, 'icon', iconName)}
               />
               <div>
                 <label className="block text-sm font-medium mb-2">Texto Detalhado (Modal)</label>

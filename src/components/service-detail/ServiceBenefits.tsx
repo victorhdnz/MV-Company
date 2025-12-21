@@ -4,37 +4,60 @@ import { useState } from 'react'
 import { ServiceDetailContent, BenefitItem } from '@/types/service-detail'
 import { BentoCard, BentoGrid } from '@/components/ui/bento-grid'
 import { BenefitDetailModal } from './BenefitDetailModal'
-import Image from 'next/image'
+import { 
+  Check, FileText, Calendar, Bell, Share2, Globe, 
+  Search, Settings, Zap, Star, Heart, Shield,
+  Award, Target, Rocket, Lightbulb, TrendingUp,
+  Users, Briefcase, Code, Palette, Camera, Video,
+  Music, Book, Mail, Phone, MapPin, Clock, Gift
+} from 'lucide-react'
 
 interface ServiceBenefitsProps {
   content: ServiceDetailContent
 }
 
+// Mapeamento de nomes de ícones para componentes
+const iconMap: Record<string, React.ElementType> = {
+  'check': Check,
+  'file-text': FileText,
+  'calendar': Calendar,
+  'bell': Bell,
+  'share': Share2,
+  'globe': Globe,
+  'search': Search,
+  'settings': Settings,
+  'zap': Zap,
+  'star': Star,
+  'heart': Heart,
+  'shield': Shield,
+  'award': Award,
+  'target': Target,
+  'rocket': Rocket,
+  'lightbulb': Lightbulb,
+  'trending-up': TrendingUp,
+  'users': Users,
+  'briefcase': Briefcase,
+  'code': Code,
+  'palette': Palette,
+  'camera': Camera,
+  'video': Video,
+  'music': Music,
+  'book': Book,
+  'mail': Mail,
+  'phone': Phone,
+  'map-pin': MapPin,
+  'clock': Clock,
+  'gift': Gift,
+}
+
 // Função para obter ícone como componente React
-function getIconComponent(icon: string | undefined, title: string) {
-  if (!icon) {
-    return ({ className }: { className?: string }) => (
-      <span className={className}>✓</span>
-    )
+function getIconComponent(icon: string | undefined) {
+  if (!icon || !iconMap[icon]) {
+    const DefaultIcon = Check
+    return DefaultIcon
   }
-
-  if (icon.startsWith('http')) {
-    return ({ className }: { className?: string }) => (
-      <div className={className}>
-        <Image
-          src={icon}
-          alt={title}
-          width={48}
-          height={48}
-          className="object-contain"
-        />
-      </div>
-    )
-  }
-
-  return ({ className }: { className?: string }) => (
-    <span className={className}>{icon}</span>
-  )
+  
+  return iconMap[icon]
 }
 
 export function ServiceBenefits({ content }: ServiceBenefitsProps) {
@@ -49,14 +72,14 @@ export function ServiceBenefits({ content }: ServiceBenefitsProps) {
     setIsModalOpen(true)
   }
 
-  // Paleta de cores neutras (preto, branco, cinza)
+  // Gradientes branco/cinza como nos exemplos
   const backgroundGradients = [
-    'from-gray-800/20 to-gray-900/20',
-    'from-gray-700/20 to-gray-800/20',
-    'from-gray-800/20 to-gray-700/20',
-    'from-gray-900/20 to-gray-800/20',
-    'from-gray-700/20 to-gray-900/20',
-    'from-gray-800/20 to-gray-700/20',
+    'from-white/10 via-gray-200/5 to-white/10',
+    'from-gray-100/10 via-white/5 to-gray-200/10',
+    'from-white/5 via-gray-300/10 to-white/10',
+    'from-gray-200/10 via-white/10 to-gray-100/5',
+    'from-white/10 via-gray-100/10 to-white/5',
+    'from-gray-300/5 via-white/10 to-gray-200/10',
   ]
 
   if (!hasItems) {
@@ -116,7 +139,7 @@ export function ServiceBenefits({ content }: ServiceBenefitsProps) {
 
           <BentoGrid className="lg:grid-rows-3">
             {items.map((item, index) => {
-              const IconComponent = getIconComponent(item.icon, item.title)
+              const IconComponent = getIconComponent(item.icon)
               const gradient = backgroundGradients[index % backgroundGradients.length]
 
               return (

@@ -20,7 +20,7 @@ export function ServiceHeroVideo({ content, serviceName }: ServiceHeroVideoProps
       // Processar título com destaque, garantindo espaçamento adequado
       let titleParts: string[] = []
       let highlightWord = content.hero_title_highlight || ''
-      const highlightColor = content.hero_title_highlight_color || '#00D9FF'
+      const highlightColor = content.hero_title_highlight_color || '#FFFFFF'
       
       if (content.hero_title && highlightWord) {
         // Dividir o título pela palavra destacada
