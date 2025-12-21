@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, memo, useEffect, useRef, useState } from 'react'
+import { useMemo, memo } from 'react'
 import { cn } from '@/lib/utils'
 import { Marquee } from '@/components/ui/marquee'
 import { FadeInSection } from '@/components/ui/FadeInSection'
@@ -85,18 +85,6 @@ export function TestimonialsSection({
   testimonials = [],
   duration = 200,
 }: TestimonialsSectionProps) {
-  // Garantir que duration seja sempre um número válido
-  // Converter para número caso venha como string do banco de dados
-  // IMPORTANTE: Se não houver valor ou for inválido, usar 200 segundos (extremamente lento)
-  const validDuration = useMemo(() => {
-    // Se duration for undefined, null, 0, ou inválido, usar 200
-    if (!duration || duration === 0 || isNaN(Number(duration))) {
-      return 200
-    }
-    const numDuration = typeof duration === 'number' ? duration : Number(duration)
-    // Garantir que seja pelo menos 20 segundos (mínimo razoável)
-    return numDuration > 0 ? numDuration : 200
-  }, [duration])
   // Se não estiver habilitado explicitamente como false, verificar se há depoimentos
   if (enabled === false) return null
   
@@ -105,36 +93,6 @@ export function TestimonialsSection({
   
   // Se não houver depoimentos, não renderizar
   if (!validTestimonials || validTestimonials.length === 0) return null
-
-  // IntersectionObserver para pausar animação quando não estiver visível
-  const [isVisible, setIsVisible] = useState(true)
-  const sectionRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          setIsVisible(entry.isIntersecting)
-        })
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '100px',
-      }
-    )
-
-    const currentRef = sectionRef.current
-    if (currentRef) {
-      observer.observe(currentRef)
-    }
-
-    return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef)
-      }
-      observer.disconnect()
-    }
-  }, [])
 
   // Memoizar a criação dos arrays intercalados para evitar recálculos desnecessários
   const [firstRow, secondRow, thirdRow, fourthRow] = useMemo(() => {
@@ -240,16 +198,7 @@ export function TestimonialsSection({
             </div>
           )}
 
-          <div 
-            ref={sectionRef}
-            className="relative flex h-96 w-full flex-row items-center justify-center gap-4 overflow-hidden [perspective:300px] z-0"
-            style={{
-              transformStyle: 'preserve-3d',
-              willChange: isVisible ? 'transform' : 'auto',
-              contain: 'layout style paint',
-              contentVisibility: isVisible ? 'auto' : 'hidden',
-            }}
-          >
+          <div className="relative flex h-96 w-full flex-row items-center justify-center gap-4 overflow-hidden [perspective:300px] bg-black">
             <div
               className="flex flex-row items-center gap-4"
               style={{
@@ -257,51 +206,32 @@ export function TestimonialsSection({
                   'translateX(-100px) translateY(0px) translateZ(-100px) rotateX(20deg) rotateY(-10deg) rotateZ(20deg)',
               }}
             >
-              <Marquee 
-                pauseOnHover 
-                vertical 
-                className={`[--duration:${validDuration}s] ${!isVisible ? '[animation-play-state:paused]' : ''}`}
-              >
+              <Marquee pauseOnHover vertical className="[--duration:20s]">
                 {firstRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee 
-                reverse 
-                pauseOnHover 
-                className={`[--duration:${validDuration}s] ${!isVisible ? '[animation-play-state:paused]' : ''}`} 
-                vertical
-              >
+              <Marquee reverse pauseOnHover className="[--duration:20s]" vertical>
                 {secondRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee 
-                reverse 
-                pauseOnHover 
-                className={`[--duration:${validDuration}s] ${!isVisible ? '[animation-play-state:paused]' : ''}`} 
-                vertical
-              >
+              <Marquee reverse pauseOnHover className="[--duration:20s]" vertical>
                 {thirdRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee 
-                pauseOnHover 
-                className={`[--duration:${validDuration}s] ${!isVisible ? '[animation-play-state:paused]' : ''}`} 
-                vertical
-              >
+              <Marquee pauseOnHover className="[--duration:20s]" vertical>
                 {fourthRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
             </div>
 
-            {/* Gradientes para efeito de fade infinito nas bordas - igual à demo */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black via-black/80 to-transparent z-50"></div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black via-black/80 to-transparent z-50"></div>
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-black via-black/60 to-transparent z-50"></div>
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-black via-black/60 to-transparent z-50"></div>
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-black"></div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black"></div>
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-black"></div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-black"></div>
           </div>
         </div>
       </section>
