@@ -159,8 +159,9 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
           <Card
             key={plan.id}
             className={cn(
-              "flex flex-col transition-all duration-300 shadow-md hover:shadow-lg bg-gray-900 border border-gray-800 text-white",
-              isFeatured && "ring-2 ring-white shadow-xl transform md:scale-[1.02] hover:scale-[1.04]"
+              "flex flex-col transition-all duration-300 shadow-md hover:shadow-xl bg-gray-900 border border-gray-800 text-white",
+              "transform hover:scale-[1.02] hover:-translate-y-1",
+              isFeatured && "ring-2 ring-white shadow-xl md:scale-[1.02] hover:scale-[1.05]"
             )}
           >
             <CardHeader className="p-6 pb-4">
