@@ -2,6 +2,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { Service } from '@/types'
 import { HomepageTracker } from '@/components/analytics/HomepageTracker'
 import { HomepageSections } from '@/components/homepage/HomepageSections'
+import { FixedLogo } from '@/components/layout/FixedLogo'
 
 async function getServices(): Promise<Service[]> {
   try {
@@ -142,6 +143,7 @@ export default async function Home() {
 
   return (
     <HomepageTracker>
+      <FixedLogo />
       <div className="min-h-screen bg-black">
         <HomepageSections
           homepageContent={homepageContent}

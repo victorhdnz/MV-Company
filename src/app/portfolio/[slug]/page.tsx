@@ -12,6 +12,7 @@ import { ServiceAlternateContent } from '@/components/service-detail/ServiceAlte
 import { ServiceAbout } from '@/components/service-detail/ServiceAbout'
 import { ServiceTestimonials } from '@/components/service-detail/ServiceTestimonials'
 import { ServiceCTA } from '@/components/service-detail/ServiceCTA'
+import { FixedLogo } from '@/components/layout/FixedLogo'
 
 async function getService(slug: string): Promise<Service | null> {
   try {
@@ -177,6 +178,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
 
   return (
     <ServicePageTracker serviceId={service.id} serviceSlug={service.slug}>
+      <FixedLogo />
       <div className="min-h-screen bg-black">
         {/* Renderizar seções na ordem configurada */}
         {sectionOrder.map((sectionId: string) => {

@@ -69,30 +69,16 @@ export function HomepageSections({
               />
             </div>
           )}
-          <div className="container mx-auto max-w-6xl text-center relative z-10">
-            {homepageContent.hero_logo ? (
-              <div className="flex justify-center mb-8">
-                <div className="relative w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
-                  <Image
-                    src={homepageContent.hero_logo}
-                    alt={siteSettings?.site_name || 'MV Company'}
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-              </div>
-            ) : (
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 tracking-tight text-white">
-                {homepageContent.hero_title || siteSettings?.site_name || 'MV Company'}
-              </h1>
-            )}
+          <div className="container mx-auto max-w-6xl text-center relative z-10 pt-24 md:pt-32">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 tracking-tight text-white">
+              {homepageContent.hero_title || siteSettings?.site_name || 'MV Company'}
+            </h1>
             {homepageContent.hero_subtitle && (() => {
               const { firstPart, secondPart } = splitTextForHighlights(homepageContent.hero_subtitle)
               return (
                 <p className="text-2xl md:text-3xl lg:text-4xl text-white max-w-4xl mx-auto font-bold mb-6 leading-tight">
                   <span className="inline-block relative z-0">
-                    <Highlighter action="underline" color="#FF9800" isView={true}>
+                    <Highlighter action="underline" color="#E5E7EB" isView={true}>
                       {firstPart}
                     </Highlighter>
                   </span>
@@ -101,7 +87,7 @@ export function HomepageSections({
                       {homepageContent.hero_subtitle.includes(',') ? ',' : ' '}
                       {' '}
                       <span className="inline-block relative z-0">
-                        <Highlighter action="highlight" color="#87CEFA" isView={true}>
+                        <Highlighter action="highlight" color="#9CA3AF" isView={true}>
                           {secondPart}
                         </Highlighter>
                       </span>
@@ -112,7 +98,7 @@ export function HomepageSections({
             })()}
             {homepageContent.hero_description && (
               <p className="text-xl md:text-2xl lg:text-3xl text-white max-w-3xl mx-auto font-bold">
-                <AuroraText colors={["#0070F3", "#38bdf8", "#60a5fa", "#93c5fd", "#dbeafe"]} speed={1}>
+                <AuroraText colors={["#F9FAFB", "#E5E7EB", "#D1D5DB", "#9CA3AF", "#6B7280"]} speed={1}>
                   {homepageContent.hero_description}
                 </AuroraText>
               </p>
