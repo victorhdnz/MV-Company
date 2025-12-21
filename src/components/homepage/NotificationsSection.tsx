@@ -95,7 +95,7 @@ export function NotificationsSection({
 
   return (
     <FadeInSection>
-      <section className="py-16 md:py-24 px-4 bg-gradient-to-b from-black via-gray-950 to-black">
+      <section className="py-16 md:py-24 px-4 bg-black">
         <div className="container mx-auto max-w-4xl">
           {title && (
             <div className="text-center mb-12">
@@ -117,7 +117,10 @@ export function NotificationsSection({
               ))}
             </AnimatedList>
 
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black via-gray-950"></div>
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-black to-transparent"></div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black to-transparent"></div>
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-black to-transparent"></div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-black to-transparent"></div>
           </div>
         </div>
       </section>

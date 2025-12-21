@@ -37,9 +37,15 @@ const ReviewCard = ({
       className={cn(
         'relative h-full w-fit cursor-pointer overflow-hidden rounded-xl border p-4 sm:w-36',
         // dark styles adaptados para paleta preto/branco/cinza
-        'border-gray-800 bg-gray-900/50',
-        'backdrop-blur-sm'
+        'border-gray-800 bg-gray-900',
+        'will-change-transform'
       )}
+      style={{ 
+        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        transform: 'translateZ(0)'
+      }}
     >
       <div className="flex flex-row items-center gap-2">
         {img ? (
@@ -80,23 +86,62 @@ export function TestimonialsSection({
   // Se não houver depoimentos, não renderizar
   if (!testimonials || testimonials.length === 0) return null
 
-  // Distribuir depoimentos de forma intercalada entre as 4 colunas (round-robin)
-  // Isso garante que cada coluna tenha uma mistura variada e evita repetições consecutivas
-  const distributeTestimonials = (items: TestimonialItem[]) => {
+  // Criar arrays intercalados para cada coluna, garantindo que todos os depoimentos
+  // apareçam em todas as colunas, mas em ordens diferentes e intercaladas
+  // Sem repetições consecutivas
+  const createInterleavedColumns = (items: TestimonialItem[]) => {
+    if (items.length === 0) return [[], [], [], []]
+    
+    // Função para embaralhar sem repetições consecutivas
+    const shuffleWithoutConsecutive = (arr: TestimonialItem[]): TestimonialItem[] => {
+      const shuffled: TestimonialItem[] = []
+      const available = [...arr]
+      let lastItem: TestimonialItem | null = null
+      
+      while (available.length > 0) {
+        // Filtrar itens que não são iguais ao último adicionado
+        const candidates = available.filter(item => item.id !== lastItem?.id)
+        
+        // Se não houver candidatos (todos são iguais), usar todos
+        const pool = candidates.length > 0 ? candidates : available
+        
+        // Escolher aleatoriamente
+        const randomIndex = Math.floor(Math.random() * pool.length)
+        const selected = pool[randomIndex]
+        
+        shuffled.push(selected)
+        lastItem = selected
+        
+        // Remover o item selecionado do pool disponível
+        const itemIndex = available.indexOf(selected)
+        available.splice(itemIndex, 1)
+        
+        // Se o array disponível ficou vazio, recarregar com todos os itens originais
+        if (available.length === 0) {
+          available.push(...arr)
+        }
+      }
+      
+      return shuffled
+    }
+    
+    // Criar múltiplas sequências embaralhadas sem repetições consecutivas
+    const extendedItems: TestimonialItem[] = []
+    for (let i = 0; i < 8; i++) {
+      const shuffled = shuffleWithoutConsecutive(items)
+      extendedItems.push(...shuffled)
+    }
+    
+    // Distribuir de forma intercalada (round-robin) entre as 4 colunas
     const columns: TestimonialItem[][] = [[], [], [], []]
-    
-    // Embaralhar os depoimentos para maior variedade
-    const shuffled = [...items].sort(() => Math.random() - 0.5)
-    
-    // Distribuir de forma round-robin (intercalada)
-    shuffled.forEach((item, index) => {
+    extendedItems.forEach((item, index) => {
       columns[index % 4].push(item)
     })
     
     return columns
   }
 
-  const [firstRow, secondRow, thirdRow, fourthRow] = distributeTestimonials(testimonials)
+  const [firstRow, secondRow, thirdRow, fourthRow] = createInterleavedColumns(testimonials)
 
   return (
     <FadeInSection>
@@ -115,7 +160,13 @@ export function TestimonialsSection({
             </div>
           )}
 
-          <div className="relative flex h-96 w-full flex-row items-center justify-center gap-4 overflow-hidden [perspective:300px] z-0">
+          <div 
+            className="relative flex h-96 w-full flex-row items-center justify-center gap-4 overflow-hidden [perspective:300px] z-0"
+            style={{
+              transformStyle: 'preserve-3d',
+              willChange: 'transform'
+            }}
+          >
             <div
               className="flex flex-row items-center gap-4"
               style={{
