@@ -88,8 +88,8 @@ export default async function Home() {
   }
   
   // Ordem padrão das seções
-  let sectionOrder = homepageContent.section_order || ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'contact']
-  // Garantir que 'notifications' e 'testimonials' estejam na ordem se não estiverem
+  let sectionOrder = homepageContent.section_order || ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'spline', 'contact']
+  // Garantir que 'notifications', 'testimonials' e 'spline' estejam na ordem se não estiverem
   if (Array.isArray(sectionOrder)) {
     if (!sectionOrder.includes('notifications')) {
       const contactIndex = sectionOrder.indexOf('contact')
@@ -109,6 +109,15 @@ export default async function Home() {
         sectionOrder = [...sectionOrder, 'testimonials']
       }
     }
+    if (!sectionOrder.includes('spline')) {
+      const contactIndex = sectionOrder.indexOf('contact')
+      if (contactIndex >= 0) {
+        sectionOrder = [...sectionOrder]
+        sectionOrder.splice(contactIndex, 0, 'spline')
+      } else {
+        sectionOrder = [...sectionOrder, 'spline']
+      }
+    }
   }
   
   let sectionVisibility = homepageContent.section_visibility || {
@@ -117,14 +126,18 @@ export default async function Home() {
     comparison: true,
     notifications: true,
     testimonials: true,
+    spline: true,
     contact: true,
   }
-  // Garantir que 'notifications' e 'testimonials' tenham visibilidade definida
+  // Garantir que 'notifications', 'testimonials' e 'spline' tenham visibilidade definida
   if (sectionVisibility.notifications === undefined) {
     sectionVisibility = { ...sectionVisibility, notifications: true }
   }
   if (sectionVisibility.testimonials === undefined) {
     sectionVisibility = { ...sectionVisibility, testimonials: true }
+  }
+  if (sectionVisibility.spline === undefined) {
+    sectionVisibility = { ...sectionVisibility, spline: true }
   }
 
   return (

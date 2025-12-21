@@ -11,6 +11,7 @@ import { SocialButton } from '@/components/ui/SocialButton'
 import { FadeInSection } from '@/components/ui/FadeInSection'
 import { NotificationsSection } from './NotificationsSection'
 import { TestimonialsSection } from './TestimonialsSection'
+import { SplineSection } from './SplineSection'
 import { Highlighter } from '@/components/ui/highlighter'
 import { AuroraText } from '@/components/ui/aurora-text'
 
@@ -250,6 +251,20 @@ export function HomepageSections({
     )
   }
 
+  // Função para renderizar seção Spline (3D)
+  const renderSplineSection = () => {
+    if (homepageContent.spline_enabled === false || sectionVisibility.spline === false) return null
+    
+    return (
+      <SplineSection
+        enabled={homepageContent.spline_enabled !== false}
+        title={homepageContent.spline_title}
+        description={homepageContent.spline_description}
+        sceneUrl={homepageContent.spline_scene_url || 'https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode'}
+      />
+    )
+  }
+
   // Função para renderizar seção de Contato
   const renderContactSection = () => {
     if (homepageContent.contact_enabled === false || sectionVisibility.contact === false) return null
@@ -302,13 +317,14 @@ export function HomepageSections({
     comparison: renderComparisonSection,
     notifications: renderNotificationsSection,
     testimonials: renderTestimonialsSection,
+    spline: renderSplineSection,
     contact: renderContactSection,
   }
 
   // Garantir que sectionOrder seja um array válido
   const validSectionOrder = Array.isArray(sectionOrder) && sectionOrder.length > 0 
     ? sectionOrder 
-    : ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'contact']
+    : ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'spline', 'contact']
   
   return (
     <>

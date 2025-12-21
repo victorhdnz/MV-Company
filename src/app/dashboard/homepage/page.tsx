@@ -80,6 +80,12 @@ interface HomepageSettings {
   }>
   testimonials_duration?: number
 
+  // Seção Spline (3D)
+  spline_enabled?: boolean
+  spline_title?: string
+  spline_description?: string
+  spline_scene_url?: string
+
   section_order?: string[]
   section_visibility?: Record<string, boolean>
 }
@@ -91,6 +97,7 @@ const sectionIcons: Record<string, string> = {
   comparison: '⚖️',
   notifications: '🔔',
   testimonials: '⭐',
+  spline: '🤖',
   contact: '📞',
 }
 
@@ -100,6 +107,7 @@ const sectionLabels: Record<string, string> = {
   comparison: 'Comparação (CTA)',
   notifications: 'Notificações (Prova Social)',
   testimonials: 'Depoimentos (Marquee 3D)',
+  spline: 'Spline 3D (Futuro e Evolução)',
   contact: 'Contato',
 }
 
@@ -117,6 +125,7 @@ export default function HomepageEditorPage() {
     'comparison',
     'notifications',
     'testimonials',
+    'spline',
     'contact',
   ])
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
@@ -125,6 +134,7 @@ export default function HomepageEditorPage() {
     comparison: true,
     notifications: true,
     testimonials: true,
+    spline: true,
     contact: true,
   })
   const [formData, setFormData] = useState<HomepageSettings>({
@@ -166,6 +176,11 @@ export default function HomepageEditorPage() {
     testimonials_description: 'Depoimentos reais de quem confia na MV Company',
     testimonials_items: [],
     testimonials_duration: 200,
+
+    spline_enabled: true,
+    spline_title: 'O Futuro da Sua Empresa',
+    spline_description: 'Estamos aqui para ajudar sua empresa a evoluir e crescer no mundo digital. Com tecnologia de ponta e soluções inovadoras, transformamos sua presença online e impulsionamos seus resultados.',
+    spline_scene_url: 'https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode',
   })
 
   useEffect(() => {
@@ -575,6 +590,50 @@ export default function HomepageEditorPage() {
                     onChange={(items) => setFormData({ ...formData, testimonials_items: items })}
                     label="Depoimentos"
                   />
+                </div>
+              </>
+            )}
+          </div>
+        )
+      case 'spline':
+        return (
+          <div className="space-y-4">
+            <Switch
+              label="Habilitar Seção Spline 3D"
+              checked={formData.spline_enabled}
+              onCheckedChange={(checked) => setFormData({ ...formData, spline_enabled: checked })}
+            />
+            {formData.spline_enabled && (
+              <>
+                <Input
+                  label="Título da Seção"
+                  value={formData.spline_title || ''}
+                  onChange={(e) => setFormData({ ...formData, spline_title: e.target.value })}
+                  placeholder="Ex: O Futuro da Sua Empresa"
+                />
+                <div>
+                  <label className="block text-sm font-medium mb-2">Descrição</label>
+                  <textarea
+                    value={formData.spline_description || ''}
+                    onChange={(e) => setFormData({ ...formData, spline_description: e.target.value })}
+                    placeholder="Ex: Estamos aqui para ajudar sua empresa a evoluir e crescer no mundo digital..."
+                    rows={4}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">URL da Cena Spline (Opcional)</label>
+                  <Input
+                    value={formData.spline_scene_url || ''}
+                    onChange={(e) => setFormData({ ...formData, spline_scene_url: e.target.value })}
+                    placeholder="https://prod.spline.design/..."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Deixe vazio para usar a cena padrão do robô. Você pode criar suas próprias cenas em{' '}
+                    <a href="https://spline.design" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      spline.design
+                    </a>
+                  </p>
                 </div>
               </>
             )}
