@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { Marquee } from '@/components/ui/marquee'
 import { FadeInSection } from '@/components/ui/FadeInSection'
 import Image from 'next/image'
+import Image from 'next/image'
 
 export interface TestimonialItem {
   id: string
@@ -37,27 +38,41 @@ const ReviewCard = memo(({
     <figure
       className={cn(
         'relative h-full w-fit cursor-pointer overflow-hidden rounded-xl border p-4 sm:w-36',
-        // dark styles adaptados para paleta preto/branco/cinza - igual à demo
-        'border-gray-800 bg-gray-900/50 hover:bg-gray-800/50',
-        'backdrop-blur-sm'
+        // dark styles adaptados para paleta preto/branco/cinza
+        'border-gray-800 bg-gray-900',
+        'will-change-transform'
       )}
+      style={{ 
+        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        transform: 'translateZ(0)'
+      }}
     >
       <div className="flex flex-row items-center gap-2">
         {img ? (
-          <img className="rounded-full" width="32" height="32" alt="" src={img} />
+          <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+            <Image
+              src={img}
+              alt={name}
+              fill
+              className="object-cover"
+              loading="lazy"
+            />
+          </div>
         ) : (
           <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
             <span className="text-xs text-gray-400">👤</span>
           </div>
         )}
-        <div className="flex flex-col">
-          <figcaption className="text-sm font-medium text-white">
+        <div className="flex flex-col min-w-0">
+          <figcaption className="text-sm font-medium text-white truncate">
             {name}
           </figcaption>
-          <p className="text-xs font-medium text-gray-400">{username}</p>
+          <p className="text-xs font-medium text-gray-400 truncate">{username}</p>
         </div>
       </div>
-      <blockquote className="mt-2 text-sm text-gray-300">{body}</blockquote>
+      <blockquote className="mt-2 text-sm text-gray-300 line-clamp-3">{body}</blockquote>
     </figure>
   )
 })
@@ -192,22 +207,22 @@ export function TestimonialsSection({
                   'translateX(-100px) translateY(0px) translateZ(-100px) rotateX(20deg) rotateY(-10deg) rotateZ(20deg)',
               }}
             >
-              <Marquee pauseOnHover vertical className="[--duration:20s]">
+              <Marquee pauseOnHover vertical className={`[--duration:${duration || 200}s]`}>
                 {firstRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee reverse pauseOnHover className="[--duration:20s]" vertical>
+              <Marquee reverse pauseOnHover className={`[--duration:${duration || 200}s]`} vertical>
                 {secondRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee reverse pauseOnHover className="[--duration:20s]" vertical>
+              <Marquee reverse pauseOnHover className={`[--duration:${duration || 200}s]`} vertical>
                 {thirdRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee pauseOnHover className="[--duration:20s]" vertical>
+              <Marquee pauseOnHover className={`[--duration:${duration || 200}s]`} vertical>
                 {fourthRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
