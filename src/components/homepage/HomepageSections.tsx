@@ -202,7 +202,7 @@ export function HomepageSections({
         title={homepageContent.testimonials_title}
         description={homepageContent.testimonials_description}
         testimonials={testimonialsItems}
-        duration={homepageContent.testimonials_duration ? Number(homepageContent.testimonials_duration) : 150}
+        duration={homepageContent.testimonials_duration ? Number(homepageContent.testimonials_duration) : 200}
       />
     )
   }

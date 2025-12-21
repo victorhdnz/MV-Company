@@ -83,13 +83,19 @@ export function TestimonialsSection({
   title,
   description,
   testimonials = [],
-  duration = 150,
+  duration = 200,
 }: TestimonialsSectionProps) {
   // Garantir que duration seja sempre um número válido
   // Converter para número caso venha como string do banco de dados
+  // IMPORTANTE: Se não houver valor ou for inválido, usar 200 segundos (extremamente lento)
   const validDuration = useMemo(() => {
-    const numDuration = typeof duration === 'number' ? duration : Number(duration) || 150
-    return numDuration > 0 ? numDuration : 150
+    // Se duration for undefined, null, 0, ou inválido, usar 200
+    if (!duration || duration === 0 || isNaN(Number(duration))) {
+      return 200
+    }
+    const numDuration = typeof duration === 'number' ? duration : Number(duration)
+    // Garantir que seja pelo menos 20 segundos (mínimo razoável)
+    return numDuration > 0 ? numDuration : 200
   }, [duration])
   // Se não estiver habilitado explicitamente como false, verificar se há depoimentos
   if (enabled === false) return null
@@ -251,22 +257,40 @@ export function TestimonialsSection({
                   'translateX(-100px) translateY(0px) translateZ(-100px) rotateX(20deg) rotateY(-10deg) rotateZ(20deg)',
               }}
             >
-              <Marquee pauseOnHover vertical className={`[--duration:${validDuration}s] ${!isVisible ? '[animation-play-state:paused]' : ''}`}>
+              <Marquee 
+                pauseOnHover 
+                vertical 
+                className={`[--duration:${validDuration}s!important] ${!isVisible ? '[animation-play-state:paused]' : ''}`}
+              >
                 {firstRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee reverse pauseOnHover className={`[--duration:${validDuration}s] ${!isVisible ? '[animation-play-state:paused]' : ''}`} vertical>
+              <Marquee 
+                reverse 
+                pauseOnHover 
+                className={`[--duration:${validDuration}s!important] ${!isVisible ? '[animation-play-state:paused]' : ''}`} 
+                vertical
+              >
                 {secondRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee reverse pauseOnHover className={`[--duration:${validDuration}s] ${!isVisible ? '[animation-play-state:paused]' : ''}`} vertical>
+              <Marquee 
+                reverse 
+                pauseOnHover 
+                className={`[--duration:${validDuration}s!important] ${!isVisible ? '[animation-play-state:paused]' : ''}`} 
+                vertical
+              >
                 {thirdRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
               </Marquee>
-              <Marquee pauseOnHover className={`[--duration:${validDuration}s] ${!isVisible ? '[animation-play-state:paused]' : ''}`} vertical>
+              <Marquee 
+                pauseOnHover 
+                className={`[--duration:${validDuration}s!important] ${!isVisible ? '[animation-play-state:paused]' : ''}`} 
+                vertical
+              >
                 {fourthRow.map((review) => (
                   <ReviewCard key={review.id} {...review} />
                 ))}
