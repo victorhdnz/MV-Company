@@ -66,6 +66,8 @@ export interface BenefitItem {
   title: string
   description?: string
   icon?: string // Emoji ou URL de imagem
+  detail_text?: string // Texto detalhado para o modal
+  detail_image?: string // Imagem para o modal
 }
 
 export interface GiftItem {

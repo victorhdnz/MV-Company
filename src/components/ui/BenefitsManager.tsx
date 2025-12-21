@@ -118,6 +118,29 @@ export function BenefitsManager({ value = [], onChange, label = 'Itens de Benef�
                 onChange={(e) => handleUpdate(index, 'icon', e.target.value)}
                 placeholder="Ex: ✓ ou URL da imagem"
               />
+              <div>
+                <label className="block text-sm font-medium mb-2">Texto Detalhado (Modal)</label>
+                <textarea
+                  value={item.detail_text || ''}
+                  onChange={(e) => handleUpdate(index, 'detail_text', e.target.value)}
+                  placeholder="Texto detalhado que aparecerá no modal quando clicar em 'Ver mais'..."
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Imagem Detalhada (Modal)</label>
+                <ImageUploader
+                  value={item.detail_image || ''}
+                  onChange={(url) => handleUpdate(index, 'detail_image', url)}
+                  cropType="square"
+                  aspectRatio={16/9}
+                  recommendedDimensions="800x450px"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Imagem opcional que aparecerá no modal de detalhes
+                </p>
+              </div>
             </div>
           </div>
         ))}

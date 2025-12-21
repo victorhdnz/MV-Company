@@ -1,90 +1,150 @@
 'use client'
 
+import { useState } from 'react'
 import { ServiceDetailContent, BenefitItem } from '@/types/service-detail'
+import { BentoCard, BentoGrid } from '@/components/ui/bento-grid'
+import { BenefitDetailModal } from './BenefitDetailModal'
 import Image from 'next/image'
 
 interface ServiceBenefitsProps {
   content: ServiceDetailContent
 }
 
+// Função para obter ícone como componente React
+function getIconComponent(icon: string | undefined, title: string) {
+  if (!icon) {
+    return ({ className }: { className?: string }) => (
+      <span className={className}>✓</span>
+    )
+  }
+
+  if (icon.startsWith('http')) {
+    return ({ className }: { className?: string }) => (
+      <div className={className}>
+        <Image
+          src={icon}
+          alt={title}
+          width={48}
+          height={48}
+          className="object-contain"
+        />
+      </div>
+    )
+  }
+
+  return ({ className }: { className?: string }) => (
+    <span className={className}>{icon}</span>
+  )
+}
+
 export function ServiceBenefits({ content }: ServiceBenefitsProps) {
   if (!content.benefits_enabled) return null
 
   const hasItems = content.benefits_items && content.benefits_items.length > 0
+  const [selectedBenefit, setSelectedBenefit] = useState<BenefitItem | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Paleta de cores neutras (preto, branco, cinza) com variações sutis
-  const accentColors = [
-    { bg: 'bg-gray-800/80', border: 'border-gray-700/60', text: 'text-white', iconBg: 'bg-gray-700/90' },
-    { bg: 'bg-gray-800/80', border: 'border-gray-600/50', text: 'text-white', iconBg: 'bg-gray-700/90' },
-    { bg: 'bg-gray-800/80', border: 'border-gray-700/60', text: 'text-white', iconBg: 'bg-gray-700/90' },
-    { bg: 'bg-gray-800/80', border: 'border-gray-600/50', text: 'text-white', iconBg: 'bg-gray-700/90' },
+  const handleCardClick = (benefit: BenefitItem) => {
+    setSelectedBenefit(benefit)
+    setIsModalOpen(true)
+  }
+
+  // Paleta de cores neutras (preto, branco, cinza)
+  const backgroundGradients = [
+    'from-gray-800/20 to-gray-900/20',
+    'from-gray-700/20 to-gray-800/20',
+    'from-gray-800/20 to-gray-700/20',
+    'from-gray-900/20 to-gray-800/20',
+    'from-gray-700/20 to-gray-900/20',
+    'from-gray-800/20 to-gray-700/20',
   ]
 
-  return (
-    <section className="py-16 md:py-24 px-4 bg-gradient-to-b from-black via-gray-950 to-black text-white relative">
-      <div className="container mx-auto max-w-7xl">
-        {content.benefits_title && (
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-16">
-            {content.benefits_title}
-          </h2>
-        )}
-
-        {!hasItems ? (
+  if (!hasItems) {
+    return (
+      <section className="py-16 md:py-24 px-4 bg-gradient-to-b from-black via-gray-950 to-black text-white relative">
+        <div className="container mx-auto max-w-7xl">
+          {content.benefits_title && (
+            <h2 className="text-3xl md:text-5xl font-bold text-center mb-16">
+              {content.benefits_title}
+            </h2>
+          )}
           <div className="text-center py-12">
             <p className="text-gray-400 text-lg">Nenhum benefício adicionado ainda</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {(content.benefits_items || []).map((item, index) => {
-              const colors = accentColors[index % accentColors.length]
+        </div>
+      </section>
+    )
+  }
+
+  const items = content.benefits_items || []
+  
+  // Determinar layout baseado no número de itens
+  const getCardClassName = (index: number, total: number) => {
+    if (total === 1) {
+      return 'lg:col-span-3'
+    }
+    if (total === 2) {
+      return index === 0 ? 'lg:col-span-2' : 'lg:col-span-1'
+    }
+    if (total === 3) {
+      return 'lg:col-span-1'
+    }
+    if (total === 4) {
+      if (index === 0) return 'lg:col-span-2 lg:row-span-2'
+      return 'lg:col-span-1'
+    }
+    if (total === 5) {
+      if (index === 0) return 'lg:col-span-2 lg:row-span-2'
+      if (index === 1) return 'lg:col-span-1 lg:row-span-2'
+      return 'lg:col-span-1'
+    }
+    // Para 6 ou mais, layout padrão
+    if (index === 0) return 'lg:col-span-2 lg:row-span-2'
+    if (index === 1) return 'lg:col-span-1 lg:row-span-2'
+    return 'lg:col-span-1'
+  }
+
+  return (
+    <>
+      <section className="py-16 md:py-24 px-4 bg-gradient-to-b from-black via-gray-950 to-black text-white relative">
+        <div className="container mx-auto max-w-7xl">
+          {content.benefits_title && (
+            <h2 className="text-3xl md:text-5xl font-bold text-center mb-16">
+              {content.benefits_title}
+            </h2>
+          )}
+
+          <BentoGrid className="lg:grid-rows-3">
+            {items.map((item, index) => {
+              const IconComponent = getIconComponent(item.icon, item.title)
+              const gradient = backgroundGradients[index % backgroundGradients.length]
 
               return (
-                <div
+                <BentoCard
                   key={item.id}
-                  className="relative group"
-                >
-                  {/* Card maior com design sofisticado */}
-                  <div className={`h-full rounded-2xl ${colors.bg} ${colors.border} border-2 p-8 md:p-10 flex flex-col items-center text-center transition-all duration-300 hover:scale-105 hover:shadow-2xl`}>
-                    {/* Ícone centralizado no topo */}
-                    <div className="mb-6">
-                      <div className={`w-20 h-20 md:w-24 md:h-24 rounded-2xl ${colors.iconBg} ${colors.border} border-2 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300`}>
-                        {item.icon ? (
-                          item.icon.startsWith('http') ? (
-                            <Image
-                              src={item.icon}
-                              alt={item.title}
-                              width={48}
-                              height={48}
-                              className="object-contain"
-                            />
-                          ) : (
-                            <span className="text-4xl md:text-5xl">{item.icon}</span>
-                          )
-                        ) : (
-                          <span className="text-4xl md:text-5xl">✓</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Título - Fonte bold e maior */}
-                    <h3 className="text-xl md:text-2xl font-bold mb-4 text-white leading-tight">
-                      {item.title}
-                    </h3>
-
-                    {/* Descrição breve - Fonte light e menor */}
-                    {item.description && (
-                      <p className="text-gray-300 text-sm md:text-base leading-relaxed font-light flex-1">
-                        {item.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  name={item.title}
+                  description={item.description || ''}
+                  href="#"
+                  cta="Ver mais"
+                  Icon={IconComponent}
+                  className={getCardClassName(index, items.length)}
+                  background={
+                    <div className={`absolute inset-0 bg-gradient-to-br ${gradient} rounded-xl`} />
+                  }
+                  onClick={() => handleCardClick(item)}
+                />
               )
             })}
-          </div>
-        )}
-      </div>
-    </section>
+          </BentoGrid>
+        </div>
+      </section>
+
+      <BenefitDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        benefit={selectedBenefit}
+      />
+    </>
   )
 }
 

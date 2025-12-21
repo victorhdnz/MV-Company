@@ -16,8 +16,9 @@ interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
   background: ReactNode
   Icon: React.ElementType
   description: string
-  href: string
+  href?: string
   cta: string
+  onClick?: () => void
 }
 
 export const BentoGrid = ({ children, className, ...props }: BentoGridProps) => {
@@ -42,6 +43,7 @@ export const BentoCard = ({
   description,
   href,
   cta,
+  onClick,
   ...props
 }: BentoCardProps) => (
   <div
@@ -49,21 +51,22 @@ export const BentoCard = ({
     className={cn(
       "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
       // light styles
-      "bg-white [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
+      "bg-gray-900 border border-gray-800 [box-shadow:0_0_0_1px_rgba(255,255,255,.05),0_2px_4px_rgba(0,0,0,.3),0_12px_24px_rgba(0,0,0,.2)]",
       // dark styles
-      "dark:bg-gray-900 transform-gpu dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset] dark:[border:1px_solid_rgba(255,255,255,.1)]",
+      "transform-gpu cursor-pointer",
       className
     )}
+    onClick={onClick}
     {...props}
   >
     <div>{background}</div>
     <div className="p-4">
       <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 transition-all duration-300 lg:group-hover:-translate-y-10">
-        <Icon className="h-12 w-12 origin-left transform-gpu text-neutral-700 transition-all duration-300 ease-in-out group-hover:scale-75 dark:text-neutral-300" />
-        <h3 className="text-xl font-semibold text-neutral-700 dark:text-neutral-300">
+        <Icon className="h-12 w-12 origin-left transform-gpu text-white transition-all duration-300 ease-in-out group-hover:scale-75" />
+        <h3 className="text-xl font-semibold text-white">
           {name}
         </h3>
-        <p className="max-w-lg text-neutral-400">{description}</p>
+        <p className="max-w-lg text-gray-300">{description}</p>
       </div>
 
       <div
@@ -71,13 +74,16 @@ export const BentoCard = ({
           "pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:hidden"
         )}
       >
-        <a 
-          href={href}
-          className="pointer-events-auto inline-flex items-center text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onClick?.()
+          }}
+          className="pointer-events-auto inline-flex items-center text-sm text-white hover:text-gray-300 transition-colors"
         >
           {cta}
           <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
-        </a>
+        </button>
       </div>
     </div>
 
@@ -86,16 +92,19 @@ export const BentoCard = ({
         "pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:flex"
       )}
     >
-      <a 
-        href={href}
-        className="pointer-events-auto inline-flex items-center text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          onClick?.()
+        }}
+        className="pointer-events-auto inline-flex items-center text-sm text-white hover:text-gray-300 transition-colors"
       >
         {cta}
         <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
-      </a>
+      </button>
     </div>
 
-    <div className="pointer-events-none absolute inset-0 transform-gpu transition-all duration-300 group-hover:bg-black/[.03] group-hover:dark:bg-neutral-800/10" />
+    <div className="pointer-events-none absolute inset-0 transform-gpu transition-all duration-300 group-hover:bg-white/[.05]" />
   </div>
 )
 
