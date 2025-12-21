@@ -51,7 +51,9 @@ export default function PricingEditorPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [comparisonFeaturesExpanded, setComparisonFeaturesExpanded] = useState(true)
+  const [categoriesExpanded, setCategoriesExpanded] = useState(true)
   const [comparisonFeatures, setComparisonFeatures] = useState<ComparisonFeature[]>([])
+  const [featureCategories, setFeatureCategories] = useState<FeatureCategory[]>([])
   const [formData, setFormData] = useState<PricingSettings>({
     pricing_enabled: false,
     pricing_title: 'Escolha o plano ideal para sua empresa',
