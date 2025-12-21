@@ -202,11 +202,13 @@ export function TestimonialsSection({
           )}
 
           <div className="relative flex h-96 w-full flex-row items-center justify-center gap-4 overflow-hidden [perspective:300px] bg-black">
+            {/* Conteúdo 3D - deve ficar atrás */}
             <div
-              className="flex flex-row items-center gap-4"
+              className="flex flex-row items-center gap-4 absolute inset-0"
               style={{
                 transform:
                   'translateX(-100px) translateY(0px) translateZ(-100px) rotateX(20deg) rotateY(-10deg) rotateZ(20deg)',
+                zIndex: 1,
               }}
             >
               <Marquee 
@@ -249,7 +251,7 @@ export function TestimonialsSection({
               </Marquee>
             </div>
 
-            {/* Gradientes para efeito de fade infinito - igual à seção de notificações */}
+            {/* Gradientes para efeito de fade infinito - devem ficar acima do conteúdo 3D */}
             <div 
               className="pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-black to-transparent"
               style={{ zIndex: 10 }}
