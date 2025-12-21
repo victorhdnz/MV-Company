@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { X, RotateCw, RotateCcw, Check } from 'lucide-react'
-import { Button } from './Button'
+import { Button } from '@/components/ui/button'
 import toast from 'react-hot-toast'
 import Cropper from 'react-easy-crop'
 import { Area } from 'react-easy-crop'

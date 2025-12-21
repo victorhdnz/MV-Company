@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Plus, Trash2, Image as ImageIcon } from 'lucide-react'
-import { Button } from './Button'
+import { Button } from '@/components/ui/button'
 import { ImageUploader } from './ImageUploader'
 import Image from 'next/image'
 

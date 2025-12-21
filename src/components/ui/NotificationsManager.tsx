@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
-import { Button } from './Button'
+import { Button } from '@/components/ui/button'
 import { Input } from './Input'
 import { NotificationIconSelector } from './NotificationIconSelector'
 import { NotificationItem } from '@/components/homepage/NotificationsSection'

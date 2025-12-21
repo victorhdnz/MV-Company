@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Plus, Trash2, ArrowUp, ArrowDown, Edit2 } from 'lucide-react'
-import { Button } from './Button'
+import { Button } from '@/components/ui/button'
 import { Input } from './Input'
 import { ImageUploader } from './ImageUploader'
 import Image from 'next/image'

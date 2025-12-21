@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Upload, X, Video as VideoIcon, Play, Maximize2, Minimize2 } from 'lucide-react'
-import { Button } from './Button'
+import { Button } from '@/components/ui/button'
 import { MediaManager } from '@/components/dashboard/MediaManager'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/hooks/useAuth'

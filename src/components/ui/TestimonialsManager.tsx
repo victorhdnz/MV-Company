@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from './Button'
+import { Button } from '@/components/ui/button'
 import { Input } from './Input'
 import { ImageUploader } from './ImageUploader'
 import { ArrowUp, ArrowDown, Trash2, Plus } from 'lucide-react'
