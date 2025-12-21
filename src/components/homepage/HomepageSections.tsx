@@ -70,14 +70,11 @@ export function HomepageSections({
             </div>
           )}
           <div className="container mx-auto max-w-6xl text-center relative z-10 pt-24 md:pt-32">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 tracking-tight text-white">
-              {homepageContent.hero_title || siteSettings?.site_name || 'MV Company'}
-            </h1>
             {homepageContent.hero_subtitle && (() => {
               const { firstPart, secondPart } = splitTextForHighlights(homepageContent.hero_subtitle)
               return (
                 <p className="text-2xl md:text-3xl lg:text-4xl text-white max-w-4xl mx-auto font-bold mb-6 leading-tight">
-                  <span className="inline-block relative z-0">
+                  <span className="inline-block relative z-0 mb-2 md:mb-0">
                     <Highlighter action="underline" color="#E5E7EB" isView={true}>
                       {firstPart}
                     </Highlighter>
@@ -86,7 +83,7 @@ export function HomepageSections({
                     <>
                       {homepageContent.hero_subtitle.includes(',') ? ',' : ' '}
                       {' '}
-                      <span className="inline-block relative z-0">
+                      <span className="inline-block relative z-0 mt-2 md:mt-0">
                         <Highlighter action="highlight" color="#9CA3AF" isView={true}>
                           {secondPart}
                         </Highlighter>
