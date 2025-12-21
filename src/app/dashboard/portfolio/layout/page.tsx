@@ -9,7 +9,6 @@ import { Switch } from '@/components/ui/Switch'
 import { ImageUploader } from '@/components/ui/ImageUploader'
 import { VideoUploader } from '@/components/ui/VideoUploader'
 import { BenefitsManager } from '@/components/ui/BenefitsManager'
-import { GiftsManager } from '@/components/ui/GiftsManager'
 import { AlternateContentManager } from '@/components/ui/AlternateContentManager'
 import { createClient } from '@/lib/supabase/client'
 import { Save, Eye } from 'lucide-react'
@@ -24,21 +23,17 @@ import { ServiceDetailContent } from '@/types/service-detail'
 const sectionIcons: Record<string, string> = {
   hero: '🎥',
   benefits: '📋',
-  gifts: '🎁',
   alternate: '🔄',
   about: '👥',
-  testimonials: '💬',
   cta: '📞',
 }
 
 const sectionLabels: Record<string, string> = {
   hero: 'Hero com Vídeo',
   benefits: 'O que você receberá',
-  gifts: 'Ganhe esses presentes',
   alternate: 'Conteúdo Alternado',
   about: 'Quem somos nós',
-  testimonials: 'Depoimentos',
-  cta: 'CTA Final',
+  cta: 'Contato',
 }
 
 export default function ServiceDetailLayoutPage() {
@@ -52,19 +47,15 @@ export default function ServiceDetailLayoutPage() {
   const [sectionOrder, setSectionOrder] = useState<string[]>([
     'hero',
     'benefits',
-    'gifts',
     'alternate',
     'about',
-    'testimonials',
     'cta',
   ])
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
     hero: true,
     benefits: true,
-    gifts: true,
     alternate: true,
     about: true,
-    testimonials: true,
     cta: true,
   })
   const [formData, setFormData] = useState<ServiceDetailContent>({
@@ -80,10 +71,6 @@ export default function ServiceDetailLayoutPage() {
     benefits_title: 'O que você receberá dentro da MV Company',
     benefits_items: [],
 
-    gifts_enabled: true,
-    gifts_title: 'Ganhe esses presentes entrando agora',
-    gifts_items: [],
-
     alternate_content_enabled: true,
     alternate_content_items: [],
 
@@ -92,12 +79,8 @@ export default function ServiceDetailLayoutPage() {
     about_image: '',
     about_text: '',
 
-    testimonials_enabled: true,
-    testimonials_title: 'Todos os dias recebemos esse tipo de depoimentos',
-    testimonials_stats: 'Mais de 60 clientes satisfeitos',
-
     cta_enabled: true,
-    cta_title: 'Entenda mais e entre em contato conosco',
+    cta_title: 'Fale Conosco',
     cta_description: 'Inicie seu planejamento hoje mesmo',
     cta_whatsapp_enabled: true,
     cta_whatsapp_number: '',
@@ -130,12 +113,18 @@ export default function ServiceDetailLayoutPage() {
         const layout = data.service_detail_layout as ServiceDetailContent
         setFormData(prev => ({ ...prev, ...layout }))
         
-        // Carregar ordem e visibilidade se existirem
+        // Carregar ordem e visibilidade se existirem, filtrando 'gifts' e 'testimonials'
         if (layout.section_order) {
-          setSectionOrder(layout.section_order)
+          const filteredOrder = layout.section_order.filter(
+            (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials'
+          )
+          setSectionOrder(filteredOrder.length > 0 ? filteredOrder : ['hero', 'benefits', 'alternate', 'about', 'cta'])
         }
         if (layout.section_visibility) {
-          setSectionVisibility(layout.section_visibility)
+          const filteredVisibility = { ...layout.section_visibility }
+          delete filteredVisibility.gifts
+          delete filteredVisibility.testimonials
+          setSectionVisibility(filteredVisibility)
         }
       }
     } catch (error) {
@@ -299,31 +288,6 @@ export default function ServiceDetailLayoutPage() {
           </div>
         )
 
-      case 'gifts':
-        return (
-          <div className="space-y-4">
-            <Switch
-              label="Habilitar Seção 'Ganhe esses presentes'"
-              checked={formData.gifts_enabled ?? true}
-              onCheckedChange={(checked) => setFormData({ ...formData, gifts_enabled: checked })}
-            />
-            {formData.gifts_enabled && (
-              <>
-                <Input
-                  label="Título da Seção"
-                  value={formData.gifts_title || ''}
-                  onChange={(e) => setFormData({ ...formData, gifts_title: e.target.value })}
-                  placeholder="Ex: Ganhe esses presentes entrando agora"
-                />
-                <GiftsManager
-                  value={formData.gifts_items || []}
-                  onChange={(items) => setFormData({ ...formData, gifts_items: items })}
-                />
-              </>
-            )}
-          </div>
-        )
-
       case 'alternate':
         return (
           <div className="space-y-4">
@@ -382,102 +346,109 @@ export default function ServiceDetailLayoutPage() {
           </div>
         )
 
-      case 'testimonials':
-        return (
-          <div className="space-y-4">
-            <Switch
-              label="Habilitar Seção Depoimentos"
-              checked={formData.testimonials_enabled ?? true}
-              onCheckedChange={(checked) => setFormData({ ...formData, testimonials_enabled: checked })}
-            />
-            {formData.testimonials_enabled && (
-              <>
-                <Input
-                  label="Título da Seção"
-                  value={formData.testimonials_title || ''}
-                  onChange={(e) => setFormData({ ...formData, testimonials_title: e.target.value })}
-                  placeholder="Ex: Todos os dias recebemos esse tipo de depoimentos"
-                />
-                <Input
-                  label="Estatística (ex: Mais de 60 clientes satisfeitos)"
-                  value={formData.testimonials_stats || ''}
-                  onChange={(e) => setFormData({ ...formData, testimonials_stats: e.target.value })}
-                  placeholder="Ex: Mais de 60 clientes satisfeitos"
-                />
-                <p className="text-sm text-gray-500">
-                  Os depoimentos são gerenciados na seção "Avaliações" do dashboard.
-                </p>
-              </>
-            )}
-          </div>
-        )
-
       case 'cta':
         return (
           <div className="space-y-4">
             <Switch
-              label="Habilitar CTA Final"
+              label="Habilitar Seção de Contato"
               checked={formData.cta_enabled ?? true}
               onCheckedChange={(checked) => setFormData({ ...formData, cta_enabled: checked })}
             />
             {formData.cta_enabled && (
               <>
                 <Input
-                  label="Título do CTA"
+                  label="Título"
                   value={formData.cta_title || ''}
                   onChange={(e) => setFormData({ ...formData, cta_title: e.target.value })}
-                  placeholder="Ex: Entenda mais e entre em contato conosco"
+                  placeholder="Ex: Fale Conosco"
                 />
                 <div>
                   <label className="block text-sm font-medium mb-2">Descrição</label>
                   <textarea
                     value={formData.cta_description || ''}
                     onChange={(e) => setFormData({ ...formData, cta_description: e.target.value })}
-                    placeholder="Ex: Inicie seu planejamento hoje mesmo"
-                    rows={2}
+                    placeholder="Descrição do contato..."
+                    rows={3}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div className="border-t border-gray-200 pt-4 mt-4 space-y-4">
-                  <h3 className="font-semibold">Contatos</h3>
-                  <Switch
-                    label="Habilitar WhatsApp"
-                    checked={formData.cta_whatsapp_enabled ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, cta_whatsapp_enabled: checked })}
-                  />
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <h3 className="text-lg font-semibold mb-3">Botão WhatsApp</h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">Habilitar WhatsApp</label>
+                    <Switch
+                      checked={formData.cta_whatsapp_enabled ?? true}
+                      onCheckedChange={(checked) => setFormData({ ...formData, cta_whatsapp_enabled: checked })}
+                    />
+                  </div>
                   {formData.cta_whatsapp_enabled && (
-                    <Input
-                      label="Número do WhatsApp (com DDD, ex: 5534984136291)"
-                      value={formData.cta_whatsapp_number || ''}
-                      onChange={(e) => setFormData({ ...formData, cta_whatsapp_number: e.target.value })}
-                      placeholder="Ex: 5534984136291"
-                    />
+                    <>
+                      <Input
+                        label="Número do WhatsApp (com DDD, ex: 5534984136291)"
+                        value={formData.cta_whatsapp_number || ''}
+                        onChange={(e) => setFormData({ ...formData, cta_whatsapp_number: e.target.value })}
+                        placeholder="Ex: 5534984136291"
+                      />
+                      <Input
+                        label="Texto do Botão WhatsApp"
+                        value={formData.cta_whatsapp_text || ''}
+                        onChange={(e) => setFormData({ ...formData, cta_whatsapp_text: e.target.value })}
+                        placeholder="Ex: Falar no WhatsApp"
+                      />
+                    </>
                   )}
-                  <Switch
-                    label="Habilitar E-mail"
-                    checked={formData.cta_email_enabled ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, cta_email_enabled: checked })}
-                  />
+                </div>
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <h3 className="text-lg font-semibold mb-3">Botão E-mail</h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">Habilitar E-mail</label>
+                    <Switch
+                      checked={formData.cta_email_enabled ?? true}
+                      onCheckedChange={(checked) => setFormData({ ...formData, cta_email_enabled: checked })}
+                    />
+                  </div>
                   {formData.cta_email_enabled && (
-                    <Input
-                      label="Endereço de E-mail"
-                      value={formData.cta_email_address || ''}
-                      onChange={(e) => setFormData({ ...formData, cta_email_address: e.target.value })}
-                      placeholder="Ex: contato@mvcompany.com.br"
-                    />
+                    <>
+                      <Input
+                        label="Endereço de E-mail"
+                        value={formData.cta_email_address || ''}
+                        onChange={(e) => setFormData({ ...formData, cta_email_address: e.target.value })}
+                        placeholder="Ex: contato@mvcompany.com"
+                        type="email"
+                      />
+                      <Input
+                        label="Texto do Botão E-mail"
+                        value={formData.cta_email_text || ''}
+                        onChange={(e) => setFormData({ ...formData, cta_email_text: e.target.value })}
+                        placeholder="Ex: Enviar E-mail"
+                      />
+                    </>
                   )}
-                  <Switch
-                    label="Habilitar Instagram"
-                    checked={formData.cta_instagram_enabled ?? true}
-                    onCheckedChange={(checked) => setFormData({ ...formData, cta_instagram_enabled: checked })}
-                  />
-                  {formData.cta_instagram_enabled && (
-                    <Input
-                      label="URL do Instagram"
-                      value={formData.cta_instagram_url || ''}
-                      onChange={(e) => setFormData({ ...formData, cta_instagram_url: e.target.value })}
-                      placeholder="Ex: https://instagram.com/mvcompany"
+                </div>
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <h3 className="text-lg font-semibold mb-3">Botão Instagram</h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">Habilitar Instagram</label>
+                    <Switch
+                      checked={formData.cta_instagram_enabled ?? true}
+                      onCheckedChange={(checked) => setFormData({ ...formData, cta_instagram_enabled: checked })}
                     />
+                  </div>
+                  {formData.cta_instagram_enabled && (
+                    <>
+                      <Input
+                        label="URL do Instagram"
+                        value={formData.cta_instagram_url || ''}
+                        onChange={(e) => setFormData({ ...formData, cta_instagram_url: e.target.value })}
+                        placeholder="Ex: https://instagram.com/mvcompany"
+                      />
+                      <Input
+                        label="Texto do Botão Instagram"
+                        value={formData.cta_instagram_text || ''}
+                        onChange={(e) => setFormData({ ...formData, cta_instagram_text: e.target.value })}
+                        placeholder="Ex: Instagram"
+                      />
+                    </>
                   )}
                 </div>
               </>
