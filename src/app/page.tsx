@@ -2,7 +2,6 @@ import { createServerClient } from '@/lib/supabase/server'
 import { Service } from '@/types'
 import { HomepageTracker } from '@/components/analytics/HomepageTracker'
 import { HomepageSections } from '@/components/homepage/HomepageSections'
-import { DotPattern } from '@/components/ui/dot-pattern'
 
 async function getServices(): Promise<Service[]> {
   try {

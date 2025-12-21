@@ -306,14 +306,25 @@ export function HomepageSections({
   }
 
   // Garantir que sectionOrder seja um array válido
-  const validSectionOrder = Array.isArray(sectionOrder) ? sectionOrder : []
+  const validSectionOrder = Array.isArray(sectionOrder) && sectionOrder.length > 0 
+    ? sectionOrder 
+    : ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'contact']
   
   return (
     <>
-      {validSectionOrder.map((sectionId: string) => {
+      {validSectionOrder.map((sectionId: string, index: number) => {
         if (!sectionId || typeof sectionId !== 'string') return null
         const renderer = sectionRenderers[sectionId]
-        return renderer ? renderer() : null
+        if (!renderer) {
+          console.warn(`No renderer found for section: ${sectionId}`)
+          return null
+        }
+        try {
+          return <div key={`${sectionId}-${index}`}>{renderer()}</div>
+        } catch (error) {
+          console.error(`Error rendering section ${sectionId}:`, error)
+          return null
+        }
       })}
     </>
   )
