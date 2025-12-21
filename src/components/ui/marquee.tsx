@@ -43,6 +43,9 @@ export function Marquee({
   repeat = 4,
   ...props
 }: MarqueeProps) {
+  // Garantir que repeat seja um número válido e positivo
+  const safeRepeat = Math.max(1, Math.min(Math.floor(Number(repeat) || 4), 10))
+  
   return (
     <div
       {...props}
@@ -55,7 +58,7 @@ export function Marquee({
         className
       )}
     >
-      {Array(repeat)
+      {Array(safeRepeat)
         .fill(0)
         .map((_, i) => (
           <div

@@ -83,27 +83,40 @@ export function TestimonialsSection({
 }: TestimonialsSectionProps) {
   // Se não estiver habilitado explicitamente como false, verificar se há depoimentos
   if (enabled === false) return null
+  
+  // Garantir que testimonials seja sempre um array válido
+  const validTestimonials = Array.isArray(testimonials) ? testimonials : []
+  
   // Se não houver depoimentos, não renderizar
-  if (!testimonials || testimonials.length === 0) return null
+  if (!validTestimonials || validTestimonials.length === 0) return null
 
   // Criar arrays intercalados para cada coluna, garantindo que todos os depoimentos
   // apareçam em todas as colunas, mas em ordens diferentes e intercaladas
   // Sem repetições consecutivas
   const createInterleavedColumns = (items: TestimonialItem[]) => {
-    if (items.length === 0) return [[], [], [], []]
+    if (!Array.isArray(items) || items.length === 0) return [[], [], [], []]
     
     // Função para embaralhar sem repetições consecutivas
     const shuffleWithoutConsecutive = (arr: TestimonialItem[]): TestimonialItem[] => {
+      if (!Array.isArray(arr) || arr.length === 0) return []
+      
       const shuffled: TestimonialItem[] = []
       const available = [...arr]
       let lastItem: TestimonialItem | null = null
+      let iterations = 0
+      const maxIterations = arr.length * 10 // Proteção contra loop infinito
       
-      while (available.length > 0) {
+      while (available.length > 0 && iterations < maxIterations) {
+        iterations++
+        
         // Filtrar itens que não são iguais ao último adicionado
         const candidates = available.filter(item => item.id !== lastItem?.id)
         
         // Se não houver candidatos (todos são iguais), usar todos
         const pool = candidates.length > 0 ? candidates : available
+        
+        // Se o pool estiver vazio, parar
+        if (pool.length === 0) break
         
         // Escolher aleatoriamente
         const randomIndex = Math.floor(Math.random() * pool.length)
@@ -114,7 +127,9 @@ export function TestimonialsSection({
         
         // Remover o item selecionado do pool disponível
         const itemIndex = available.indexOf(selected)
-        available.splice(itemIndex, 1)
+        if (itemIndex >= 0) {
+          available.splice(itemIndex, 1)
+        }
         
         // Se o array disponível ficou vazio, recarregar com todos os itens originais
         if (available.length === 0) {
@@ -141,7 +156,7 @@ export function TestimonialsSection({
     return columns
   }
 
-  const [firstRow, secondRow, thirdRow, fourthRow] = createInterleavedColumns(testimonials)
+  const [firstRow, secondRow, thirdRow, fourthRow] = createInterleavedColumns(validTestimonials)
 
   return (
     <FadeInSection>

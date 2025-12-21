@@ -45,9 +45,20 @@ async function getSiteSettings() {
       homepageContent = data.homepage_content
     }
     
-    // Garantir que services_cards seja sempre um array
-    if (homepageContent && !Array.isArray(homepageContent.services_cards)) {
-      homepageContent.services_cards = []
+    // Garantir que todos os arrays sejam sempre arrays válidos
+    if (homepageContent) {
+      if (!Array.isArray(homepageContent.services_cards)) {
+        homepageContent.services_cards = []
+      }
+      if (!Array.isArray(homepageContent.notifications_items)) {
+        homepageContent.notifications_items = []
+      }
+      if (!Array.isArray(homepageContent.testimonials_items)) {
+        homepageContent.testimonials_items = []
+      }
+      if (!Array.isArray(homepageContent.section_order)) {
+        homepageContent.section_order = ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'contact']
+      }
     }
     
     return {
@@ -64,6 +75,17 @@ export default async function Home() {
   const services = await getServices()
   const siteSettings = await getSiteSettings()
   const homepageContent = siteSettings?.homepage_content || {}
+  
+  // Garantir que arrays sejam sempre arrays válidos
+  if (!Array.isArray(homepageContent.notifications_items)) {
+    homepageContent.notifications_items = []
+  }
+  if (!Array.isArray(homepageContent.testimonials_items)) {
+    homepageContent.testimonials_items = []
+  }
+  if (!Array.isArray(homepageContent.services_cards)) {
+    homepageContent.services_cards = []
+  }
   
   // Ordem padrão das seções
   let sectionOrder = homepageContent.section_order || ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'contact']

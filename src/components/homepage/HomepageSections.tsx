@@ -164,15 +164,20 @@ export function HomepageSections({
     // Se estiver explicitamente desabilitado ou oculto, não renderizar
     if (homepageContent.notifications_enabled === false || sectionVisibility.notifications === false) return null
     
+    // Garantir que notifications_items seja um array válido
+    const notificationsItems = Array.isArray(homepageContent.notifications_items) 
+      ? homepageContent.notifications_items 
+      : []
+    
     // Se não houver notificações configuradas, não renderizar
-    if (!homepageContent.notifications_items || homepageContent.notifications_items.length === 0) return null
+    if (!notificationsItems || notificationsItems.length === 0) return null
     
     return (
       <NotificationsSection
         enabled={homepageContent.notifications_enabled !== false}
         title={homepageContent.notifications_title}
         description={homepageContent.notifications_description}
-        notifications={homepageContent.notifications_items}
+        notifications={notificationsItems}
         delay={homepageContent.notifications_delay}
       />
     )
@@ -183,15 +188,20 @@ export function HomepageSections({
     // Se estiver explicitamente desabilitado ou oculto, não renderizar
     if (homepageContent.testimonials_enabled === false || sectionVisibility.testimonials === false) return null
     
+    // Garantir que testimonials_items seja um array válido
+    const testimonialsItems = Array.isArray(homepageContent.testimonials_items) 
+      ? homepageContent.testimonials_items 
+      : []
+    
     // Se não houver depoimentos configurados, não renderizar
-    if (!homepageContent.testimonials_items || homepageContent.testimonials_items.length === 0) return null
+    if (!testimonialsItems || testimonialsItems.length === 0) return null
     
     return (
       <TestimonialsSection
         enabled={homepageContent.testimonials_enabled !== false}
         title={homepageContent.testimonials_title}
         description={homepageContent.testimonials_description}
-        testimonials={homepageContent.testimonials_items}
+        testimonials={testimonialsItems}
         duration={homepageContent.testimonials_duration}
       />
     )
@@ -252,9 +262,13 @@ export function HomepageSections({
     contact: renderContactSection,
   }
 
+  // Garantir que sectionOrder seja um array válido
+  const validSectionOrder = Array.isArray(sectionOrder) ? sectionOrder : []
+  
   return (
     <>
-      {sectionOrder.map((sectionId: string) => {
+      {validSectionOrder.map((sectionId: string) => {
+        if (!sectionId || typeof sectionId !== 'string') return null
         const renderer = sectionRenderers[sectionId]
         return renderer ? renderer() : null
       })}

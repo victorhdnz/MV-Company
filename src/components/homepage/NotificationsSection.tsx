@@ -90,8 +90,12 @@ export function NotificationsSection({
 }: NotificationsSectionProps) {
   // Se não estiver habilitado explicitamente como false, verificar se há notificações
   if (enabled === false) return null
+  
+  // Garantir que notifications seja sempre um array válido
+  const validNotifications = Array.isArray(notifications) ? notifications : []
+  
   // Se não houver notificações, não renderizar
-  if (!notifications || notifications.length === 0) return null
+  if (!validNotifications || validNotifications.length === 0) return null
 
   return (
     <FadeInSection>
@@ -112,7 +116,7 @@ export function NotificationsSection({
 
           <div className="relative flex h-[500px] w-full flex-col overflow-hidden p-2">
             <AnimatedList delay={delay}>
-              {notifications.map((item) => (
+              {validNotifications.map((item) => (
                 <Notification key={item.id} {...item} />
               ))}
             </AnimatedList>

@@ -36,10 +36,15 @@ export const AnimatedList = React.memo(
     const [index, setIndex] = useState(0)
     const [isVisible, setIsVisible] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
-    const childrenArray = useMemo(
-      () => React.Children.toArray(children),
-      [children]
-    )
+    const childrenArray = useMemo(() => {
+      try {
+        const array = React.Children.toArray(children)
+        return Array.isArray(array) ? array : []
+      } catch (error) {
+        console.error('Erro ao processar children do AnimatedList:', error)
+        return []
+      }
+    }, [children])
 
     // Intersection Observer para detectar quando o componente está visível
     useEffect(() => {
@@ -82,8 +87,17 @@ export const AnimatedList = React.memo(
     }, [index, delay, childrenArray.length, isVisible])
 
     const itemsToShow = useMemo(() => {
-      const result = childrenArray.slice(0, index + 1).reverse()
-      return result
+      if (!Array.isArray(childrenArray) || childrenArray.length === 0) {
+        return []
+      }
+      try {
+        const safeIndex = Math.max(0, Math.min(index, childrenArray.length - 1))
+        const result = childrenArray.slice(0, safeIndex + 1).reverse()
+        return Array.isArray(result) ? result : []
+      } catch (error) {
+        console.error('Erro ao criar itemsToShow:', error)
+        return []
+      }
     }, [index, childrenArray])
 
     return (
