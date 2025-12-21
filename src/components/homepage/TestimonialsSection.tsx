@@ -83,7 +83,7 @@ export function TestimonialsSection({
   title,
   description,
   testimonials = [],
-  duration = 60,
+  duration = 150,
 }: TestimonialsSectionProps) {
   // Se não estiver habilitado explicitamente como false, verificar se há depoimentos
   if (enabled === false) return null
