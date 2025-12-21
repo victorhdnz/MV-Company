@@ -53,12 +53,12 @@ export interface PricingComponentProps extends React.HTMLAttributes<HTMLDivEleme
 /** Renders a single feature row with an icon. */
 const FeatureItem: React.FC<{ feature: Feature }> = ({ feature }) => {
   const Icon = feature.isIncluded ? Check : X
-  const iconColor = feature.isIncluded ? "text-primary" : "text-muted-foreground"
+  const iconColor = feature.isIncluded ? "text-white" : "text-gray-500"
 
   return (
     <li className="flex items-start space-x-3 py-2">
       <Icon className={cn("h-4 w-4 flex-shrink-0 mt-0.5", iconColor)} aria-hidden="true" />
-      <span className={cn("text-sm", feature.isIncluded ? "text-foreground" : "text-muted-foreground")}>
+      <span className={cn("text-sm", feature.isIncluded ? "text-white" : "text-gray-500")}>
         {feature.name}
       </span>
     </li>
@@ -72,8 +72,8 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
   billingCycle,
   onCycleChange,
   onPlanSelect,
-  title = "Choose the right plan for your business.",
-  description = "Scale effortlessly with features designed for growth, from startups to enterprise.",
+  title = "Escolha o plano ideal para sua empresa",
+  description = "Soluções completas de gestão digital para impulsionar seu negócio. Do básico ao enterprise, temos o plano certo para você.",
   annualDiscountPercent = 20,
   className,
   ...props
@@ -96,23 +96,23 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
           }
         }}
         aria-label="Select billing cycle"
-        className="border rounded-lg p-1 bg-muted/50 dark:bg-muted/30"
+        className="border border-gray-700 rounded-lg p-1 bg-gray-900/50"
       >
         <ToggleGroupItem
           value="monthly"
-          aria-label="Monthly Billing"
-          className="px-6 py-1.5 text-sm font-medium data-[state=on]:bg-background data-[state=on]:shadow-sm data-[state=on]:border data-[state=on]:ring-1 data-[state=on]:ring-ring/20 rounded-md transition-colors"
+          aria-label="Cobrança Mensal"
+          className="px-6 py-1.5 text-sm font-medium text-gray-300 data-[state=on]:bg-white data-[state=on]:text-black data-[state=on]:shadow-sm data-[state=on]:border data-[state=on]:border-gray-600 rounded-md transition-colors"
         >
-          Monthly
+          Mensal
         </ToggleGroupItem>
         <ToggleGroupItem
           value="annually"
-          aria-label="Annual Billing"
-          className="px-6 py-1.5 text-sm font-medium data-[state=on]:bg-background data-[state=on]:shadow-sm data-[state=on]:border data-[state=on]:ring-1 data-[state=on]:ring-ring/20 rounded-md transition-colors relative"
+          aria-label="Cobrança Anual"
+          className="px-6 py-1.5 text-sm font-medium text-gray-300 data-[state=on]:bg-white data-[state=on]:text-black data-[state=on]:shadow-sm data-[state=on]:border data-[state=on]:border-gray-600 rounded-md transition-colors relative"
         >
-          Annually
-          <span className="absolute -top-3 right-0 text-xs font-semibold text-primary/80 dark:text-primary/70 bg-primary/10 dark:bg-primary/20 px-1.5 rounded-full whitespace-nowrap">
-            Save {annualDiscountPercent}%
+          Anual
+          <span className="absolute -top-3 right-0 text-xs font-semibold text-white bg-gray-800 border border-gray-700 px-1.5 rounded-full whitespace-nowrap">
+            Economize {annualDiscountPercent}%
           </span>
         </ToggleGroupItem>
       </ToggleGroup>
@@ -131,51 +131,51 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
         const isFeatured = plan.isPopular
         const currentPrice = billingCycle === 'monthly' ? plan.priceMonthly : plan.priceAnnually
         const originalMonthlyPrice = plan.priceMonthly
-        const priceSuffix = billingCycle === 'monthly' ? '/mo' : '/yr'
+        const priceSuffix = billingCycle === 'monthly' ? '/mês' : '/ano'
 
         return (
           <Card
             key={plan.id}
             className={cn(
-              "flex flex-col transition-all duration-300 shadow-md hover:shadow-lg dark:hover:shadow-white/10",
-              isFeatured && "ring-2 ring-primary dark:ring-primary/80 shadow-xl dark:shadow-primary/20 transform md:scale-[1.02] hover:scale-[1.04]"
+              "flex flex-col transition-all duration-300 shadow-md hover:shadow-lg bg-gray-900 border border-gray-800 text-white",
+              isFeatured && "ring-2 ring-white shadow-xl transform md:scale-[1.02] hover:scale-[1.04]"
             )}
           >
             <CardHeader className="p-6 pb-4">
               <div className="flex justify-between items-start">
-                <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
+                <CardTitle className="text-2xl font-bold text-white">{plan.name}</CardTitle>
                 {isFeatured && (
-                  <span className="text-xs font-semibold px-3 py-1 bg-primary text-primary-foreground rounded-full">
-                    Most Popular
+                  <span className="text-xs font-semibold px-3 py-1 bg-white text-black rounded-full">
+                    Mais Popular
                   </span>
                 )}
               </div>
-              <CardDescription className="text-sm mt-1">{plan.description}</CardDescription>
+              <CardDescription className="text-sm mt-1 text-gray-300">{plan.description}</CardDescription>
               <div className="mt-4">
-                <p className="text-4xl font-extrabold text-foreground">
-                  ${currentPrice}
-                  <span className="text-base font-normal text-muted-foreground ml-1">{priceSuffix}</span>
+                <p className="text-4xl font-extrabold text-white">
+                  R$ {currentPrice.toLocaleString('pt-BR')}
+                  <span className="text-base font-normal text-gray-400 ml-1">{priceSuffix}</span>
                 </p>
                 {billingCycle === 'annually' && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Billed annually (${plan.priceAnnually})
+                  <p className="text-xs text-gray-400 mt-1">
+                    Cobrado anualmente (R$ {plan.priceAnnually.toLocaleString('pt-BR')})
                   </p>
                 )}
                 {billingCycle === 'annually' && (
-                    <p className="text-xs text-muted-foreground line-through opacity-70 mt-1">
-                        ${originalMonthlyPrice}/mo
+                    <p className="text-xs text-gray-500 line-through opacity-70 mt-1">
+                        R$ {originalMonthlyPrice.toLocaleString('pt-BR')}/mês
                     </p>
                 )}
               </div>
             </CardHeader>
             <CardContent className="flex-grow p-6 pt-0">
-              <h4 className="text-sm font-semibold mb-2 mt-4 text-foreground/80">Key Features:</h4>
+              <h4 className="text-sm font-semibold mb-2 mt-4 text-gray-300">Recursos Incluídos:</h4>
               <ul className="list-none space-y-0">
                 {plan.features.slice(0, 5).map((feature) => (
                   <FeatureItem key={feature.name} feature={feature} />
                 ))}
                 {plan.features.length > 5 && (
-                    <li className="text-sm text-muted-foreground mt-2">
+                    <li className="text-sm text-gray-400 mt-2">
                         + {plan.features.length - 5} more features
                     </li>
                 )}
@@ -187,8 +187,8 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                 className={cn(
                   "w-full transition-all duration-200",
                   isFeatured
-                    ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 dark:shadow-primary/40"
-                    : "bg-muted text-foreground hover:bg-muted/80 border border-input"
+                    ? "bg-white hover:bg-gray-100 text-black shadow-lg"
+                    : "bg-gray-800 text-white hover:bg-gray-700 border border-gray-700"
                 )}
                 size="lg"
                 aria-label={`Select ${plan.name} plan for ${currentPrice} ${priceSuffix}`}
@@ -204,20 +204,20 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
 
   // --- 3.3. Comparison Table (Mobile hidden, Tablet/Desktop visible) ---
   const ComparisonTable = (
-    <div className="mt-16 hidden md:block border rounded-lg overflow-x-auto shadow-sm dark:border-border/50">
-      <table className="min-w-full divide-y divide-border/80 dark:divide-border/50">
+    <div className="mt-16 hidden md:block border border-gray-700 rounded-lg overflow-x-auto shadow-sm bg-gray-900">
+      <table className="min-w-full divide-y divide-gray-700">
         <thead>
-          <tr className="bg-muted/30 dark:bg-muted/20">
-            <th scope="col" className="px-6 py-4 text-left text-sm font-semibold text-foreground/80 w-[200px] whitespace-nowrap">
-              Feature
+          <tr className="bg-gray-800">
+            <th scope="col" className="px-6 py-4 text-left text-sm font-semibold text-white w-[200px] whitespace-nowrap">
+              Recurso
             </th>
             {plans.map((plan) => (
               <th
                 key={`th-${plan.id}`}
                 scope="col"
                 className={cn(
-                  "px-6 py-4 text-center text-sm font-semibold text-foreground/80 whitespace-nowrap",
-                  plan.isPopular && "bg-primary/10 dark:bg-primary/20"
+                  "px-6 py-4 text-center text-sm font-semibold text-white whitespace-nowrap",
+                  plan.isPopular && "bg-gray-800"
                 )}
               >
                 {plan.name}
@@ -225,24 +225,24 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border/80 dark:divide-border/50 bg-background/90">
+        <tbody className="divide-y divide-gray-700 bg-gray-900">
           {allFeatures.map((featureName, index) => (
-            <tr key={featureName} className={cn("transition-colors hover:bg-accent/20 dark:hover:bg-accent/10", index % 2 === 0 ? "bg-background" : "bg-muted/10 dark:bg-muted/5")}>
-              <td className="px-6 py-3 text-left text-sm font-medium text-foreground/90 whitespace-nowrap">
+            <tr key={featureName} className={cn("transition-colors hover:bg-gray-800", index % 2 === 0 ? "bg-gray-900" : "bg-gray-800/50")}>
+              <td className="px-6 py-3 text-left text-sm font-medium text-white whitespace-nowrap">
                 {featureName}
               </td>
               {plans.map((plan) => {
                 const feature = plan.features.find(f => f.name === featureName)
                 const isIncluded = feature?.isIncluded ?? false
                 const Icon = isIncluded ? Check : X
-                const iconColor = isIncluded ? "text-primary" : "text-muted-foreground/70"
+                const iconColor = isIncluded ? "text-white" : "text-gray-500"
 
                 return (
                   <td
                     key={`${plan.id}-${featureName}`}
                     className={cn(
                       "px-6 py-3 text-center transition-all duration-150",
-                      plan.isPopular && "bg-primary/5 dark:bg-primary/10"
+                      plan.isPopular && "bg-gray-800/30"
                     )}
                   >
                     <Icon className={cn("h-5 w-5 mx-auto", iconColor)} aria-hidden="true" />
@@ -260,10 +260,10 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
   return (
     <div className={cn("w-full py-12 md:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8", className)} {...props}>
       <header className="text-center mb-10">
-        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
           {title}
         </h2>
-        <p className="mt-3 text-lg text-muted-foreground max-w-2xl mx-auto">
+        <p className="mt-3 text-lg text-gray-300 max-w-2xl mx-auto">
           {description}
         </p>
       </header>
@@ -277,8 +277,8 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
 
       {/* Comparison Table (Desktop/Tablet visibility) */}
       <section aria-label="Feature Comparison Table" className="mt-16">
-        <h3 className="text-2xl font-bold mb-6 hidden md:block text-center text-foreground">
-          Detailed Feature Comparison
+        <h3 className="text-2xl font-bold mb-6 hidden md:block text-center text-white">
+          Comparação Detalhada de Recursos
         </h3>
         {ComparisonTable}
       </section>

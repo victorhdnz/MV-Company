@@ -31,65 +31,73 @@ export default function PricingEditorPage() {
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState<PricingSettings>({
     pricing_enabled: false,
-    pricing_title: 'Choose the right plan for your business.',
-    pricing_description: 'Scale effortlessly with features designed for growth, from startups to enterprise.',
+    pricing_title: 'Escolha o plano ideal para sua empresa',
+    pricing_description: 'Soluções completas de gestão digital para impulsionar seu negócio. Do básico ao enterprise, temos o plano certo para você.',
     pricing_annual_discount: 20,
     pricing_whatsapp_number: '',
     pricing_plans: [
       {
-        id: 'starter',
-        name: 'Starter',
-        description: 'Perfect for new teams and small projects.',
-        priceMonthly: 19,
-        priceAnnually: 182,
+        id: 'basico',
+        name: 'Básico',
+        description: 'Ideal para pequenas empresas que estão começando sua jornada digital.',
+        priceMonthly: 497,
+        priceAnnually: 4766,
         isPopular: false,
-        buttonLabel: 'Start Free Trial',
+        buttonLabel: 'Saiba mais',
         features: [
-          { name: '1 Project', isIncluded: true },
-          { name: 'Basic Analytics', isIncluded: true },
-          { name: 'Email Support', isIncluded: true },
-          { name: '10,000 API Calls', isIncluded: true },
-          { name: 'Custom Domains', isIncluded: false },
+          { name: 'Criação de site institucional', isIncluded: true },
+          { name: 'Gestão de redes sociais (3 plataformas)', isIncluded: true },
+          { name: 'Criação de conteúdo (8 posts/mês)', isIncluded: true },
+          { name: 'Relatórios mensais básicos', isIncluded: true },
+          { name: 'Suporte por e-mail', isIncluded: true },
+          { name: 'Tráfego pago', isIncluded: false },
+          { name: 'Consultoria estratégica', isIncluded: false },
         ],
-        whatsappMessageMonthly: 'Olá! Gostaria de contratar o plano Starter no plano mensal.',
-        whatsappMessageAnnually: 'Olá! Gostaria de contratar o plano Starter no plano anual.',
+        whatsappMessageMonthly: 'Olá! Tenho interesse no plano Básico mensal. Gostaria de saber mais informações.',
+        whatsappMessageAnnually: 'Olá! Tenho interesse no plano Básico anual. Gostaria de saber mais informações.',
       },
       {
-        id: 'pro',
-        name: 'Pro',
-        description: 'Everything a growing business needs to succeed.',
-        priceMonthly: 49,
-        priceAnnually: 470,
+        id: 'profissional',
+        name: 'Profissional',
+        description: 'Perfeito para empresas em crescimento que precisam de uma presença digital completa.',
+        priceMonthly: 997,
+        priceAnnually: 9565,
         isPopular: true,
-        buttonLabel: 'Choose Pro',
+        buttonLabel: 'Como iniciar',
         features: [
-          { name: 'Unlimited Projects', isIncluded: true },
-          { name: 'Advanced Analytics', isIncluded: true },
-          { name: 'Priority Chat Support', isIncluded: true },
-          { name: '500,000 API Calls', isIncluded: true },
-          { name: 'Custom Domains', isIncluded: true },
+          { name: 'Criação de site institucional', isIncluded: true },
+          { name: 'Gestão de redes sociais (5 plataformas)', isIncluded: true },
+          { name: 'Criação de conteúdo (16 posts/mês)', isIncluded: true },
+          { name: 'Tráfego pago (até R$ 1.000/mês)', isIncluded: true },
+          { name: 'Relatórios mensais detalhados', isIncluded: true },
+          { name: 'Suporte prioritário WhatsApp', isIncluded: true },
+          { name: 'Consultoria estratégica mensal', isIncluded: true },
+          { name: 'E-mail marketing', isIncluded: false },
         ],
-        whatsappMessageMonthly: 'Olá! Gostaria de contratar o plano Pro no plano mensal.',
-        whatsappMessageAnnually: 'Olá! Gostaria de contratar o plano Pro no plano anual.',
+        whatsappMessageMonthly: 'Olá! Tenho interesse no plano Profissional mensal. Gostaria de saber como iniciar.',
+        whatsappMessageAnnually: 'Olá! Tenho interesse no plano Profissional anual. Gostaria de saber como iniciar.',
       },
       {
         id: 'enterprise',
         name: 'Enterprise',
-        description: 'Advanced features and dedicated support for large organizations.',
-        priceMonthly: 199,
-        priceAnnually: 1910,
+        description: 'Solução completa para grandes empresas que precisam de máxima performance e suporte dedicado.',
+        priceMonthly: 2497,
+        priceAnnually: 23965,
         isPopular: false,
-        buttonLabel: 'Contact Sales',
+        buttonLabel: 'Saiba mais',
         features: [
-          { name: 'Unlimited Projects', isIncluded: true },
-          { name: 'Advanced Analytics', isIncluded: true },
-          { name: 'Priority Chat Support', isIncluded: true },
-          { name: '5,000,000 API Calls', isIncluded: true },
-          { name: 'Custom Domains', isIncluded: true },
-          { name: 'Dedicated Account Manager', isIncluded: true },
+          { name: 'Criação de site institucional + e-commerce', isIncluded: true },
+          { name: 'Gestão de redes sociais (ilimitado)', isIncluded: true },
+          { name: 'Criação de conteúdo (ilimitado)', isIncluded: true },
+          { name: 'Tráfego pago (até R$ 5.000/mês)', isIncluded: true },
+          { name: 'Relatórios semanais detalhados', isIncluded: true },
+          { name: 'Suporte 24/7 dedicado', isIncluded: true },
+          { name: 'Consultoria estratégica semanal', isIncluded: true },
+          { name: 'E-mail marketing completo', isIncluded: true },
+          { name: 'Gerente de conta dedicado', isIncluded: true },
         ],
-        whatsappMessageMonthly: 'Olá! Gostaria de contratar o plano Enterprise no plano mensal.',
-        whatsappMessageAnnually: 'Olá! Gostaria de contratar o plano Enterprise no plano anual.',
+        whatsappMessageMonthly: 'Olá! Tenho interesse no plano Enterprise mensal. Gostaria de agendar uma conversa.',
+        whatsappMessageAnnually: 'Olá! Tenho interesse no plano Enterprise anual. Gostaria de agendar uma conversa.',
       },
     ],
   })
@@ -235,14 +243,14 @@ export default function PricingEditorPage() {
                     label="Título"
                     value={formData.pricing_title || ''}
                     onChange={(e) => setFormData({ ...formData, pricing_title: e.target.value })}
-                    placeholder="Ex: Choose the right plan for your business."
+                    placeholder="Ex: Escolha o plano ideal para sua empresa"
                   />
                   <div>
                     <label className="block text-sm font-medium mb-2">Descrição</label>
                     <textarea
                       value={formData.pricing_description || ''}
                       onChange={(e) => setFormData({ ...formData, pricing_description: e.target.value })}
-                      placeholder="Ex: Scale effortlessly with features designed for growth..."
+                      placeholder="Ex: Soluções completas de gestão digital para impulsionar seu negócio..."
                       rows={3}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -290,14 +298,14 @@ export default function PricingEditorPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <Input
-                        label="Preço Mensal ($)"
+                        label="Preço Mensal (R$)"
                         value={plan.priceMonthly.toString()}
                         onChange={(e) => updatePlan(planIndex, 'priceMonthly', parseFloat(e.target.value) || 0)}
                         type="number"
                         min="0"
                       />
                       <Input
-                        label="Preço Anual ($)"
+                        label="Preço Anual (R$)"
                         value={plan.priceAnnually.toString()}
                         onChange={(e) => updatePlan(planIndex, 'priceAnnually', parseFloat(e.target.value) || 0)}
                         type="number"

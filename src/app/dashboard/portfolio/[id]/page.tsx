@@ -31,6 +31,7 @@ const sectionIcons: Record<string, string> = {
   hero: '🎥',
   benefits: '📋',
   alternate: '🔄',
+  pricing: '💰',
   cta: '📞',
 }
 
@@ -39,6 +40,7 @@ const sectionLabels: Record<string, string> = {
   hero: 'Hero com Vídeo',
   benefits: 'O que você receberá',
   alternate: 'Conteúdo Alternado',
+  pricing: 'Planos de Assinatura',
   cta: 'Contato',
 }
 
@@ -55,6 +57,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     'hero',
     'benefits',
     'alternate',
+    'pricing',
     'cta',
   ])
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
@@ -62,6 +65,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     hero: true,
     benefits: true,
     alternate: true,
+    pricing: false,
     cta: true,
   })
   const supabase = createClient()
@@ -171,13 +175,25 @@ export default function EditServicePage({ params }: EditServicePageProps) {
           const filteredOrder = layout.section_order.filter(
             (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials' && sectionId !== 'about'
           )
-          setSectionOrder(filteredOrder.length > 0 ? filteredOrder : ['basic', 'hero', 'benefits', 'alternate', 'cta'])
+          // Garantir que 'pricing' esteja presente antes de 'cta'
+          let finalOrder = filteredOrder.length > 0 ? filteredOrder : ['basic', 'hero', 'benefits', 'alternate', 'pricing', 'cta']
+          if (!finalOrder.includes('pricing') && finalOrder.includes('cta')) {
+            const ctaIndex = finalOrder.indexOf('cta')
+            finalOrder.splice(ctaIndex, 0, 'pricing')
+          } else if (!finalOrder.includes('pricing')) {
+            finalOrder.push('pricing')
+          }
+          setSectionOrder(finalOrder)
         }
         if (layout.section_visibility) {
           const filteredVisibility = { ...layout.section_visibility }
           delete filteredVisibility.gifts
           delete filteredVisibility.testimonials
           delete filteredVisibility.about
+          // Garantir que 'pricing' esteja presente na visibilidade
+          if (filteredVisibility.pricing === undefined) {
+            filteredVisibility.pricing = false
+          }
           setSectionVisibility(filteredVisibility)
         }
       }
@@ -429,6 +445,27 @@ export default function EditServicePage({ params }: EditServicePageProps) {
                 onChange={(items) => setLayoutData({ ...layoutData, alternate_content_items: items })}
               />
             )}
+          </div>
+        )
+
+      case 'pricing':
+        return (
+          <div className="space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>💡 Informação:</strong> Os planos de assinatura são gerenciados exclusivamente na página{' '}
+                <a href="/dashboard/pricing" className="text-blue-600 hover:underline font-semibold">
+                  Gerenciar Planos de Assinatura
+                </a>
+                . A seção aparecerá automaticamente na homepage e nas páginas de serviços quando estiver habilitada na página de pricing.
+              </p>
+            </div>
+            <p className="text-sm text-gray-600">
+              Para configurar os planos, preços, features e mensagens do WhatsApp, acesse{' '}
+              <a href="/dashboard/pricing" className="text-blue-600 hover:underline font-semibold">
+                /dashboard/pricing
+              </a>
+            </p>
           </div>
         )
 
