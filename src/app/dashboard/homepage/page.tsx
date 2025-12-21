@@ -61,7 +61,7 @@ interface HomepageSettings {
     id: string
     name: string
     description: string
-    icon: 'whatsapp' | 'email' | 'instagram' | 'like' | 'user' | 'trending' | 'check'
+    icon: 'whatsapp' | 'email' | 'instagram' | 'like' | 'user' | 'trending' | 'check' | 'sale'
     time: string
   }>
   notifications_delay?: number

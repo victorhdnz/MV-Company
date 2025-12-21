@@ -3,7 +3,7 @@
 import { AnimatedList } from '@/components/ui/animated-list'
 import { Bell, Mail, MessageCircle, Heart, UserPlus, TrendingUp, CheckCircle, ShoppingCart } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { FadeInSection } from '@/components/ui/FadeInSectionWrapper'
+import { FadeInSection } from '@/components/ui/FadeInSection'
 
 export interface NotificationItem {
   id: string
