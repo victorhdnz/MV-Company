@@ -161,14 +161,22 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                   <span className="text-base font-normal text-gray-400 ml-1">{priceSuffix}</span>
                 </p>
                 {billingCycle === 'annually' && (
-                  <p className="text-xs text-gray-400 mt-1">
-                    Cobrado anualmente (R$ {plan.priceAnnually.toLocaleString('pt-BR')})
-                  </p>
-                )}
-                {billingCycle === 'annually' && (
-                    <p className="text-xs text-gray-500 line-through opacity-70 mt-1">
-                        R$ {originalMonthlyPrice.toLocaleString('pt-BR')}/mês
+                  <>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Cobrado anualmente (R$ {plan.priceAnnually.toLocaleString('pt-BR')})
                     </p>
+                    <p className="text-sm text-white font-semibold mt-2">
+                      Equivale a R$ {(plan.priceAnnually / 12).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mês
+                    </p>
+                    <p className="text-xs text-gray-500 line-through opacity-70 mt-1">
+                      R$ {originalMonthlyPrice.toLocaleString('pt-BR')}/mês
+                    </p>
+                  </>
+                )}
+                {billingCycle === 'monthly' && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    Economize {annualDiscountPercent}% com o plano anual
+                  </p>
                 )}
               </div>
             </CardHeader>

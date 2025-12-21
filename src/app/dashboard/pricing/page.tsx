@@ -174,6 +174,17 @@ export default function PricingEditorPage() {
     
     const newPlans = [...formData.pricing_plans] as [PriceTier, PriceTier, PriceTier]
     newPlans[index] = { ...newPlans[index], [field]: value }
+    
+    // Se o preço mensal foi alterado, calcular automaticamente o preço anual
+    if (field === 'priceMonthly' && typeof value === 'number' && value > 0) {
+      const discountPercent = formData.pricing_annual_discount || 20
+      const monthlyPrice = value
+      const yearlyTotal = monthlyPrice * 12
+      const discountAmount = yearlyTotal * (discountPercent / 100)
+      const annualPrice = yearlyTotal - discountAmount
+      newPlans[index].priceAnnually = Math.round(annualPrice)
+    }
+    
     setFormData({ ...formData, pricing_plans: newPlans })
   }
 
@@ -258,7 +269,27 @@ export default function PricingEditorPage() {
                   <Input
                     label="Percentual de Desconto Anual (%)"
                     value={formData.pricing_annual_discount?.toString() || '20'}
-                    onChange={(e) => setFormData({ ...formData, pricing_annual_discount: parseInt(e.target.value) || 20 })}
+                    onChange={(e) => {
+                      const newDiscount = parseInt(e.target.value) || 20
+                      setFormData((prev) => {
+                        // Recalcular preços anuais de todos os planos quando o desconto mudar
+                        const updatedPlans = prev.pricing_plans?.map((plan) => {
+                          const yearlyTotal = plan.priceMonthly * 12
+                          const discountAmount = yearlyTotal * (newDiscount / 100)
+                          const annualPrice = yearlyTotal - discountAmount
+                          return {
+                            ...plan,
+                            priceAnnually: Math.round(annualPrice)
+                          }
+                        }) as [PriceTier, PriceTier, PriceTier] | undefined
+                        
+                        return {
+                          ...prev,
+                          pricing_annual_discount: newDiscount,
+                          pricing_plans: updatedPlans
+                        }
+                      })
+                    }}
                     type="number"
                     min="0"
                     max="100"
@@ -296,21 +327,55 @@ export default function PricingEditorPage() {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4">
                       <Input
                         label="Preço Mensal (R$)"
                         value={plan.priceMonthly.toString()}
                         onChange={(e) => updatePlan(planIndex, 'priceMonthly', parseFloat(e.target.value) || 0)}
                         type="number"
                         min="0"
+                        step="0.01"
                       />
-                      <Input
-                        label="Preço Anual (R$)"
-                        value={plan.priceAnnually.toString()}
-                        onChange={(e) => updatePlan(planIndex, 'priceAnnually', parseFloat(e.target.value) || 0)}
-                        type="number"
-                        min="0"
-                      />
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p className="text-xs text-blue-800 mb-1">
+                          <strong>💡 Dica:</strong> O preço anual é calculado automaticamente com base no desconto de {formData.pricing_annual_discount || 20}%.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Preço Anual (R$) - Calculado automaticamente
+                          </label>
+                          <Input
+                            value={plan.priceAnnually.toString()}
+                            onChange={(e) => updatePlan(planIndex, 'priceAnnually', parseFloat(e.target.value) || 0)}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            className="bg-gray-50"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            <strong>Parcela mensal equivalente:</strong> R$ {(plan.priceAnnually / 12).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mês
+                          </p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Informações de Economia</label>
+                          <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm space-y-1">
+                            <p className="text-gray-700">
+                              <strong>Total sem desconto (12x):</strong> R$ {(plan.priceMonthly * 12).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <p className="text-green-600 font-semibold">
+                              <strong>Economia total:</strong> R$ {((plan.priceMonthly * 12) - plan.priceAnnually).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <p className="text-blue-600 font-semibold">
+                              <strong>Desconto aplicado:</strong> {formData.pricing_annual_discount || 20}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500 bg-yellow-50 border border-yellow-200 rounded-lg p-2">
+                        <strong>💡 Nota:</strong> O preço anual é calculado automaticamente quando você altera o preço mensal. Você pode editá-lo manualmente se necessário, mas será recalculado novamente se alterar o preço mensal.
+                      </div>
                     </div>
                     <Switch
                       label="Marcar como 'Most Popular'"
