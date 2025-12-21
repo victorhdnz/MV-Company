@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PricingComponent, PriceTier, BillingCycle, ComparisonFeature, FeatureCategory } from '@/components/ui/pricing-card'
+import { PricingComponent, PriceTier, BillingCycle, FeatureCategory } from '@/components/ui/pricing-card'
 import { FadeInSection } from '@/components/ui/FadeInSection'
 
 interface ServicePricingProps {
@@ -12,7 +12,6 @@ interface ServicePricingProps {
   plans?: [PriceTier, PriceTier, PriceTier]
   whatsappNumber?: string
   serviceName?: string
-  comparisonFeatures?: ComparisonFeature[]
   featureCategories?: FeatureCategory[]
 }
 
@@ -24,7 +23,6 @@ export function ServicePricing({
   plans,
   whatsappNumber,
   serviceName,
-  comparisonFeatures = [],
   featureCategories = [],
 }: ServicePricingProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('annually')

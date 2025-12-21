@@ -489,46 +489,72 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700 bg-gray-900">
-              {allFeatures.map((featureName, index) => {
-                // Se estiver usando recursos globais, encontrar o ID do recurso
-                const comparisonFeature = comparisonFeatures.find(f => f.name === featureName)
-                const featureId = comparisonFeature?.id
+              {sortedCategories.length > 0 ? (
+                sortedCategories.map((category, index) => {
+                  const planValues = plans.map(plan => {
+                    const categoryValue = (plan.category_values || []).find(cv => cv.category_id === category.id)
+                    return {
+                      plan,
+                      hasCategory: !!(categoryValue?.text && categoryValue.text.trim() !== ''),
+                      text: categoryValue?.text || ''
+                    }
+                  })
+                  
+                  const allHaveCategory = planValues.every(pv => pv.hasCategory)
 
-                return (
-                  <tr key={`modal-${featureName}`} className={cn("transition-colors hover:bg-gray-800", index % 2 === 0 ? "bg-gray-900" : "bg-gray-800/50")}>
-                    <td className="px-4 py-3 text-left text-sm font-medium text-white">
-                      {featureName}
-                    </td>
-                    {plans.map((plan) => {
-                      // Se usar recursos globais, verificar feature_values
-                      let isIncluded = false
-                      if (comparisonFeatures.length > 0 && featureId) {
-                        const featureValue = (plan.feature_values || []).find(fv => fv.feature_id === featureId)
-                        isIncluded = !!(featureValue?.text && featureValue.text.trim() !== '')
-                      } else {
-                        // Fallback para features antigas
-                        const feature = plan.features.find(f => f.name === featureName)
-                        isIncluded = feature?.isIncluded ?? false
-                      }
-                      
-                      const Icon = isIncluded ? Check : X
-                      const iconColor = isIncluded ? "text-white" : "text-gray-500"
-
-                      return (
-                        <td
-                          key={`modal-${plan.id}-${featureName}`}
-                          className={cn(
-                            "px-4 py-3 text-center transition-all duration-150",
-                            plan.isPopular && "bg-gray-800/30"
-                          )}
-                        >
-                          <Icon className={cn("h-5 w-5 mx-auto", iconColor)} aria-hidden="true" />
-                        </td>
-                      )
-                    })}
-                  </tr>
-                )
-              })}
+                  return (
+                    <tr key={`modal-${category.id}`} className={cn("transition-colors hover:bg-gray-800", index % 2 === 0 ? "bg-gray-900" : "bg-gray-800/50")}>
+                      <td className="px-4 py-3 text-left text-sm font-semibold text-white">
+                        {category.name}
+                      </td>
+                      {planValues.map(({ plan, hasCategory, text }) => {
+                        if (allHaveCategory) {
+                          return (
+                            <td
+                              key={`modal-${plan.id}-${category.id}`}
+                              className={cn(
+                                "px-4 py-3 text-left transition-all duration-150",
+                                plan.isPopular && "bg-gray-800/30"
+                              )}
+                            >
+                              <div className="flex items-start gap-2">
+                                <Check className="h-4 w-4 flex-shrink-0 text-white mt-0.5" aria-hidden="true" />
+                                <span className="text-sm text-gray-300 leading-relaxed">{text}</span>
+                              </div>
+                            </td>
+                          )
+                        } else {
+                          return (
+                            <td
+                              key={`modal-${plan.id}-${category.id}`}
+                              className={cn(
+                                "px-4 py-3 transition-all duration-150",
+                                hasCategory ? "text-left" : "text-center",
+                                plan.isPopular && "bg-gray-800/30"
+                              )}
+                            >
+                              {hasCategory && text ? (
+                                <div className="flex items-start gap-2">
+                                  <Check className="h-4 w-4 flex-shrink-0 text-white mt-0.5" aria-hidden="true" />
+                                  <span className="text-sm text-gray-300 leading-relaxed">{text}</span>
+                                </div>
+                              ) : (
+                                <X className="h-5 w-5 mx-auto text-gray-500" aria-hidden="true" />
+                              )}
+                            </td>
+                          )
+                        }
+                      })}
+                    </tr>
+                  )
+                })
+              ) : (
+                <tr>
+                  <td colSpan={4} className="px-4 py-4 text-center text-sm text-gray-400">
+                    Nenhuma categoria configurada
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
