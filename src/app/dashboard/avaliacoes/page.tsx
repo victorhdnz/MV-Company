@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { ServiceTestimonial, Service } from '@/types'
 import { Plus, Edit, Trash2, Eye, EyeOff, Search, Filter, Star, Image as ImageIcon } from 'lucide-react'

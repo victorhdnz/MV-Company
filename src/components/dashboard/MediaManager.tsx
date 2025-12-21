@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, X, Image as ImageIcon, Video, File, Trash2, Eye, Download, Copy } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
 

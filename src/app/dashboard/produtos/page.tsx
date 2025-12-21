@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { Product } from '@/types'
 import { formatCurrency } from '@/lib/utils/format'
