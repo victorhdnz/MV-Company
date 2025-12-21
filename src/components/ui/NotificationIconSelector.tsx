@@ -80,19 +80,27 @@ export function NotificationIconSelector({
         if (buttonRef.current) {
           const rect = buttonRef.current.getBoundingClientRect()
           setPosition({
-            top: rect.bottom + window.scrollY + 4,
-            left: rect.left + window.scrollX,
+            top: rect.bottom + 4, // fixed é relativo ao viewport, não precisa scrollY
+            left: rect.left, // fixed é relativo ao viewport, não precisa scrollX
             width: rect.width,
           })
         }
       }
+      // Calcular posição imediatamente
       updatePosition()
+      // Usar requestAnimationFrame também para garantir
+      requestAnimationFrame(() => {
+        updatePosition()
+      })
       window.addEventListener('scroll', updatePosition, true)
       window.addEventListener('resize', updatePosition)
       return () => {
         window.removeEventListener('scroll', updatePosition, true)
         window.removeEventListener('resize', updatePosition)
       }
+    } else if (!isOpen) {
+      // Resetar posição quando fechar
+      setPosition({ top: 0, left: 0, width: 0 })
     }
   }, [isOpen, mounted])
 
@@ -124,6 +132,15 @@ export function NotificationIconSelector({
           type="button"
           onClick={(e) => {
             e.stopPropagation()
+            if (!isOpen && buttonRef.current) {
+              // Calcular posição antes de abrir
+              const rect = buttonRef.current.getBoundingClientRect()
+              setPosition({
+                top: rect.bottom + 4,
+                left: rect.left,
+                width: rect.width,
+              })
+            }
             setIsOpen(!isOpen)
           }}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white flex items-center justify-between hover:border-gray-400 transition-colors"
@@ -155,7 +172,7 @@ export function NotificationIconSelector({
           </svg>
         </button>
 
-        {isOpen && mounted && createPortal(
+        {isOpen && mounted && position.width > 0 && createPortal(
           <>
             <div
               className="fixed inset-0 z-[9998]"
@@ -167,7 +184,7 @@ export function NotificationIconSelector({
               style={{
                 top: `${position.top}px`,
                 left: `${position.left}px`,
-                width: `${position.width}px`,
+                width: position.width > 0 ? `${position.width}px` : '300px',
                 minWidth: '300px',
               }}
             >
