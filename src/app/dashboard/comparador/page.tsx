@@ -537,7 +537,7 @@ export default function ComparadorDashboardPage() {
             <p className="text-gray-600">Configure empresas, tópicos e compare com MV Company</p>
           </div>
           <div className="flex gap-3">
-            <Link href="/comparar?preview=true" target="_blank">
+            <Link href="/comparar" target="_blank">
               <Button variant="outline" className="flex items-center gap-2">
                 <Eye size={18} />
                 Ver Preview

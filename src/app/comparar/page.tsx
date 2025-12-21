@@ -5,8 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 import { CompanyComparison } from '@/types'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ComparisonFooter } from '@/components/comparador/ComparisonFooter'
-import { useSearchParams } from 'next/navigation'
 import { getSiteSettings } from '@/lib/supabase/site-settings-helper'
 
 interface GlobalTopic {
@@ -27,8 +25,6 @@ export default function CompararPage() {
   const [globalTopics, setGlobalTopics] = useState<GlobalTopic[]>([])
   const [mvCompany, setMvCompany] = useState<MVCompany | null>(null)
   const [loading, setLoading] = useState(true)
-  const searchParams = useSearchParams()
-  const isPreview = searchParams.get('preview') === 'true'
 
   useEffect(() => {
     // Iniciar loading como false para não bloquear navegação
@@ -114,17 +110,14 @@ export default function CompararPage() {
   }
 
   return (
-    <>
-      <ComparisonTable 
-        companies={companies} 
-        globalTopics={globalTopics}
-        mvCompany={mvCompany}
-        loading={loading}
-        getMVCompanyTopicValue={getMVCompanyTopicValue}
-        getCompanyTopicValue={getCompanyTopicValue}
-      />
-      {!isPreview && <ComparisonFooter />}
-    </>
+    <ComparisonTable 
+      companies={companies} 
+      globalTopics={globalTopics}
+      mvCompany={mvCompany}
+      loading={loading}
+      getMVCompanyTopicValue={getMVCompanyTopicValue}
+      getCompanyTopicValue={getCompanyTopicValue}
+    />
   )
 }
 

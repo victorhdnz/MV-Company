@@ -107,8 +107,8 @@ export function NotificationIconSelector({
               className="fixed inset-0 z-10"
               onClick={() => setIsOpen(false)}
             />
-            <div className="absolute z-20 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-              <div className="p-3 grid grid-cols-4 gap-2">
+            <div className="absolute z-20 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-[400px] overflow-y-auto overscroll-contain">
+              <div className="p-3 grid grid-cols-4 gap-2 pb-3">
                 {iconOptions.map((iconName) => {
                   const Icon = iconMap[iconName]
                   const isSelected = value === iconName
