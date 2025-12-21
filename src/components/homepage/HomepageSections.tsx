@@ -12,6 +12,7 @@ import { FadeInSection } from '@/components/ui/FadeInSection'
 import { NotificationsSection } from './NotificationsSection'
 import { TestimonialsSection } from './TestimonialsSection'
 import { SplineSection } from './SplineSection'
+import { PricingSection } from './PricingSection'
 import { Highlighter } from '@/components/ui/highlighter'
 import { AuroraText } from '@/components/ui/aurora-text'
 
@@ -248,6 +249,28 @@ export function HomepageSections({
     )
   }
 
+  // Função para renderizar seção de Pricing
+  // A seção apenas espelha o que está configurado em /dashboard/pricing
+  // Não depende de sectionVisibility, apenas de pricing_enabled da página de pricing
+  const renderPricingSection = () => {
+    const pricing = homepageContent.pricing || {}
+    
+    // A seção só aparece se estiver habilitada na página de pricing
+    // Não verifica sectionVisibility.pricing pois é gerenciado exclusivamente em /dashboard/pricing
+    if (pricing.pricing_enabled !== true) return null
+
+    return (
+      <PricingSection
+        enabled={true}
+        title={pricing.pricing_title}
+        description={pricing.pricing_description}
+        annualDiscount={pricing.pricing_annual_discount}
+        plans={pricing.pricing_plans}
+        whatsappNumber={pricing.pricing_whatsapp_number || siteSettings?.contact_whatsapp}
+      />
+    )
+  }
+
   // Função para renderizar seção de Contato
   const renderContactSection = () => {
     if (homepageContent.contact_enabled === false || sectionVisibility.contact === false) return null
@@ -301,6 +324,7 @@ export function HomepageSections({
     notifications: renderNotificationsSection,
     testimonials: renderTestimonialsSection,
     spline: renderSplineSection,
+    pricing: renderPricingSection,
     contact: renderContactSection,
   }
 
@@ -318,6 +342,12 @@ export function HomepageSections({
           console.warn(`No renderer found for section: ${sectionId}`)
           return null
         }
+        
+        // Para pricing, não verificar sectionVisibility pois é gerenciado exclusivamente em /dashboard/pricing
+        if (sectionId !== 'pricing' && sectionVisibility[sectionId] === false) {
+          return null
+        }
+        
         try {
           return <div key={`${sectionId}-${index}`}>{renderer()}</div>
         } catch (error) {

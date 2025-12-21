@@ -98,6 +98,7 @@ const sectionIcons: Record<string, string> = {
   notifications: '🔔',
   testimonials: '⭐',
   spline: '🤖',
+  pricing: '💰',
   contact: '📞',
 }
 
@@ -108,6 +109,7 @@ const sectionLabels: Record<string, string> = {
   notifications: 'Notificações (Prova Social)',
   testimonials: 'Depoimentos (Marquee 3D)',
   spline: 'Spline 3D (Futuro e Evolução)',
+  pricing: 'Planos de Assinatura',
   contact: 'Contato',
 }
 
@@ -126,6 +128,7 @@ export default function HomepageEditorPage() {
     'notifications',
     'testimonials',
     'spline',
+    'pricing',
     'contact',
   ])
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
@@ -135,6 +138,7 @@ export default function HomepageEditorPage() {
     notifications: true,
     testimonials: true,
     spline: false, // Desabilitado por padrão para melhor performance
+    pricing: false, // Desabilitado por padrão até ser configurado
     contact: true,
   })
   const [formData, setFormData] = useState<HomepageSettings>({
@@ -274,6 +278,15 @@ export default function HomepageEditorPage() {
               order.push('spline')
             }
           }
+          if (!order.includes('pricing')) {
+            // Adicionar 'pricing' antes de 'contact' se 'contact' existir, senão no final
+            const contactIndex = order.indexOf('contact')
+            if (contactIndex >= 0) {
+              order.splice(contactIndex, 0, 'pricing')
+            } else {
+              order.push('pricing')
+            }
+          }
           setSectionOrder(order)
         } else {
           // Se não houver ordem salva, usar a ordem padrão
@@ -284,6 +297,7 @@ export default function HomepageEditorPage() {
             'notifications',
             'testimonials',
             'spline',
+            'pricing',
             'contact',
           ])
         }
@@ -298,6 +312,9 @@ export default function HomepageEditorPage() {
           }
           if (visibility.spline === undefined) {
             visibility.spline = false // Desabilitado por padrão para performance
+          }
+          if (visibility.pricing === undefined) {
+            visibility.pricing = false // Desabilitado por padrão até ser configurado
           }
           setSectionVisibility(visibility)
         }
@@ -660,6 +677,26 @@ export default function HomepageEditorPage() {
                 </div>
               </>
             )}
+          </div>
+        )
+      case 'pricing':
+        return (
+          <div className="space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>💡 Informação:</strong> Os planos de assinatura são gerenciados exclusivamente na página{' '}
+                <a href="/dashboard/pricing" className="text-blue-600 hover:underline font-semibold">
+                  Gerenciar Planos de Assinatura
+                </a>
+                . A seção aparecerá automaticamente na homepage e nas páginas de serviços quando estiver habilitada na página de pricing.
+              </p>
+            </div>
+            <p className="text-sm text-gray-600">
+              Para configurar os planos, preços, features e mensagens do WhatsApp, acesse{' '}
+              <a href="/dashboard/pricing" className="text-blue-600 hover:underline font-semibold">
+                /dashboard/pricing
+              </a>
+            </p>
           </div>
         )
       case 'contact':

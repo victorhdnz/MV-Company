@@ -8,6 +8,7 @@ import { ServicePageTracker } from '@/components/analytics/ServicePageTracker'
 import { ServiceHeroVideo } from '@/components/service-detail/ServiceHeroVideo'
 import { ServiceBenefits } from '@/components/service-detail/ServiceBenefits'
 import { ServiceAlternateContent } from '@/components/service-detail/ServiceAlternateContent'
+import { ServicePricing } from '@/components/service-detail/ServicePricing'
 import { ServiceCTA } from '@/components/service-detail/ServiceCTA'
 import { FixedLogo } from '@/components/layout/FixedLogo'
 
@@ -150,13 +151,24 @@ export default async function ServicePage({ params }: { params: { slug: string }
   }
 
   // Ordem padrão das seções (sem 'gifts', 'testimonials' e 'about')
-  const sectionOrder = (content.section_order || ['hero', 'benefits', 'alternate', 'cta']).filter(
+  const sectionOrder = (content.section_order || ['hero', 'benefits', 'alternate', 'pricing', 'cta']).filter(
     (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials' && sectionId !== 'about'
   )
+  // Garantir que 'pricing' esteja antes de 'cta' se não estiver
+  if (!sectionOrder.includes('pricing')) {
+    const ctaIndex = sectionOrder.indexOf('cta')
+    if (ctaIndex >= 0) {
+      sectionOrder.splice(ctaIndex, 0, 'pricing')
+    } else {
+      sectionOrder.push('pricing')
+    }
+  }
+  
   const sectionVisibility = content.section_visibility || {
     hero: true,
     benefits: true,
     alternate: true,
+    pricing: false,
     cta: true,
   }
   
@@ -164,12 +176,33 @@ export default async function ServicePage({ params }: { params: { slug: string }
   if (sectionVisibility.gifts !== undefined) delete sectionVisibility.gifts
   if (sectionVisibility.testimonials !== undefined) delete sectionVisibility.testimonials
   if (sectionVisibility.about !== undefined) delete sectionVisibility.about
+  if (sectionVisibility.pricing === undefined) sectionVisibility.pricing = false
+
+  // Obter dados de pricing do site_settings
+  const pricing = siteSettings?.homepage_content?.pricing || {}
 
   // Mapear seções para componentes
   const sectionRenderers: Record<string, () => JSX.Element | null> = {
     hero: () => <ServiceHeroVideo content={content} serviceName={service.name} />,
     benefits: () => <ServiceBenefits content={content} />,
     alternate: () => <ServiceAlternateContent content={content} />,
+    pricing: () => {
+      // A seção apenas espelha o que está configurado em /dashboard/pricing
+      // Só aparece se estiver habilitada na página de pricing
+      if (pricing.pricing_enabled !== true) return null
+      
+      return (
+        <ServicePricing
+          enabled={true}
+          title={pricing.pricing_title}
+          description={pricing.pricing_description}
+          annualDiscount={pricing.pricing_annual_discount}
+          plans={pricing.pricing_plans}
+          whatsappNumber={pricing.pricing_whatsapp_number || siteSettings?.contact_whatsapp}
+          serviceName={service.name}
+        />
+      )
+    },
     cta: () => <ServiceCTA content={content} siteSettings={siteSettings} />,
   }
 
@@ -180,7 +213,15 @@ export default async function ServicePage({ params }: { params: { slug: string }
         {/* Renderizar seções na ordem configurada */}
         {sectionOrder.map((sectionId: string) => {
           const renderer = sectionRenderers[sectionId]
-          if (!renderer || sectionVisibility[sectionId] === false) return null
+          if (!renderer) return null
+          
+          // Para pricing, não verificar sectionVisibility pois é gerenciado exclusivamente em /dashboard/pricing
+          if (sectionId === 'pricing') {
+            return <div key={sectionId}>{renderer()}</div>
+          }
+          
+          // Para outras seções, verificar sectionVisibility normalmente
+          if (sectionVisibility[sectionId] === false) return null
           return <div key={sectionId}>{renderer()}</div>
         })}
       </div>

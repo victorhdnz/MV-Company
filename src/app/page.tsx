@@ -89,8 +89,8 @@ export default async function Home() {
   }
   
   // Ordem padrão das seções
-  let sectionOrder = homepageContent.section_order || ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'spline', 'contact']
-  // Garantir que 'notifications', 'testimonials' e 'spline' estejam na ordem se não estiverem
+  let sectionOrder = homepageContent.section_order || ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'spline', 'pricing', 'contact']
+  // Garantir que 'notifications', 'testimonials', 'spline' e 'pricing' estejam na ordem se não estiverem
   if (Array.isArray(sectionOrder)) {
     if (!sectionOrder.includes('notifications')) {
       const contactIndex = sectionOrder.indexOf('contact')
@@ -119,6 +119,15 @@ export default async function Home() {
         sectionOrder = [...sectionOrder, 'spline']
       }
     }
+    if (!sectionOrder.includes('pricing')) {
+      const contactIndex = sectionOrder.indexOf('contact')
+      if (contactIndex >= 0) {
+        sectionOrder = [...sectionOrder]
+        sectionOrder.splice(contactIndex, 0, 'pricing')
+      } else {
+        sectionOrder = [...sectionOrder, 'pricing']
+      }
+    }
   }
   
   let sectionVisibility = homepageContent.section_visibility || {
@@ -128,9 +137,10 @@ export default async function Home() {
     notifications: true,
     testimonials: true,
     spline: true,
+    pricing: false, // Desabilitado por padrão até ser configurado
     contact: true,
   }
-  // Garantir que 'notifications', 'testimonials' e 'spline' tenham visibilidade definida
+  // Garantir que 'notifications', 'testimonials', 'spline' e 'pricing' tenham visibilidade definida
   if (sectionVisibility.notifications === undefined) {
     sectionVisibility = { ...sectionVisibility, notifications: true }
   }
@@ -139,6 +149,9 @@ export default async function Home() {
   }
   if (sectionVisibility.spline === undefined) {
     sectionVisibility = { ...sectionVisibility, spline: true }
+  }
+  if (sectionVisibility.pricing === undefined) {
+    sectionVisibility = { ...sectionVisibility, pricing: false }
   }
 
   return (

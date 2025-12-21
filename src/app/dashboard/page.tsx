@@ -260,6 +260,13 @@ function DashboardContent() {
           icon: Package,
           color: 'bg-blue-500',
         },
+        {
+          title: 'Planos de Assinatura',
+          description: 'Configure planos mensais e anuais com preços e mensagens WhatsApp',
+          href: '/dashboard/pricing',
+          icon: Sparkles,
+          color: 'bg-yellow-500',
+        },
       ],
     },
     {
