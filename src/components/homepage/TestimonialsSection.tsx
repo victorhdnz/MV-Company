@@ -173,14 +173,16 @@ export function TestimonialsSection({
         return shuffled
       }
       
-      // Reduzir para 2 sequências para melhor performance
+      // Criar sequências suficientes para preencher todas as 4 colunas
+      // Usar 4 sequências para garantir conteúdo distribuído em todas as colunas
       const extendedItems: TestimonialItem[] = []
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < 4; i++) {
         const shuffled = shuffleWithoutConsecutive(items)
         extendedItems.push(...shuffled)
       }
       
       // Distribuir de forma intercalada (round-robin) entre as 4 colunas
+      // Isso garante que cada coluna receba itens de forma equilibrada
       const columns: TestimonialItem[][] = [[], [], [], []]
       extendedItems.forEach((item, index) => {
         columns[index % 4].push(item)
