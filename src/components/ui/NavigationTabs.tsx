@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { DollarSign, MessageCircle, Home } from 'lucide-react'
 import { ExpandableTabs } from './expandable-tabs'
 
@@ -83,10 +84,8 @@ export function NavigationTabs({ variant, className }: NavigationTabsProps) {
           }, 100)
           break
         case 2: // Homepage
-          // Usar window.location para garantir redirecionamento completo
-          if (typeof window !== 'undefined') {
-            window.location.href = '/'
-          }
+          // Usar router.push igual ao comparador
+          router.push('/')
           break
       }
     }
