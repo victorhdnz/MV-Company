@@ -12,6 +12,7 @@ import { VideoUploader } from '@/components/ui/VideoUploader'
 import { ArrayImageManager } from '@/components/ui/ArrayImageManager'
 import { BenefitsManager } from '@/components/ui/BenefitsManager'
 import { AlternateContentManager } from '@/components/ui/AlternateContentManager'
+import { StatsManager } from '@/components/ui/StatsManager'
 import { createClient } from '@/lib/supabase/client'
 import { Service } from '@/types'
 import { ServiceDetailContent } from '@/types/service-detail'
@@ -32,6 +33,7 @@ const sectionIcons: Record<string, string> = {
   scroll_animation: '📱',
   benefits: '📋',
   alternate: '🔄',
+  stats: '📊',
   pricing: '💰',
   cta: '📞',
 }
@@ -42,6 +44,7 @@ const sectionLabels: Record<string, string> = {
   scroll_animation: 'Animação de Scroll',
   benefits: 'O que você receberá',
   alternate: 'Conteúdo Alternado',
+  stats: 'Estatísticas/Alcance',
   pricing: 'Planos de Assinatura',
   cta: 'Contato',
 }
@@ -60,6 +63,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     'scroll_animation',
     'benefits',
     'alternate',
+    'stats',
     'pricing',
     'cta',
   ])
@@ -69,6 +73,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     scroll_animation: true,
     benefits: true,
     alternate: true,
+    stats: false,
     pricing: false,
     cta: true,
   })
@@ -108,6 +113,10 @@ export default function EditServicePage({ params }: EditServicePageProps) {
 
     alternate_content_enabled: true,
     alternate_content_items: [],
+
+    stats_enabled: false,
+    stats_title: 'Nosso Alcance',
+    stats_items: [],
 
     cta_enabled: true,
     cta_title: 'Fale Conosco',
@@ -177,13 +186,19 @@ export default function EditServicePage({ params }: EditServicePageProps) {
           const filteredOrder = layout.section_order.filter(
             (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials' && sectionId !== 'about'
           )
-          // Garantir que 'pricing' esteja presente antes de 'cta' e 'scroll_animation' esteja presente
-          let finalOrder = filteredOrder.length > 0 ? filteredOrder : ['basic', 'hero', 'scroll_animation', 'benefits', 'alternate', 'pricing', 'cta']
+          // Garantir que 'pricing', 'stats' e 'scroll_animation' estejam presentes
+          let finalOrder = filteredOrder.length > 0 ? filteredOrder : ['basic', 'hero', 'scroll_animation', 'benefits', 'alternate', 'stats', 'pricing', 'cta']
           if (!finalOrder.includes('scroll_animation') && finalOrder.includes('hero')) {
             const heroIndex = finalOrder.indexOf('hero')
             finalOrder.splice(heroIndex + 1, 0, 'scroll_animation')
           } else if (!finalOrder.includes('scroll_animation')) {
             finalOrder.splice(2, 0, 'scroll_animation')
+          }
+          if (!finalOrder.includes('stats') && finalOrder.includes('alternate')) {
+            const alternateIndex = finalOrder.indexOf('alternate')
+            finalOrder.splice(alternateIndex + 1, 0, 'stats')
+          } else if (!finalOrder.includes('stats')) {
+            finalOrder.push('stats')
           }
           if (!finalOrder.includes('pricing') && finalOrder.includes('cta')) {
             const ctaIndex = finalOrder.indexOf('cta')
@@ -198,9 +213,12 @@ export default function EditServicePage({ params }: EditServicePageProps) {
           delete filteredVisibility.gifts
           delete filteredVisibility.testimonials
           delete filteredVisibility.about
-          // Garantir que 'pricing' e 'scroll_animation' estejam presentes na visibilidade
+          // Garantir que 'pricing', 'stats' e 'scroll_animation' estejam presentes na visibilidade
           if (filteredVisibility.pricing === undefined) {
             filteredVisibility.pricing = false
+          }
+          if (filteredVisibility.stats === undefined) {
+            filteredVisibility.stats = false
           }
           if (filteredVisibility.scroll_animation === undefined) {
             filteredVisibility.scroll_animation = true
@@ -472,6 +490,31 @@ export default function EditServicePage({ params }: EditServicePageProps) {
                 value={layoutData.alternate_content_items || []}
                 onChange={(items) => setLayoutData({ ...layoutData, alternate_content_items: items })}
               />
+            )}
+          </div>
+        )
+
+      case 'stats':
+        return (
+          <div className="space-y-4">
+            <Switch
+              label="Habilitar Seção de Estatísticas/Alcance"
+              checked={layoutData.stats_enabled ?? false}
+              onCheckedChange={(checked) => setLayoutData({ ...layoutData, stats_enabled: checked })}
+            />
+            {layoutData.stats_enabled && (
+              <>
+                <Input
+                  label="Título da Seção"
+                  value={layoutData.stats_title || ''}
+                  onChange={(e) => setLayoutData({ ...layoutData, stats_title: e.target.value })}
+                  placeholder="Ex: Nosso Alcance"
+                />
+                <StatsManager
+                  value={layoutData.stats_items || []}
+                  onChange={(items) => setLayoutData({ ...layoutData, stats_items: items })}
+                />
+              </>
             )}
           </div>
         )

@@ -43,6 +43,11 @@ export interface ServiceDetailContent {
   testimonials_title?: string
   testimonials_stats?: string // Ex: "Mais de 60 clientes satisfeitos"
 
+  // Estatísticas/Alcance
+  stats_enabled?: boolean
+  stats_title?: string
+  stats_items?: StatsItem[]
+
   // CTA Final
   cta_enabled?: boolean
   cta_title?: string
@@ -93,5 +98,12 @@ export interface AlternateContentItem {
   description?: string
   image?: string
   image_position?: 'left' | 'right'
+}
+
+export interface StatsItem {
+  id: string
+  target: number // Número alvo para a animação
+  label: string // Texto abaixo do número (ex: "Views", "Clientes", "Projetos")
+  duration?: number // Duração da animação em ms (padrão: 2000)
 }
 

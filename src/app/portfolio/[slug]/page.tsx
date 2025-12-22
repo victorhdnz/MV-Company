@@ -11,6 +11,7 @@ import { ServiceAlternateContent } from '@/components/service-detail/ServiceAlte
 import { ServicePricing } from '@/components/service-detail/ServicePricing'
 import { ServiceCTA } from '@/components/service-detail/ServiceCTA'
 import { ServiceScrollAnimation } from '@/components/service-detail/ServiceScrollAnimation'
+import { ServiceStats } from '@/components/service-detail/ServiceStats'
 import { FixedLogo } from '@/components/layout/FixedLogo'
 import { NavigationTabs } from '@/components/ui/NavigationTabs'
 
@@ -144,18 +145,19 @@ export default async function ServicePage({ params }: { params: { slug: string }
     alternate_content_enabled: true,
     alternate_content_items: [],
     cta_enabled: true,
-    section_order: ['hero', 'scroll_animation', 'benefits', 'alternate', 'cta'],
+    section_order: ['hero', 'scroll_animation', 'benefits', 'alternate', 'stats', 'cta'],
     section_visibility: {
       hero: true,
       scroll_animation: true,
       benefits: true,
       alternate: true,
+      stats: false,
       cta: true,
     },
   }
 
   // Ordem padrão das seções (sem 'gifts', 'testimonials' e 'about')
-  const sectionOrder = (content.section_order || ['hero', 'scroll_animation', 'benefits', 'alternate', 'pricing', 'cta']).filter(
+  const sectionOrder = (content.section_order || ['hero', 'scroll_animation', 'benefits', 'alternate', 'stats', 'pricing', 'cta']).filter(
     (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials' && sectionId !== 'about'
   )
   // Garantir que 'pricing' esteja antes de 'cta' se não estiver
@@ -173,6 +175,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
     scroll_animation: true,
     benefits: true,
     alternate: true,
+    stats: false,
     pricing: false,
     cta: true,
   }
@@ -182,6 +185,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
   if (sectionVisibility.testimonials !== undefined) delete sectionVisibility.testimonials
   if (sectionVisibility.about !== undefined) delete sectionVisibility.about
   if (sectionVisibility.pricing === undefined) sectionVisibility.pricing = false
+  if (sectionVisibility.stats === undefined) sectionVisibility.stats = false
   if (sectionVisibility.scroll_animation === undefined) sectionVisibility.scroll_animation = true
 
   // Obter dados de pricing do site_settings
@@ -203,6 +207,10 @@ export default async function ServicePage({ params }: { params: { slug: string }
     },
     benefits: () => <ServiceBenefits content={content} />,
     alternate: () => <ServiceAlternateContent content={content} />,
+    stats: () => {
+      if (sectionVisibility.stats === false) return null
+      return <ServiceStats content={content} />
+    },
     pricing: () => {
       // A seção apenas espelha o que está configurado em /dashboard/pricing
       // Só aparece se estiver habilitada na página de pricing
