@@ -11,6 +11,7 @@ import { ServicePricing } from '@/components/service-detail/ServicePricing'
 import { ServiceCTA } from '@/components/service-detail/ServiceCTA'
 import { ServiceScrollAnimation } from '@/components/service-detail/ServiceScrollAnimation'
 import { ServiceStats } from '@/components/service-detail/ServiceStats'
+import { ServiceCardSwap } from '@/components/service-detail/ServiceCardSwap'
 import { FixedLogo } from '@/components/layout/FixedLogo'
 import { NavigationTabs } from '@/components/ui/NavigationTabs'
 
@@ -205,6 +206,19 @@ export default async function ServicePage({ params }: { params: { slug: string }
     stats: () => {
       if (sectionVisibility.stats === false) return null
       return <ServiceStats content={content} />
+    },
+    card_swap: () => {
+      if (sectionVisibility.card_swap === false) return null
+      return (
+        <ServiceCardSwap
+          enabled={content.card_swap_enabled}
+          title={content.card_swap_title}
+          subtitle={content.card_swap_subtitle}
+          cards={content.card_swap_cards}
+          delay={content.card_swap_delay}
+          pauseOnHover={content.card_swap_pause_on_hover}
+        />
+      )
     },
     pricing: () => {
       // A seção apenas espelha o que está configurado em /dashboard/pricing

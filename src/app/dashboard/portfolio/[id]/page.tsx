@@ -12,6 +12,7 @@ import { VideoUploader } from '@/components/ui/VideoUploader'
 import { ArrayImageManager } from '@/components/ui/ArrayImageManager'
 import { BenefitsManager } from '@/components/ui/BenefitsManager'
 import { StatsManager } from '@/components/ui/StatsManager'
+import { CardSwapManager } from '@/components/ui/CardSwapManager'
 import { createClient } from '@/lib/supabase/client'
 import { Service } from '@/types'
 import { ServiceDetailContent } from '@/types/service-detail'
@@ -32,6 +33,7 @@ const sectionIcons: Record<string, string> = {
   scroll_animation: '📱',
   benefits: '📋',
   stats: '📊',
+  card_swap: '🃏',
   pricing: '💰',
   cta: '📞',
 }
@@ -42,6 +44,7 @@ const sectionLabels: Record<string, string> = {
   scroll_animation: 'Animação de Scroll',
   benefits: 'O que você receberá',
   stats: 'Estatísticas/Alcance',
+  card_swap: 'Animação de Cards',
   pricing: 'Planos de Assinatura',
   cta: 'Contato',
 }
@@ -60,6 +63,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     'scroll_animation',
     'benefits',
     'stats',
+    'card_swap',
     'pricing',
     'cta',
   ])
@@ -69,6 +73,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     scroll_animation: true,
     benefits: true,
     stats: false,
+    card_swap: false,
     pricing: false,
     cta: true,
   })
@@ -109,6 +114,13 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     stats_enabled: false,
     stats_title: 'Nosso Alcance',
     stats_items: [],
+
+    card_swap_enabled: false,
+    card_swap_title: '',
+    card_swap_subtitle: '',
+    card_swap_cards: [],
+    card_swap_delay: 5000,
+    card_swap_pause_on_hover: false,
 
     cta_enabled: true,
     cta_title: 'Fale Conosco',
@@ -485,6 +497,52 @@ export default function EditServicePage({ params }: EditServicePageProps) {
                 <StatsManager
                   value={layoutData.stats_items || []}
                   onChange={(items) => setLayoutData({ ...layoutData, stats_items: items })}
+                />
+              </>
+            )}
+          </div>
+        )
+
+      case 'card_swap':
+        return (
+          <div className="space-y-4">
+            <Switch
+              label="Habilitar Animação de Cards"
+              checked={layoutData.card_swap_enabled ?? false}
+              onCheckedChange={(checked) => setLayoutData({ ...layoutData, card_swap_enabled: checked })}
+            />
+            {layoutData.card_swap_enabled && (
+              <>
+                <Input
+                  label="Título da Seção"
+                  value={layoutData.card_swap_title || ''}
+                  onChange={(e) => setLayoutData({ ...layoutData, card_swap_title: e.target.value })}
+                  placeholder="Ex: Card stacks have never looked so good"
+                />
+                <Input
+                  label="Subtítulo"
+                  value={layoutData.card_swap_subtitle || ''}
+                  onChange={(e) => setLayoutData({ ...layoutData, card_swap_subtitle: e.target.value })}
+                  placeholder="Ex: Just look at it go!"
+                />
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Delay entre trocas (ms)</label>
+                  <Input
+                    type="number"
+                    value={layoutData.card_swap_delay?.toString() || '5000'}
+                    onChange={(e) => setLayoutData({ ...layoutData, card_swap_delay: parseInt(e.target.value) || 5000 })}
+                    placeholder="5000"
+                  />
+                  <p className="text-xs text-gray-500">Tempo em milissegundos entre cada troca de card (padrão: 5000ms)</p>
+                </div>
+                <Switch
+                  label="Pausar ao passar o mouse"
+                  checked={layoutData.card_swap_pause_on_hover ?? false}
+                  onCheckedChange={(checked) => setLayoutData({ ...layoutData, card_swap_pause_on_hover: checked })}
+                />
+                <CardSwapManager
+                  value={layoutData.card_swap_cards || []}
+                  onChange={(cards) => setLayoutData({ ...layoutData, card_swap_cards: cards })}
                 />
               </>
             )}

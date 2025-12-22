@@ -48,6 +48,14 @@ export interface ServiceDetailContent {
   stats_title?: string
   stats_items?: StatsItem[]
 
+  // Card Swap Animation
+  card_swap_enabled?: boolean
+  card_swap_title?: string
+  card_swap_subtitle?: string
+  card_swap_cards?: CardSwapItem[]
+  card_swap_delay?: number
+  card_swap_pause_on_hover?: boolean
+
   // CTA Final
   cta_enabled?: boolean
   cta_title?: string
@@ -105,5 +113,13 @@ export interface StatsItem {
   target: number // Número alvo para a animação
   label: string // Texto abaixo do número (ex: "Views", "Clientes", "Projetos")
   duration?: number // Duração da animação em ms (padrão: 2000)
+}
+
+export interface CardSwapItem {
+  id: string
+  title: string
+  description?: string
+  image?: string
+  custom_content?: string // HTML ou conteúdo customizado
 }
 
