@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/Input'
 import { ImageUploader } from '@/components/ui/ImageUploader'
+import { VideoUploader } from '@/components/ui/VideoUploader'
 import { Switch } from '@/components/ui/Switch'
 import { createClient } from '@/lib/supabase/client'
 import { Save, Eye, Trash2 } from 'lucide-react'
@@ -25,6 +26,12 @@ interface HomepageSettings {
   hero_subtitle?: string
   hero_description?: string
   hero_background_image?: string
+
+  video_enabled?: boolean
+  video_url?: string
+  video_autoplay?: boolean
+  video_title?: string
+  video_subtitle?: string
 
   services_enabled?: boolean
   services_title?: string
@@ -93,6 +100,7 @@ interface HomepageSettings {
 // Mapeamento de seções
 const sectionIcons: Record<string, string> = {
   hero: '🎯',
+  video: '🎥',
   services: '📦',
   comparison: '⚖️',
   notifications: '🔔',
@@ -104,6 +112,7 @@ const sectionIcons: Record<string, string> = {
 
 const sectionLabels: Record<string, string> = {
   hero: 'Hero (Principal)',
+  video: 'Vídeo (Sobre Nós)',
   services: 'Nossos Serviços',
   comparison: 'Comparação (CTA)',
   notifications: 'Notificações (Prova Social)',
@@ -123,6 +132,7 @@ export default function HomepageEditorPage() {
   const [expandedSection, setExpandedSection] = useState<string | null>('hero')
   const [sectionOrder, setSectionOrder] = useState<string[]>([
     'hero',
+    'video',
     'services',
     'comparison',
     'notifications',
@@ -133,6 +143,7 @@ export default function HomepageEditorPage() {
   ])
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
     hero: true,
+    video: false,
     services: true,
     comparison: true,
     notifications: true,
@@ -249,8 +260,17 @@ export default function HomepageEditorPage() {
         
         // Carregar ordem e visibilidade se existirem
         if (content.section_order && Array.isArray(content.section_order)) {
-          // Garantir que 'notifications', 'testimonials' e 'spline' estejam na ordem se não estiverem
+          // Garantir que 'video', 'notifications', 'testimonials' e 'spline' estejam na ordem se não estiverem
           const order = [...content.section_order]
+          if (!order.includes('video')) {
+            // Adicionar 'video' após 'hero' se 'hero' existir, senão no início
+            const heroIndex = order.indexOf('hero')
+            if (heroIndex >= 0) {
+              order.splice(heroIndex + 1, 0, 'video')
+            } else {
+              order.unshift('video')
+            }
+          }
           if (!order.includes('notifications')) {
             // Adicionar 'notifications' antes de 'contact' se 'contact' existir, senão no final
             const contactIndex = order.indexOf('contact')
@@ -292,6 +312,7 @@ export default function HomepageEditorPage() {
           // Se não houver ordem salva, usar a ordem padrão
           setSectionOrder([
             'hero',
+            'video',
             'services',
             'comparison',
             'notifications',
@@ -302,8 +323,11 @@ export default function HomepageEditorPage() {
           ])
         }
         if (content.section_visibility) {
-          // Garantir que 'notifications', 'testimonials' e 'spline' tenham visibilidade definida
+          // Garantir que 'video', 'notifications', 'testimonials' e 'spline' tenham visibilidade definida
           const visibility = { ...content.section_visibility }
+          if (visibility.video === undefined) {
+            visibility.video = false // Desabilitado por padrão
+          }
           if (visibility.notifications === undefined) {
             visibility.notifications = true
           }
@@ -458,6 +482,51 @@ export default function HomepageEditorPage() {
             )}
           </div>
         )
+
+      case 'video':
+        return (
+          <div className="space-y-4">
+            <Switch
+              label="Habilitar Seção de Vídeo"
+              checked={formData.video_enabled ?? false}
+              onCheckedChange={(checked) => setFormData({ ...formData, video_enabled: checked })}
+            />
+            {formData.video_enabled && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-2">URL do Vídeo</label>
+                  <VideoUploader
+                    value={formData.video_url || ''}
+                    onChange={(url) => setFormData({ ...formData, video_url: url })}
+                    placeholder="URL do vídeo ou upload"
+                  />
+                </div>
+                <Switch
+                  label="Auto-play do vídeo (reproduzir automaticamente)"
+                  checked={formData.video_autoplay ?? false}
+                  onCheckedChange={(checked) => setFormData({ ...formData, video_autoplay: checked })}
+                />
+                <Input
+                  label="Título Principal"
+                  value={formData.video_title || ''}
+                  onChange={(e) => setFormData({ ...formData, video_title: e.target.value })}
+                  placeholder="Ex: Conheça a MV Company"
+                />
+                <div>
+                  <label className="block text-sm font-medium mb-2">Subtítulo</label>
+                  <textarea
+                    value={formData.video_subtitle || ''}
+                    onChange={(e) => setFormData({ ...formData, video_subtitle: e.target.value })}
+                    placeholder="Subtítulo descritivo sobre o vídeo..."
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        )
+
       case 'services':
         return (
           <div className="space-y-4">

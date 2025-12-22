@@ -13,6 +13,7 @@ import { NotificationsSection } from './NotificationsSection'
 import { TestimonialsSection } from './TestimonialsSection'
 import { SplineSection } from './SplineSection'
 import { PricingSection } from './PricingSection'
+import { HomepageVideo } from './HomepageVideo'
 import { Highlighter } from '@/components/ui/highlighter'
 import { AuroraText } from '@/components/ui/aurora-text'
 
@@ -50,6 +51,21 @@ export function HomepageSections({
       firstPart: words.slice(0, midPoint).join(' '),
       secondPart: words.slice(midPoint).join(' ')
     }
+  }
+
+  // Função para renderizar seção de Vídeo
+  const renderVideoSection = () => {
+    if (homepageContent.video_enabled === false || sectionVisibility.video === false) return null
+    
+    return (
+      <HomepageVideo
+        enabled={homepageContent.video_enabled !== false}
+        videoUrl={homepageContent.video_url}
+        videoAutoplay={homepageContent.video_autoplay}
+        title={homepageContent.video_title}
+        subtitle={homepageContent.video_subtitle}
+      />
+    )
   }
 
   // Função para renderizar seção Hero
@@ -320,6 +336,7 @@ export function HomepageSections({
   // Mapear seções para funções de renderização
   const sectionRenderers: Record<string, () => JSX.Element | null> = {
     hero: renderHeroSection,
+    video: renderVideoSection,
     services: renderServicesSection,
     comparison: renderComparisonSection,
     notifications: renderNotificationsSection,

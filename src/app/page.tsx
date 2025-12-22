@@ -90,9 +90,18 @@ export default async function Home() {
   }
   
   // Ordem padrão das seções
-  let sectionOrder = homepageContent.section_order || ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'spline', 'pricing', 'contact']
-  // Garantir que 'notifications', 'testimonials', 'spline' e 'pricing' estejam na ordem se não estiverem
+  let sectionOrder = homepageContent.section_order || ['hero', 'video', 'services', 'comparison', 'notifications', 'testimonials', 'spline', 'pricing', 'contact']
+  // Garantir que 'video', 'notifications', 'testimonials', 'spline' e 'pricing' estejam na ordem se não estiverem
   if (Array.isArray(sectionOrder)) {
+    if (!sectionOrder.includes('video')) {
+      const heroIndex = sectionOrder.indexOf('hero')
+      if (heroIndex >= 0) {
+        sectionOrder = [...sectionOrder]
+        sectionOrder.splice(heroIndex + 1, 0, 'video')
+      } else {
+        sectionOrder = ['video', ...sectionOrder]
+      }
+    }
     if (!sectionOrder.includes('notifications')) {
       const contactIndex = sectionOrder.indexOf('contact')
       if (contactIndex >= 0) {
@@ -133,6 +142,7 @@ export default async function Home() {
   
   let sectionVisibility = homepageContent.section_visibility || {
     hero: true,
+    video: false,
     services: true,
     comparison: true,
     notifications: true,
@@ -141,7 +151,10 @@ export default async function Home() {
     pricing: false, // Desabilitado por padrão até ser configurado
     contact: true,
   }
-  // Garantir que 'notifications', 'testimonials', 'spline' e 'pricing' tenham visibilidade definida
+  // Garantir que 'video', 'notifications', 'testimonials', 'spline' e 'pricing' tenham visibilidade definida
+  if (sectionVisibility.video === undefined) {
+    sectionVisibility = { ...sectionVisibility, video: false }
+  }
   if (sectionVisibility.notifications === undefined) {
     sectionVisibility = { ...sectionVisibility, notifications: true }
   }
