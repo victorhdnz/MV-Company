@@ -27,23 +27,23 @@ export function ServiceCardSwap({
   return (
     <section className="relative py-8 md:py-16 lg:py-24 px-4 bg-black min-h-[400px] md:min-h-[600px] overflow-hidden">
       <div className="container mx-auto max-w-7xl relative">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 md:gap-4 lg:gap-6">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-0 md:gap-2 lg:gap-4">
           {/* Conteúdo à esquerda */}
           <div className="flex-1 max-w-2xl relative z-10">
             {title && (
-              <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 md:mb-4 tracking-tight">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-2 md:mb-3 tracking-tight">
                 {title}
               </h2>
             )}
             {subtitle && (
-              <p className="text-base md:text-lg lg:text-xl text-white/80">
+              <p className="text-base md:text-lg lg:text-xl text-white/80 mb-2 md:mb-0">
                 {subtitle}
               </p>
             )}
           </div>
 
           {/* Cards animados à direita */}
-          <div className="relative w-full lg:w-auto lg:flex-shrink-0 -mt-4 md:mt-0" style={{ height: '400px', minHeight: '400px' }}>
+          <div className="relative w-full lg:w-auto lg:flex-shrink-0 -mt-2 md:-mt-1 lg:mt-0" style={{ height: '400px', minHeight: '400px' }}>
             <CardSwap
               cardDistance={60}
               verticalDistance={70}
