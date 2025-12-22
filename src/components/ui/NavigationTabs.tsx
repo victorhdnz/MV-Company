@@ -31,7 +31,10 @@ export function NavigationTabs({ variant, className }: NavigationTabsProps) {
           }
           break
         case 2: // Comparador
-          router.push('/comparar')
+          const comparisonSection = document.getElementById('comparison-section')
+          if (comparisonSection) {
+            comparisonSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
           break
       }
     } else {
@@ -50,7 +53,7 @@ export function NavigationTabs({ variant, className }: NavigationTabsProps) {
           }
           break
         case 2: // Homepage
-          router.push('/')
+          window.location.href = '/'
           break
       }
     }
@@ -75,7 +78,6 @@ export function NavigationTabs({ variant, className }: NavigationTabsProps) {
       <ExpandableTabs
         tabs={variant === 'homepage' ? homepageTabs : serviceTabs}
         onChange={handleTabChange}
-        activeColor="text-white"
         className="bg-gray-900 border-gray-700"
       />
     </div>
