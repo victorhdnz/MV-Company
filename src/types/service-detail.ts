@@ -12,6 +12,12 @@ export interface ServiceDetailContent {
   hero_title_highlight_color?: string // Cor da palavra destacada
   hero_subtitle?: string
 
+  // Scroll Animation Section
+  scroll_animation_enabled?: boolean
+  scroll_animation_title?: string
+  scroll_animation_subtitle?: string
+  scroll_animation_image?: string
+
   // O que você receberá
   benefits_enabled?: boolean
   benefits_title?: string

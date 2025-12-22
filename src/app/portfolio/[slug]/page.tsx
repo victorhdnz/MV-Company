@@ -10,6 +10,7 @@ import { ServiceBenefits } from '@/components/service-detail/ServiceBenefits'
 import { ServiceAlternateContent } from '@/components/service-detail/ServiceAlternateContent'
 import { ServicePricing } from '@/components/service-detail/ServicePricing'
 import { ServiceCTA } from '@/components/service-detail/ServiceCTA'
+import { ServiceScrollAnimation } from '@/components/service-detail/ServiceScrollAnimation'
 import { FixedLogo } from '@/components/layout/FixedLogo'
 import { NavigationTabs } from '@/components/ui/NavigationTabs'
 
@@ -152,7 +153,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
   }
 
   // Ordem padrão das seções (sem 'gifts', 'testimonials' e 'about')
-  const sectionOrder = (content.section_order || ['hero', 'benefits', 'alternate', 'pricing', 'cta']).filter(
+  const sectionOrder = (content.section_order || ['hero', 'scroll_animation', 'benefits', 'alternate', 'pricing', 'cta']).filter(
     (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials' && sectionId !== 'about'
   )
   // Garantir que 'pricing' esteja antes de 'cta' se não estiver
@@ -167,6 +168,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
   
   const sectionVisibility = content.section_visibility || {
     hero: true,
+    scroll_animation: true,
     benefits: true,
     alternate: true,
     pricing: false,
@@ -178,6 +180,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
   if (sectionVisibility.testimonials !== undefined) delete sectionVisibility.testimonials
   if (sectionVisibility.about !== undefined) delete sectionVisibility.about
   if (sectionVisibility.pricing === undefined) sectionVisibility.pricing = false
+  if (sectionVisibility.scroll_animation === undefined) sectionVisibility.scroll_animation = true
 
   // Obter dados de pricing do site_settings
   const pricing = siteSettings?.homepage_content?.pricing || {}
@@ -185,6 +188,14 @@ export default async function ServicePage({ params }: { params: { slug: string }
   // Mapear seções para componentes
   const sectionRenderers: Record<string, () => JSX.Element | null> = {
     hero: () => <ServiceHeroVideo content={content} serviceName={service.name} />,
+    scroll_animation: () => (
+      <ServiceScrollAnimation
+        serviceName={service.name}
+        imageUrl={service.cover_image || service.images?.[0]}
+        title={content.scroll_animation_title}
+        subtitle={content.scroll_animation_subtitle}
+      />
+    ),
     benefits: () => <ServiceBenefits content={content} />,
     alternate: () => <ServiceAlternateContent content={content} />,
     pricing: () => {
