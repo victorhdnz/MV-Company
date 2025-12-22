@@ -27,13 +27,13 @@ function HandWrittenTitle({
         <div className="relative w-full max-w-4xl mx-auto py-12 md:py-16">
             <div className="relative text-center flex flex-col items-center justify-center">
                 {/* SVG apenas ao redor do título */}
-                <div className="relative inline-block mb-4">
-                    <div className="absolute -top-12 -bottom-12 -left-16 -right-16 md:-top-16 md:-bottom-16 md:-left-24 md:-right-24">
+                <div className="relative inline-block mb-4 px-8 py-6 md:px-12 md:py-8">
+                    <div className="absolute inset-0">
                         <motion.svg
                             width="100%"
                             height="100%"
                             viewBox="0 0 1200 600"
-                            preserveAspectRatio="xMidYMid meet"
+                            preserveAspectRatio="none"
                             initial="hidden"
                             animate="visible"
                             className="w-full h-full"
@@ -67,7 +67,7 @@ function HandWrittenTitle({
                 </div>
                 {subtitle && (
                     <motion.p
-                        className="relative z-10 text-lg md:text-xl text-white/90 mt-2"
+                        className="relative z-10 text-lg md:text-xl text-white/90 mt-8 md:mt-12"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 1, duration: 0.8 }}
