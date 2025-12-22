@@ -27,64 +27,66 @@ export function ServiceCardSwap({
   return (
     <section className="relative py-16 md:py-24 px-4 bg-black min-h-[600px] overflow-hidden">
       <div className="container mx-auto max-w-7xl relative">
-        {/* Conteúdo à esquerda */}
-        <div className="max-w-2xl mb-12 md:mb-0 relative z-10">
-          {title && (
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">
-              {title}
-            </h2>
-          )}
-          {subtitle && (
-            <p className="text-lg md:text-xl text-white/80">
-              {subtitle}
-            </p>
-          )}
-        </div>
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-12">
+          {/* Conteúdo à esquerda */}
+          <div className="flex-1 max-w-2xl relative z-10">
+            {title && (
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">
+                {title}
+              </h2>
+            )}
+            {subtitle && (
+              <p className="text-lg md:text-xl text-white/80">
+                {subtitle}
+              </p>
+            )}
+          </div>
 
-        {/* Cards animados à direita */}
-        <div className="relative w-full" style={{ height: '600px', minHeight: '600px' }}>
-          <CardSwap
-            cardDistance={60}
-            verticalDistance={70}
-            delay={delay}
-            pauseOnHover={pauseOnHover}
-            width={500}
-            height={400}
-          >
-            {cards.map((card) => (
-              <Card
-                key={card.id}
-                customClass="p-8 md:p-12 flex flex-col justify-between"
-              >
-                {card.image && (
-                  <div className="mb-6 relative w-full h-48 rounded-lg overflow-hidden">
-                    <Image
-                      src={card.image}
-                      alt={card.title}
-                      fill
-                      className="object-cover"
-                    />
+          {/* Cards animados à direita */}
+          <div className="relative w-full lg:w-auto lg:flex-shrink-0" style={{ height: '600px', minHeight: '600px' }}>
+            <CardSwap
+              cardDistance={60}
+              verticalDistance={70}
+              delay={delay}
+              pauseOnHover={pauseOnHover}
+              width={500}
+              height={400}
+            >
+              {cards.map((card) => (
+                <Card
+                  key={card.id}
+                  customClass="p-8 md:p-12 flex flex-col justify-between"
+                >
+                  {card.image && (
+                    <div className="mb-6 relative w-full h-48 rounded-lg overflow-hidden">
+                      <Image
+                        src={card.image}
+                        alt={card.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                      {card.title}
+                    </h3>
+                    {card.description && (
+                      <p className="text-white/80 text-base md:text-lg leading-relaxed">
+                        {card.description}
+                      </p>
+                    )}
+                    {card.custom_content && (
+                      <div
+                        className="text-white/80 text-base md:text-lg leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: card.custom_content }}
+                      />
+                    )}
                   </div>
-                )}
-                <div className="flex-1">
-                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                    {card.title}
-                  </h3>
-                  {card.description && (
-                    <p className="text-white/80 text-base md:text-lg leading-relaxed">
-                      {card.description}
-                    </p>
-                  )}
-                  {card.custom_content && (
-                    <div
-                      className="text-white/80 text-base md:text-lg leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: card.custom_content }}
-                    />
-                  )}
-                </div>
-              </Card>
-            ))}
-          </CardSwap>
+                </Card>
+              ))}
+            </CardSwap>
+          </div>
         </div>
       </div>
     </section>
