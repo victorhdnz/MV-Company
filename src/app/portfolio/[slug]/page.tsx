@@ -212,6 +212,29 @@ export default async function ServicePage({ params }: { params: { slug: string }
     <ServicePageTracker serviceId={service.id} serviceSlug={service.slug}>
       <FixedLogo />
       <div className="min-h-screen bg-black">
+        {/* Botão para voltar à homepage */}
+        <div className="bg-black text-white py-8 md:py-12 px-4 relative">
+          <div className="container mx-auto max-w-7xl">
+            <Link 
+              href="/"
+              prefetch={true}
+              className="group inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full transition-all duration-300 backdrop-blur-sm"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor" 
+                className="w-5 h-5 group-hover:-translate-x-1 transition-transform"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="text-sm font-medium hidden sm:inline">Voltar para Homepage</span>
+              <span className="text-sm font-medium sm:hidden">Voltar</span>
+            </Link>
+          </div>
+        </div>
+        
         {/* Renderizar seções na ordem configurada */}
         {sectionOrder.map((sectionId: string) => {
           const renderer = sectionRenderers[sectionId]

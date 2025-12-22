@@ -1,8 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { DollarSign, MessageCircle, Home } from 'lucide-react'
+import { DollarSign, MessageCircle } from 'lucide-react'
 import { ExpandableTabs } from './expandable-tabs'
 
 interface NavigationTabsProps {
@@ -51,7 +50,7 @@ export function NavigationTabs({ variant, className }: NavigationTabsProps) {
           break
       }
     } else {
-      // Service page tabs: Preço (0), Contato (1), Homepage (2)
+      // Service page tabs: Preço (0), Contato (1)
       switch (index) {
         case 0: // Preço
           setTimeout(() => {
@@ -83,10 +82,6 @@ export function NavigationTabs({ variant, className }: NavigationTabsProps) {
             }
           }, 100)
           break
-        case 2: // Homepage
-          // Usar router.push igual ao comparador
-          router.push('/')
-          break
       }
     }
   }
@@ -99,8 +94,6 @@ export function NavigationTabs({ variant, className }: NavigationTabsProps) {
   const serviceTabs = [
     { title: 'Preço', icon: DollarSign },
     { title: 'Contato', icon: MessageCircle },
-    { type: 'separator' as const },
-    { title: 'Homepage', icon: Home },
   ]
 
   return (
