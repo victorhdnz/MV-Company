@@ -160,7 +160,7 @@ export function HomepageSections({
     
     return (
       <FadeInSection>
-        <section id="comparison-section" className="py-16 md:py-24 px-4">
+        <section id="comparison-section" className="py-16 md:py-24 px-4 scroll-mt-24">
           <div className="container mx-auto max-w-4xl">
             <Link href={homepageContent.comparison_cta_link || "/comparar"} prefetch={true}>
               <div className="relative h-[300px] md:h-[400px] rounded-3xl overflow-hidden bg-gray-900 border border-gray-800 hover:border-gray-700 transition-all duration-300 group">
