@@ -49,55 +49,87 @@ export function NavigationTabs({ variant, className }: NavigationTabsProps) {
           }, 100)
           break
         case 2: // Comparador
-          // Função para fazer scroll até a seção
+          // Função para fazer scroll até a seção com múltiplas tentativas
+          let attemptCount = 0
+          const maxAttempts = 15
+          
           const scrollToComparison = () => {
+            attemptCount++
+            
             // Tentar encontrar por ID primeiro
             let comparisonSection = document.getElementById('comparison-section')
             
-            // Se não encontrar por ID, tentar por querySelector
+            // Se não encontrar por ID, tentar por querySelector com diferentes variações
             if (!comparisonSection) {
               comparisonSection = document.querySelector('[id="comparison-section"]') as HTMLElement
             }
             
-            // Se ainda não encontrar, tentar encontrar qualquer elemento com o texto "Compare"
+            if (!comparisonSection) {
+              comparisonSection = document.querySelector('section#comparison-section') as HTMLElement
+            }
+            
+            // Se ainda não encontrar, tentar encontrar qualquer elemento com o texto "Compare" ou "Comparar"
             if (!comparisonSection) {
               const sections = document.querySelectorAll('section')
-              sections.forEach((section) => {
+              for (const section of sections) {
                 const text = section.textContent || ''
-                if (text.includes('Compare') || text.includes('Comparar')) {
-                  comparisonSection = section as HTMLElement
+                if (text.includes('Compare') || text.includes('Comparar') || text.includes('MV Company')) {
+                  const hasGitCompare = section.querySelector('svg') || section.innerHTML.includes('GitCompare')
+                  if (hasGitCompare) {
+                    comparisonSection = section as HTMLElement
+                    break
+                  }
                 }
-              })
+              }
             }
             
             if (comparisonSection) {
-              // Usar scrollIntoView com opções para melhor controle
-              comparisonSection.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start',
-                inline: 'nearest'
+              console.log('✅ Seção de comparação encontrada! Fazendo scroll...', comparisonSection)
+              
+              // Calcular posição com offset para header fixo
+              const headerOffset = 120
+              const elementTop = comparisonSection.getBoundingClientRect().top + window.pageYOffset
+              const targetPosition = elementTop - headerOffset
+              
+              console.log('📍 Posição do elemento:', elementTop, 'Posição alvo:', targetPosition)
+              
+              // Fazer scroll suave
+              window.scrollTo({
+                top: Math.max(0, targetPosition),
+                behavior: 'smooth'
               })
               
-              // Ajustar offset após um pequeno delay para compensar header fixo
+              // Verificar se o scroll funcionou após um delay
               setTimeout(() => {
-                const headerOffset = 100
-                const elementPosition = comparisonSection!.getBoundingClientRect().top
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+                const currentPosition = window.pageYOffset
+                const elementPosition = comparisonSection!.getBoundingClientRect().top + window.pageYOffset - headerOffset
+                const distance = Math.abs(currentPosition - elementPosition)
                 
-                window.scrollTo({
-                  top: Math.max(0, offsetPosition),
-                  behavior: 'smooth'
-                })
-              }, 100)
+                console.log('📊 Verificação de scroll - Posição atual:', currentPosition, 'Distância:', distance)
+                
+                // Se ainda não estiver próximo o suficiente, tentar novamente
+                if (distance > 50 && attemptCount < maxAttempts) {
+                  console.log('🔄 Tentando scroll novamente...')
+                  scrollToComparison()
+                } else {
+                  console.log('✅ Scroll concluído com sucesso!')
+                }
+              }, 300)
+            } else if (attemptCount < maxAttempts) {
+              console.log(`🔍 Tentativa ${attemptCount}/${maxAttempts} - Seção não encontrada, tentando novamente...`)
+              // Tentar novamente após um delay maior
+              setTimeout(scrollToComparison, 200)
             } else {
-              // Se a seção não existir, redirecionar para a página de comparação
-              console.warn('Seção de comparação não encontrada, redirecionando para /comparar')
+              // Se a seção não existir após várias tentativas, redirecionar para a página de comparação
+              console.warn('Seção de comparação não encontrada após', maxAttempts, 'tentativas, redirecionando para /comparar')
               router.push('/comparar')
             }
           }
           
-          // Aguardar um pouco para garantir que o DOM esteja atualizado
-          setTimeout(scrollToComparison, 50)
+          // Usar requestAnimationFrame para garantir que o DOM esteja pronto
+          requestAnimationFrame(() => {
+            setTimeout(scrollToComparison, 100)
+          })
           break
       }
     } else {
