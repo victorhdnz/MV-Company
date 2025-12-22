@@ -29,6 +29,7 @@ interface EditServicePageProps {
 const sectionIcons: Record<string, string> = {
   basic: '📝',
   hero: '🎥',
+  scroll_animation: '📱',
   benefits: '📋',
   alternate: '🔄',
   pricing: '💰',
@@ -38,6 +39,7 @@ const sectionIcons: Record<string, string> = {
 const sectionLabels: Record<string, string> = {
   basic: 'Informações Básicas',
   hero: 'Hero com Vídeo',
+  scroll_animation: 'Animação de Scroll',
   benefits: 'O que você receberá',
   alternate: 'Conteúdo Alternado',
   pricing: 'Planos de Assinatura',
@@ -55,6 +57,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
   const [sectionOrder, setSectionOrder] = useState<string[]>([
     'basic',
     'hero',
+    'scroll_animation',
     'benefits',
     'alternate',
     'pricing',
@@ -63,6 +66,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
     basic: true,
     hero: true,
+    scroll_animation: true,
     benefits: true,
     alternate: true,
     pricing: false,
@@ -175,8 +179,14 @@ export default function EditServicePage({ params }: EditServicePageProps) {
           const filteredOrder = layout.section_order.filter(
             (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials' && sectionId !== 'about'
           )
-          // Garantir que 'pricing' esteja presente antes de 'cta'
-          let finalOrder = filteredOrder.length > 0 ? filteredOrder : ['basic', 'hero', 'benefits', 'alternate', 'pricing', 'cta']
+          // Garantir que 'pricing' esteja presente antes de 'cta' e 'scroll_animation' esteja presente
+          let finalOrder = filteredOrder.length > 0 ? filteredOrder : ['basic', 'hero', 'scroll_animation', 'benefits', 'alternate', 'pricing', 'cta']
+          if (!finalOrder.includes('scroll_animation') && finalOrder.includes('hero')) {
+            const heroIndex = finalOrder.indexOf('hero')
+            finalOrder.splice(heroIndex + 1, 0, 'scroll_animation')
+          } else if (!finalOrder.includes('scroll_animation')) {
+            finalOrder.splice(2, 0, 'scroll_animation')
+          }
           if (!finalOrder.includes('pricing') && finalOrder.includes('cta')) {
             const ctaIndex = finalOrder.indexOf('cta')
             finalOrder.splice(ctaIndex, 0, 'pricing')
@@ -190,9 +200,12 @@ export default function EditServicePage({ params }: EditServicePageProps) {
           delete filteredVisibility.gifts
           delete filteredVisibility.testimonials
           delete filteredVisibility.about
-          // Garantir que 'pricing' esteja presente na visibilidade
+          // Garantir que 'pricing' e 'scroll_animation' estejam presentes na visibilidade
           if (filteredVisibility.pricing === undefined) {
             filteredVisibility.pricing = false
+          }
+          if (filteredVisibility.scroll_animation === undefined) {
+            filteredVisibility.scroll_animation = true
           }
           setSectionVisibility(filteredVisibility)
         }
@@ -400,6 +413,44 @@ export default function EditServicePage({ params }: EditServicePageProps) {
                     rows={3}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                </div>
+              </>
+            )}
+          </div>
+        )
+
+      case 'scroll_animation':
+        return (
+          <div className="space-y-4">
+            <Switch
+              label="Habilitar Animação de Scroll"
+              checked={layoutData.scroll_animation_enabled ?? true}
+              onCheckedChange={(checked) => setLayoutData({ ...layoutData, scroll_animation_enabled: checked })}
+            />
+            {layoutData.scroll_animation_enabled && (
+              <>
+                <Input
+                  label="Título Principal"
+                  value={layoutData.scroll_animation_title || ''}
+                  onChange={(e) => setLayoutData({ ...layoutData, scroll_animation_title: e.target.value })}
+                  placeholder="Ex: Descubra o poder do"
+                />
+                <Input
+                  label="Subtítulo (Nome do Serviço)"
+                  value={layoutData.scroll_animation_subtitle || ''}
+                  onChange={(e) => setLayoutData({ ...layoutData, scroll_animation_subtitle: e.target.value })}
+                  placeholder="Ex: Tráfego Pago"
+                />
+                <div>
+                  <label className="block text-sm font-medium mb-2">Imagem (URL ou deixe vazio para usar a imagem do serviço)</label>
+                  <Input
+                    value={layoutData.scroll_animation_image || ''}
+                    onChange={(e) => setLayoutData({ ...layoutData, scroll_animation_image: e.target.value })}
+                    placeholder="URL da imagem ou deixe vazio"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Se deixar vazio, será usada a imagem de capa do serviço ou a primeira imagem do array de imagens.
+                  </p>
                 </div>
               </>
             )}

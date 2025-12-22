@@ -138,14 +138,16 @@ export default async function ServicePage({ params }: { params: { slug: string }
   const content: ServiceDetailContent = hasValidLayout ? layoutContent : {
     hero_enabled: true,
     hero_title: service.name, // Usar o nome do serviço como título padrão
+    scroll_animation_enabled: true,
     benefits_enabled: true,
     benefits_items: [],
     alternate_content_enabled: true,
     alternate_content_items: [],
     cta_enabled: true,
-    section_order: ['hero', 'benefits', 'alternate', 'cta'],
+    section_order: ['hero', 'scroll_animation', 'benefits', 'alternate', 'cta'],
     section_visibility: {
       hero: true,
+      scroll_animation: true,
       benefits: true,
       alternate: true,
       cta: true,
@@ -188,14 +190,17 @@ export default async function ServicePage({ params }: { params: { slug: string }
   // Mapear seções para componentes
   const sectionRenderers: Record<string, () => JSX.Element | null> = {
     hero: () => <ServiceHeroVideo content={content} serviceName={service.name} />,
-    scroll_animation: () => (
-      <ServiceScrollAnimation
-        serviceName={service.name}
-        imageUrl={service.cover_image || service.images?.[0]}
-        title={content.scroll_animation_title}
-        subtitle={content.scroll_animation_subtitle}
-      />
-    ),
+    scroll_animation: () => {
+      if (sectionVisibility.scroll_animation === false) return null
+      return (
+        <ServiceScrollAnimation
+          serviceName={service.name}
+          imageUrl={content.scroll_animation_image || service.cover_image || service.images?.[0]}
+          title={content.scroll_animation_title}
+          subtitle={content.scroll_animation_subtitle}
+        />
+      )
+    },
     benefits: () => <ServiceBenefits content={content} />,
     alternate: () => <ServiceAlternateContent content={content} />,
     pricing: () => {
@@ -253,6 +258,12 @@ export default async function ServicePage({ params }: { params: { slug: string }
           
           // Para pricing, não verificar sectionVisibility pois é gerenciado exclusivamente em /dashboard/pricing
           if (sectionId === 'pricing') {
+            return <div key={sectionId}>{renderer()}</div>
+          }
+          
+          // Para scroll_animation, verificar se está habilitado no layout
+          if (sectionId === 'scroll_animation') {
+            if (content.scroll_animation_enabled === false) return null
             return <div key={sectionId}>{renderer()}</div>
           }
           
