@@ -36,14 +36,14 @@ export function ServiceCardSwap({
               </h2>
             )}
             {subtitle && (
-              <p className="text-base md:text-lg lg:text-xl text-white/80 mb-4 md:mb-6 lg:mb-0">
+              <p className="text-base md:text-lg lg:text-xl text-white/80 mb-2 md:mb-6 lg:mb-0">
                 {subtitle}
               </p>
             )}
           </div>
 
           {/* Cards animados à direita - abaixo do texto no mobile, ao lado no desktop */}
-          <div className="relative w-full lg:w-auto lg:flex-shrink-0 lg:ml-4 lg:-mt-8" style={{ height: '400px', minHeight: '400px' }}>
+          <div className="relative w-full lg:w-auto lg:flex-shrink-0 lg:ml-4 lg:-mt-8 -mt-2" style={{ height: '300px', minHeight: '300px' }}>
             <CardSwap
               cardDistance={60}
               verticalDistance={70}
