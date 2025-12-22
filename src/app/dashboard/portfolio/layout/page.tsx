@@ -9,7 +9,6 @@ import { Switch } from '@/components/ui/Switch'
 import { ImageUploader } from '@/components/ui/ImageUploader'
 import { VideoUploader } from '@/components/ui/VideoUploader'
 import { BenefitsManager } from '@/components/ui/BenefitsManager'
-import { AlternateContentManager } from '@/components/ui/AlternateContentManager'
 import { createClient } from '@/lib/supabase/client'
 import { Save, Eye } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -23,14 +22,12 @@ import { ServiceDetailContent } from '@/types/service-detail'
 const sectionIcons: Record<string, string> = {
   hero: '🎥',
   benefits: '📋',
-  alternate: '🔄',
   cta: '📞',
 }
 
 const sectionLabels: Record<string, string> = {
   hero: 'Hero com Vídeo',
   benefits: 'O que você receberá',
-  alternate: 'Conteúdo Alternado',
   cta: 'Contato',
 }
 
@@ -45,13 +42,11 @@ export default function ServiceDetailLayoutPage() {
   const [sectionOrder, setSectionOrder] = useState<string[]>([
     'hero',
     'benefits',
-    'alternate',
     'cta',
   ])
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
     hero: true,
     benefits: true,
-    alternate: true,
     cta: true,
   })
   const [formData, setFormData] = useState<ServiceDetailContent>({
@@ -64,9 +59,6 @@ export default function ServiceDetailLayoutPage() {
     benefits_enabled: true,
     benefits_title: 'O que você receberá dentro da MV Company',
     benefits_items: [],
-
-    alternate_content_enabled: true,
-    alternate_content_items: [],
 
     cta_enabled: true,
     cta_title: 'Fale Conosco',
@@ -107,13 +99,14 @@ export default function ServiceDetailLayoutPage() {
           const filteredOrder = layout.section_order.filter(
             (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials' && sectionId !== 'about'
           )
-          setSectionOrder(filteredOrder.length > 0 ? filteredOrder : ['hero', 'benefits', 'alternate', 'cta'])
+          setSectionOrder(filteredOrder.length > 0 ? filteredOrder : ['hero', 'benefits', 'cta'])
         }
         if (layout.section_visibility) {
           const filteredVisibility = { ...layout.section_visibility }
           delete filteredVisibility.gifts
           delete filteredVisibility.testimonials
           delete filteredVisibility.about
+          delete filteredVisibility.alternate
           setSectionVisibility(filteredVisibility)
         }
       }
@@ -251,23 +244,6 @@ export default function ServiceDetailLayoutPage() {
                   onChange={(items) => setFormData({ ...formData, benefits_items: items })}
                 />
               </>
-            )}
-          </div>
-        )
-
-      case 'alternate':
-        return (
-          <div className="space-y-4">
-            <Switch
-              label="Habilitar Conteúdo Alternado"
-              checked={formData.alternate_content_enabled ?? true}
-              onCheckedChange={(checked) => setFormData({ ...formData, alternate_content_enabled: checked })}
-            />
-            {formData.alternate_content_enabled && (
-              <AlternateContentManager
-                value={formData.alternate_content_items || []}
-                onChange={(items) => setFormData({ ...formData, alternate_content_items: items })}
-              />
             )}
           </div>
         )

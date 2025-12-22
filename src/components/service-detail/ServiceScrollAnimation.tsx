@@ -20,19 +20,16 @@ export function ServiceScrollAnimation({
   // Se não houver imagem, usar uma imagem padrão relacionada ao serviço
   const displayImage = imageUrl || `https://images.unsplash.com/photo-1551650975-87deedd944c3?w=1400&q=80`;
 
-  const titleText = title || `Descubra o poder do`;
-  const subtitleText = subtitle || serviceName;
+  // Usar subtitle como título principal, ou title, ou serviceName como fallback
+  const mainTitle = subtitle || title || serviceName;
 
   return (
     <div className="flex flex-col overflow-hidden bg-black">
       <ContainerScroll
         titleComponent={
           <>
-            <h1 className="text-4xl font-semibold text-white">
-              {titleText} <br />
-              <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none text-white">
-                {subtitleText}
-              </span>
+            <h1 className="text-4xl md:text-[6rem] font-bold leading-none text-white">
+              {mainTitle}
             </h1>
           </>
         }

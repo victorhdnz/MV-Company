@@ -11,7 +11,6 @@ import { ImageUploader } from '@/components/ui/ImageUploader'
 import { VideoUploader } from '@/components/ui/VideoUploader'
 import { ArrayImageManager } from '@/components/ui/ArrayImageManager'
 import { BenefitsManager } from '@/components/ui/BenefitsManager'
-import { AlternateContentManager } from '@/components/ui/AlternateContentManager'
 import { StatsManager } from '@/components/ui/StatsManager'
 import { createClient } from '@/lib/supabase/client'
 import { Service } from '@/types'
@@ -32,7 +31,6 @@ const sectionIcons: Record<string, string> = {
   hero: '🎥',
   scroll_animation: '📱',
   benefits: '📋',
-  alternate: '🔄',
   stats: '📊',
   pricing: '💰',
   cta: '📞',
@@ -43,7 +41,6 @@ const sectionLabels: Record<string, string> = {
   hero: 'Hero com Vídeo',
   scroll_animation: 'Animação de Scroll',
   benefits: 'O que você receberá',
-  alternate: 'Conteúdo Alternado',
   stats: 'Estatísticas/Alcance',
   pricing: 'Planos de Assinatura',
   cta: 'Contato',
@@ -62,7 +59,6 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     'hero',
     'scroll_animation',
     'benefits',
-    'alternate',
     'stats',
     'pricing',
     'cta',
@@ -72,7 +68,6 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     hero: true,
     scroll_animation: true,
     benefits: true,
-    alternate: true,
     stats: false,
     pricing: false,
     cta: true,
@@ -110,9 +105,6 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     benefits_enabled: true,
     benefits_title: 'O que você receberá dentro da MV Company',
     benefits_items: [],
-
-    alternate_content_enabled: true,
-    alternate_content_items: [],
 
     stats_enabled: false,
     stats_title: 'Nosso Alcance',
@@ -187,16 +179,16 @@ export default function EditServicePage({ params }: EditServicePageProps) {
             (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials' && sectionId !== 'about'
           )
           // Garantir que 'pricing', 'stats' e 'scroll_animation' estejam presentes
-          let finalOrder = filteredOrder.length > 0 ? filteredOrder : ['basic', 'hero', 'scroll_animation', 'benefits', 'alternate', 'stats', 'pricing', 'cta']
+          let finalOrder = filteredOrder.length > 0 ? filteredOrder : ['basic', 'hero', 'scroll_animation', 'benefits', 'stats', 'pricing', 'cta']
           if (!finalOrder.includes('scroll_animation') && finalOrder.includes('hero')) {
             const heroIndex = finalOrder.indexOf('hero')
             finalOrder.splice(heroIndex + 1, 0, 'scroll_animation')
           } else if (!finalOrder.includes('scroll_animation')) {
             finalOrder.splice(2, 0, 'scroll_animation')
           }
-          if (!finalOrder.includes('stats') && finalOrder.includes('alternate')) {
-            const alternateIndex = finalOrder.indexOf('alternate')
-            finalOrder.splice(alternateIndex + 1, 0, 'stats')
+          if (!finalOrder.includes('stats') && finalOrder.includes('benefits')) {
+            const benefitsIndex = finalOrder.indexOf('benefits')
+            finalOrder.splice(benefitsIndex + 1, 0, 'stats')
           } else if (!finalOrder.includes('stats')) {
             finalOrder.push('stats')
           }
@@ -424,16 +416,13 @@ export default function EditServicePage({ params }: EditServicePageProps) {
               <>
                 <Input
                   label="Título Principal"
-                  value={layoutData.scroll_animation_title || ''}
-                  onChange={(e) => setLayoutData({ ...layoutData, scroll_animation_title: e.target.value })}
-                  placeholder="Ex: Descubra o poder do"
-                />
-                <Input
-                  label="Subtítulo (Nome do Serviço)"
-                  value={layoutData.scroll_animation_subtitle || ''}
+                  value={layoutData.scroll_animation_subtitle || layoutData.scroll_animation_title || ''}
                   onChange={(e) => setLayoutData({ ...layoutData, scroll_animation_subtitle: e.target.value })}
-                  placeholder="Ex: Tráfego Pago"
+                  placeholder="Ex: A gestão que você precisa!"
                 />
+                <p className="text-xs text-gray-500">
+                  Este será o título grande exibido na animação de scroll.
+                </p>
                 <div>
                   <label className="block text-sm font-medium mb-2">Imagem</label>
                   <ImageUploader
@@ -473,23 +462,6 @@ export default function EditServicePage({ params }: EditServicePageProps) {
                   onChange={(items) => setLayoutData({ ...layoutData, benefits_items: items })}
                 />
               </>
-            )}
-          </div>
-        )
-
-      case 'alternate':
-        return (
-          <div className="space-y-4">
-            <Switch
-              label="Habilitar Conteúdo Alternado"
-              checked={layoutData.alternate_content_enabled ?? true}
-              onCheckedChange={(checked) => setLayoutData({ ...layoutData, alternate_content_enabled: checked })}
-            />
-            {layoutData.alternate_content_enabled && (
-              <AlternateContentManager
-                value={layoutData.alternate_content_items || []}
-                onChange={(items) => setLayoutData({ ...layoutData, alternate_content_items: items })}
-              />
             )}
           </div>
         )
