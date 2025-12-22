@@ -188,10 +188,10 @@ export default function EditServicePage({ params }: EditServicePageProps) {
         // Filtrar seções removidas (gifts, testimonials, about)
         if (layout.section_order) {
           const filteredOrder = layout.section_order.filter(
-            (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials' && sectionId !== 'about'
+            (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials' && sectionId !== 'about' && sectionId !== 'alternate'
           )
-          // Garantir que 'pricing', 'stats' e 'scroll_animation' estejam presentes
-          let finalOrder = filteredOrder.length > 0 ? filteredOrder : ['basic', 'hero', 'scroll_animation', 'benefits', 'stats', 'pricing', 'cta']
+          // Garantir que 'pricing', 'stats', 'scroll_animation' e 'card_swap' estejam presentes
+          let finalOrder = filteredOrder.length > 0 ? filteredOrder : ['basic', 'hero', 'scroll_animation', 'benefits', 'stats', 'card_swap', 'pricing', 'cta']
           if (!finalOrder.includes('scroll_animation') && finalOrder.includes('hero')) {
             const heroIndex = finalOrder.indexOf('hero')
             finalOrder.splice(heroIndex + 1, 0, 'scroll_animation')
@@ -203,6 +203,12 @@ export default function EditServicePage({ params }: EditServicePageProps) {
             finalOrder.splice(benefitsIndex + 1, 0, 'stats')
           } else if (!finalOrder.includes('stats')) {
             finalOrder.push('stats')
+          }
+          if (!finalOrder.includes('card_swap') && finalOrder.includes('stats')) {
+            const statsIndex = finalOrder.indexOf('stats')
+            finalOrder.splice(statsIndex + 1, 0, 'card_swap')
+          } else if (!finalOrder.includes('card_swap')) {
+            finalOrder.push('card_swap')
           }
           if (!finalOrder.includes('pricing') && finalOrder.includes('cta')) {
             const ctaIndex = finalOrder.indexOf('cta')
@@ -217,12 +223,16 @@ export default function EditServicePage({ params }: EditServicePageProps) {
           delete filteredVisibility.gifts
           delete filteredVisibility.testimonials
           delete filteredVisibility.about
-          // Garantir que 'pricing', 'stats' e 'scroll_animation' estejam presentes na visibilidade
+          delete filteredVisibility.alternate
+          // Garantir que 'pricing', 'stats', 'scroll_animation' e 'card_swap' estejam presentes na visibilidade
           if (filteredVisibility.pricing === undefined) {
             filteredVisibility.pricing = false
           }
           if (filteredVisibility.stats === undefined) {
             filteredVisibility.stats = false
+          }
+          if (filteredVisibility.card_swap === undefined) {
+            filteredVisibility.card_swap = false
           }
           if (filteredVisibility.scroll_animation === undefined) {
             filteredVisibility.scroll_animation = true

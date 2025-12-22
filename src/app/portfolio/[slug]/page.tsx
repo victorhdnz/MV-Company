@@ -154,9 +154,16 @@ export default async function ServicePage({ params }: { params: { slug: string }
   }
 
   // Ordem padrão das seções (sem 'gifts', 'testimonials', 'about' e 'alternate')
-  const sectionOrder = (content.section_order || ['hero', 'scroll_animation', 'benefits', 'stats', 'pricing', 'cta']).filter(
+  const sectionOrder = (content.section_order || ['hero', 'scroll_animation', 'benefits', 'stats', 'card_swap', 'pricing', 'cta']).filter(
     (sectionId) => sectionId !== 'gifts' && sectionId !== 'testimonials' && sectionId !== 'about' && sectionId !== 'alternate'
   )
+  // Garantir que 'card_swap' esteja presente
+  if (!sectionOrder.includes('card_swap') && sectionOrder.includes('stats')) {
+    const statsIndex = sectionOrder.indexOf('stats')
+    sectionOrder.splice(statsIndex + 1, 0, 'card_swap')
+  } else if (!sectionOrder.includes('card_swap')) {
+    sectionOrder.push('card_swap')
+  }
   // Garantir que 'pricing' esteja antes de 'cta' se não estiver
   if (!sectionOrder.includes('pricing')) {
     const ctaIndex = sectionOrder.indexOf('cta')
@@ -172,6 +179,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
     scroll_animation: true,
     benefits: true,
     stats: false,
+    card_swap: false,
     pricing: false,
     cta: true,
   }
@@ -183,6 +191,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
   if (sectionVisibility.alternate !== undefined) delete sectionVisibility.alternate
   if (sectionVisibility.pricing === undefined) sectionVisibility.pricing = false
   if (sectionVisibility.stats === undefined) sectionVisibility.stats = false
+  if (sectionVisibility.card_swap === undefined) sectionVisibility.card_swap = false
   if (sectionVisibility.scroll_animation === undefined) sectionVisibility.scroll_animation = true
 
   // Obter dados de pricing do site_settings
@@ -281,6 +290,12 @@ export default async function ServicePage({ params }: { params: { slug: string }
           // Para scroll_animation, verificar se está habilitado no layout
           if (sectionId === 'scroll_animation') {
             if (content.scroll_animation_enabled === false) return null
+            return <div key={sectionId}>{renderer()}</div>
+          }
+          
+          // Para card_swap, verificar se está habilitado no layout
+          if (sectionId === 'card_swap') {
+            if (content.card_swap_enabled === false) return null
             return <div key={sectionId}>{renderer()}</div>
           }
           
