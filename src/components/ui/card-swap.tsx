@@ -217,7 +217,7 @@ const CardSwap: React.FC<CardSwapProps> = ({
     <div
       ref={container}
       className="relative w-full h-full perspective-[900px] overflow-visible"
-      style={{ width, height }}
+      style={{ width, height, overflow: 'visible' }}
     >
       {rendered}
     </div>

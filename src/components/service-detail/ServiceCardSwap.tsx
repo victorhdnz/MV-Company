@@ -36,8 +36,8 @@ export function ServiceCardSwap({
 
   if (!enabled || cards.length === 0) return null;
 
-  const cardWidth = isMobile ? 280 : 500;
-  const cardHeight = isMobile ? 240 : 400;
+  const cardWidth = isMobile ? 260 : 500;
+  const cardHeight = isMobile ? 220 : 400;
 
   return (
     <section className="relative py-8 md:py-16 lg:py-24 px-4 bg-black overflow-x-hidden md:overflow-visible">
@@ -59,10 +59,10 @@ export function ServiceCardSwap({
 
           {/* Cards animados à direita - abaixo do texto no mobile, ao lado no desktop */}
           <div className="relative w-full md:w-auto md:flex-shrink-0 mt-4 md:mt-16 flex items-start justify-center md:justify-start order-2 md:order-2" style={{ zIndex: 1, position: 'relative', clear: 'both' }}>
-            <div className="relative w-full max-w-[280px] mx-auto md:mx-0 md:w-[500px] h-[240px] md:min-h-[500px] overflow-x-hidden md:overflow-visible" style={{ position: 'relative', isolation: 'isolate' }}>
+            <div className="relative w-full max-w-[260px] mx-auto md:mx-0 md:w-[500px] h-[280px] md:min-h-[500px] overflow-x-hidden md:overflow-visible" style={{ position: 'relative', isolation: 'isolate', paddingTop: isMobile ? '40px' : '0', overflowY: 'hidden' }}>
               <CardSwap
-                cardDistance={isMobile ? 40 : 60}
-                verticalDistance={isMobile ? 50 : 70}
+                cardDistance={isMobile ? 35 : 60}
+                verticalDistance={isMobile ? 45 : 70}
                 delay={delay}
                 pauseOnHover={pauseOnHover}
                 width={cardWidth}
@@ -73,8 +73,9 @@ export function ServiceCardSwap({
                     key={card.id}
                     customClass="p-3 md:p-8 lg:p-12 flex flex-col justify-start"
                     style={{ 
-                      height: isMobile ? '240px' : '400px',
-                      overflow: 'hidden'
+                      height: isMobile ? '220px' : '400px',
+                      overflow: 'hidden',
+                      maxHeight: isMobile ? '220px' : '400px'
                     }}
                   >
                     {card.image && (
