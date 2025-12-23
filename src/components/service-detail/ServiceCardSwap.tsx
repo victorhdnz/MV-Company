@@ -36,13 +36,13 @@ export function ServiceCardSwap({
 
   if (!enabled || cards.length === 0) return null;
 
-  const cardWidth = isMobile ? 350 : 500;
-  const cardHeight = isMobile ? 300 : 400;
+  const cardWidth = isMobile ? 280 : 500;
+  const cardHeight = isMobile ? 240 : 400;
 
   return (
-    <section className="relative py-8 md:py-16 lg:py-24 px-4 bg-black overflow-x-hidden">
-      <div className="container mx-auto max-w-7xl relative overflow-x-hidden">
-        <div className="flex flex-col md:flex-row items-start gap-6 md:gap-8 lg:gap-12 overflow-x-hidden">
+    <section className="relative py-8 md:py-16 lg:py-24 px-4 bg-black overflow-x-hidden md:overflow-visible">
+      <div className="container mx-auto max-w-7xl relative">
+        <div className="flex flex-col md:flex-row items-start gap-6 md:gap-8 lg:gap-12">
           {/* Conteúdo à esquerda */}
           <div className="flex-1 md:max-w-2xl relative z-10 w-full order-1">
             {title && (
@@ -58,11 +58,11 @@ export function ServiceCardSwap({
           </div>
 
           {/* Cards animados à direita - abaixo do texto no mobile, ao lado no desktop */}
-          <div className="relative w-full md:w-auto md:flex-shrink-0 mt-4 md:mt-16 flex items-start justify-center md:justify-start order-2 md:order-2 overflow-x-hidden" style={{ zIndex: 1, position: 'relative', clear: 'both' }}>
-            <div className="relative w-full max-w-[350px] mx-auto md:mx-0 md:w-[500px] min-h-[300px] md:min-h-[500px] overflow-x-hidden" style={{ position: 'relative', isolation: 'isolate' }}>
+          <div className="relative w-full md:w-auto md:flex-shrink-0 mt-4 md:mt-16 flex items-start justify-center md:justify-start order-2 md:order-2" style={{ zIndex: 1, position: 'relative', clear: 'both' }}>
+            <div className="relative w-full max-w-[280px] mx-auto md:mx-0 md:w-[500px] h-[240px] md:min-h-[500px] overflow-x-hidden md:overflow-visible" style={{ position: 'relative', isolation: 'isolate' }}>
               <CardSwap
-                cardDistance={60}
-                verticalDistance={70}
+                cardDistance={isMobile ? 40 : 60}
+                verticalDistance={isMobile ? 50 : 70}
                 delay={delay}
                 pauseOnHover={pauseOnHover}
                 width={cardWidth}
@@ -71,13 +71,14 @@ export function ServiceCardSwap({
                 {cards.map((card) => (
                   <Card
                     key={card.id}
-                    customClass="p-4 md:p-8 lg:p-12 flex flex-col justify-start overflow-y-auto"
+                    customClass="p-3 md:p-8 lg:p-12 flex flex-col justify-start"
                     style={{ 
-                      maxHeight: isMobile ? '300px' : '400px'
+                      height: isMobile ? '240px' : '400px',
+                      overflow: 'hidden'
                     }}
                   >
                     {card.image && (
-                      <div className="mb-3 md:mb-6 relative w-full h-24 md:h-48 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="mb-2 md:mb-6 relative w-full h-16 md:h-48 rounded-lg overflow-hidden flex-shrink-0">
                         <Image
                           src={card.image}
                           alt={card.title}
@@ -86,18 +87,18 @@ export function ServiceCardSwap({
                         />
                       </div>
                     )}
-                    <div className="flex-1 min-h-0">
-                      <h3 className="text-lg md:text-2xl lg:text-3xl font-bold text-white mb-2 md:mb-4 break-words">
+                    <div className="flex-1 min-h-0 overflow-hidden">
+                      <h3 className="text-sm md:text-2xl lg:text-3xl font-bold text-white mb-1 md:mb-4 break-words line-clamp-2">
                         {card.title}
                       </h3>
                       {card.description && (
-                        <p className="text-white/80 text-xs md:text-base lg:text-lg leading-relaxed break-words whitespace-normal">
+                        <p className="text-white/80 text-xs md:text-base lg:text-lg leading-tight md:leading-relaxed break-words whitespace-normal line-clamp-3 md:line-clamp-none">
                           {card.description}
                         </p>
                       )}
                       {card.custom_content && (
                         <div
-                          className="text-white/80 text-xs md:text-base lg:text-lg leading-relaxed break-words"
+                          className="text-white/80 text-xs md:text-base lg:text-lg leading-tight md:leading-relaxed break-words line-clamp-3 md:line-clamp-none"
                           dangerouslySetInnerHTML={{ __html: card.custom_content }}
                         />
                       )}
