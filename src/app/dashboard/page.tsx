@@ -16,6 +16,7 @@ import {
   ArrowRight,
   BarChart3,
   Sparkles,
+  Link as LinkIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -308,6 +309,20 @@ function DashboardContent() {
           href: '/dashboard/testes-efeitos',
           icon: Sparkles,
           color: 'bg-purple-500',
+        },
+      ],
+    },
+    {
+      title: 'Agregadores de Links',
+      description: 'Crie e gerencie agregadores de links (link-in-bio)',
+      icon: LinkIcon,
+      items: [
+        {
+          title: 'Gerenciar Agregadores',
+          description: 'Criar e editar agregadores de links com efeitos 3D',
+          href: '/dashboard/links',
+          icon: LinkIcon,
+          color: 'bg-pink-500',
         },
       ],
     },

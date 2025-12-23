@@ -78,7 +78,8 @@ module.exports = {
 			'second': 'second 8s ease-in-out infinite',
 			'third': 'third 8s ease-in-out infinite',
 			'fourth': 'fourth 8s ease-in-out infinite',
-			'fifth': 'fifth 8s ease-in-out infinite'
+			'fifth': 'fifth 8s ease-in-out infinite',
+			'diamond-rotate': 'diamond-rotate 3s linear infinite'
 		},
   		keyframes: {
   			fadeIn: {
@@ -154,6 +155,10 @@ module.exports = {
 				'33%': { transform: 'translate(30px, 50px) scale(1.1)' },
 				'66%': { transform: 'translate(-30px, -50px) scale(0.9)' },
 				'100%': { transform: 'translate(0px, 0px) scale(1)' }
+			},
+			'diamond-rotate': {
+				'0%': { transform: 'rotate(0deg)' },
+				'100%': { transform: 'rotate(360deg)' }
 			}
 		},
   		borderRadius: {
