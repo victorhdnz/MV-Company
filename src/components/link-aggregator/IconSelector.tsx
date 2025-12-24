@@ -42,7 +42,7 @@ const linkIcons = [
   { name: 'file-text', label: 'Documento', icon: LucideIcons.FileText },
   { name: 'download', label: 'Download', icon: LucideIcons.Download },
   { name: 'video', label: 'Vídeo', icon: LucideIcons.Video },
-  { name: 'image', label: 'Imagem', icon: LucideIcons.Image },
+  { name: 'image', label: 'Imagem', icon: LucideIcons.Image as any },
   { name: 'music', label: 'Música', icon: LucideIcons.Music },
   { name: 'heart', label: 'Favorito', icon: LucideIcons.Heart },
   { name: 'star', label: 'Destaque', icon: LucideIcons.Star },
