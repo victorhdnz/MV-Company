@@ -65,7 +65,7 @@ export const Footer = () => {
   }, [])
 
   // Ocultar footer em landing pages, página principal, dashboard, comparador, catálogos, suporte, páginas de serviço e páginas 404
-  if (pathname?.startsWith('/lp/') || pathname === '/' || pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/comparar') || pathname?.startsWith('/catalogo') || pathname?.startsWith('/suporte') || pathname?.startsWith('/portfolio/') || isNotFound) {
+  if (pathname?.startsWith('/lp/') || pathname === '/' || pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/comparar') || pathname?.startsWith('/catalogo') || pathname?.startsWith('/suporte') || pathname?.startsWith('/portfolio/') || pathname?.startsWith('/links/') || isNotFound) {
     return null
   }
 

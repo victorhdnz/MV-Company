@@ -108,8 +108,8 @@ export const Header = () => {
     }
   }, [pathname])
 
-  // Ocultar header em landing pages, página principal, dashboard, comparador, portfolio e páginas 404
-  if (pathname?.startsWith('/lp/') || pathname === '/' || pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/comparar') || pathname?.startsWith('/portfolio') || isNotFound) {
+  // Ocultar header em landing pages, página principal, dashboard, comparador, portfolio, links agregadores e páginas 404
+  if (pathname?.startsWith('/lp/') || pathname === '/' || pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/comparar') || pathname?.startsWith('/portfolio') || pathname?.startsWith('/links/') || isNotFound) {
     return null
   }
 
