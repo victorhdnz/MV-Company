@@ -297,12 +297,6 @@ export function LinkAggregatorPage({ aggregator }: LinkAggregatorPageProps) {
             </div>
           )}
 
-          {/* Footer */}
-          <div className="pt-8 border-t border-white/10 text-center">
-            <p className="text-sm text-white/50">
-              Feito por {aggregator.name}
-            </p>
-          </div>
         </div>
       </div>
     </div>

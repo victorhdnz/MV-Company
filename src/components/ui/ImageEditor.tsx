@@ -347,6 +347,7 @@ export function ImageEditor({
             {/* Rotation Controls */}
             <div className="flex items-center gap-2 sm:gap-4">
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setRotation((prev) => prev - 90)}
@@ -360,6 +361,7 @@ export function ImageEditor({
                 Rotação: {rotation}°
               </div>
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setRotation((prev) => prev + 90)}
@@ -373,10 +375,10 @@ export function ImageEditor({
 
             {/* Action Buttons */}
             <div className="flex items-center justify-end gap-2 pt-2 pb-2 bg-white border-t sticky bottom-0 z-10">
-              <Button variant="outline" onClick={onCancel} size="sm" className="text-xs sm:text-sm">
+              <Button type="button" variant="outline" onClick={onCancel} size="sm" className="text-xs sm:text-sm">
                 Cancelar
               </Button>
-              <Button onClick={handleSave} size="sm" className="text-xs sm:text-sm">
+              <Button type="button" onClick={handleSave} size="sm" className="text-xs sm:text-sm">
                 <Check size={16} className="sm:mr-2" />
                 Salvar e Upload
               </Button>
