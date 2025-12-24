@@ -63,10 +63,11 @@ export function LinkAggregatorPage({ aggregator }: LinkAggregatorPageProps) {
   const getIcon = (link: LinkItem | SocialLink) => {
     // Verificar se é LinkItem e tem icon_type
     if ('icon_type' in link && link.icon_type === 'image' && link.icon) {
+      const linkItem = link as LinkItem;
       return (
         <Image
-          src={link.icon}
-          alt={'title' in link ? link.title || '' : 'platform' in link ? link.platform : ''}
+          src={linkItem.icon}
+          alt={linkItem.title || ''}
           width={24}
           height={24}
           className="rounded-full"
