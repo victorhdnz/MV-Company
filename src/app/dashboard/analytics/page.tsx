@@ -481,7 +481,7 @@ export default function AnalyticsPage() {
       if (selectError) throw selectError
 
       if (!idsToDelete || idsToDelete.length === 0) {
-        toast.info('Nenhum dado encontrado para apagar.')
+        toast('Nenhum dado encontrado para apagar.', { icon: 'ℹ️' })
         return
       }
 
