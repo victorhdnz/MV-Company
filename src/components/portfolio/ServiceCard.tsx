@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Service } from '@/types'
-import { trackClick } from '@/lib/utils/analytics'
 import { ArrowRight } from 'lucide-react'
 
 interface ServiceCardProps {
@@ -11,21 +10,13 @@ interface ServiceCardProps {
 }
 
 export const ServiceCard = ({ service }: ServiceCardProps) => {
-  const handleClick = () => {
-    trackClick({
-      pageType: 'homepage',
-      pageSlug: '/',
-      element: 'service-card',
-      text: service.name,
-      url: `/portfolio/${service.slug}`,
-    })
-  }
+  // Não rastrear clique no card - o HomepageTracker já rastreia o link interno
+  // Isso evita duplicação de cliques
 
   return (
     <Link 
       href={`/portfolio/${service.slug}`} 
       className="block group"
-      onClick={handleClick}
     >
       <div className="relative h-[300px] md:h-[350px] rounded-3xl overflow-hidden bg-gray-900 border border-gray-800 hover:border-gray-700 hover:shadow-2xl transition-all duration-300 cursor-pointer">
         {/* Gradient Background - Similar to Compare section */}

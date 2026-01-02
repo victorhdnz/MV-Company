@@ -11,15 +11,8 @@ interface CustomServiceCardProps {
 }
 
 export const CustomServiceCard = ({ card }: CustomServiceCardProps) => {
-  const handleClick = () => {
-    trackClick({
-      pageType: 'homepage',
-      pageSlug: '/',
-      element: 'custom-service-card',
-      text: card.title,
-      url: card.link || '#',
-    })
-  }
+  // Não rastrear clique no card - o HomepageTracker já rastreia o link interno
+  // Isso evita duplicação de cliques
 
   const cardContent = (
     <div className="relative h-[300px] md:h-[350px] rounded-3xl overflow-hidden bg-gray-900 border border-gray-800 hover:border-gray-700 hover:shadow-2xl transition-all duration-300 cursor-pointer group">
@@ -73,7 +66,6 @@ export const CustomServiceCard = ({ card }: CustomServiceCardProps) => {
       <Link 
         href={card.link}
         className="block"
-        onClick={handleClick}
         prefetch={true}
       >
         {cardContent}
@@ -81,6 +73,6 @@ export const CustomServiceCard = ({ card }: CustomServiceCardProps) => {
     )
   }
 
-  return <div onClick={handleClick}>{cardContent}</div>
+  return <div>{cardContent}</div>
 }
 

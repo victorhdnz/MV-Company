@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase/client'
 import { 
-  BarChart3, Clock, Eye, Users, MousePointer, 
+  BarChart3, Eye, Users, MousePointer, 
   RefreshCw, ChevronDown, ChevronUp, Trash2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -17,7 +17,6 @@ interface AnalyticsSummary {
   totalViews: number
   totalClicks: number
   uniqueVisitors: number
-  averageTimeOnPage: number
   averageScrollDepth: number
   bounceRate: number
   clickRate: number
@@ -28,7 +27,6 @@ interface DailyStats {
   views: number
   clicks: number
   visitors: number
-  avgTime: number
   avgScroll: number
 }
 
@@ -40,7 +38,6 @@ interface PagePerformance {
   views: number
   clicks: number
   visitors: number
-  avgTime: number
   avgScroll: number
   bounceRate: number
 }
@@ -226,9 +223,25 @@ export default function AnalyticsPage() {
   // Calcular resumo
   const calculateSummary = (data: any[]) => {
     const views = data.filter(a => a.event_type === 'page_view')
-    const clicks = data.filter(a => a.event_type === 'click')
+    
+    // Filtrar apenas cliques em elementos funcionais
+    const functionalElements = [
+      'service-link',
+      'related-service-link',
+      'comparison-cta',
+      'contact-button',
+      'whatsapp-button',
+      'email-button',
+      'instagram-button',
+      'cta-contact',
+    ]
+    const clicks = data.filter(a => {
+      if (a.event_type !== 'click') return false
+      const element = a.event_data?.element || 'unknown'
+      return functionalElements.includes(element)
+    })
+    
     const scrolls = data.filter(a => a.event_type === 'scroll')
-    const timeOnPage = data.filter(a => a.event_type === 'time_on_page')
 
     const totalViews = views.length
     const totalClicks = clicks.length
@@ -239,10 +252,6 @@ export default function AnalyticsPage() {
 
     const avgScrollDepth = scrolls.length > 0
       ? scrolls.reduce((sum, s) => sum + ((s.event_data?.scroll_depth || 0)), 0) / scrolls.length
-      : 0
-
-    const avgTimeOnPage = timeOnPage.length > 0
-      ? timeOnPage.reduce((sum, t) => sum + ((t.event_data?.time_seconds || 0)), 0) / timeOnPage.length
       : 0
 
     // Calcular bounce rate
@@ -267,7 +276,6 @@ export default function AnalyticsPage() {
       totalViews,
       totalClicks,
       uniqueVisitors,
-      averageTimeOnPage: Math.round(avgTimeOnPage),
       averageScrollDepth: Math.round(avgScrollDepth),
       bounceRate: Math.round(bounceRate * 10) / 10,
       clickRate: Math.round(clickRate * 10) / 10,
@@ -281,7 +289,6 @@ export default function AnalyticsPage() {
       clicks: number
       visitors: Set<string>
       scrolls: number[]
-      times: number[]
     }>()
 
     data.forEach(event => {
@@ -292,8 +299,7 @@ export default function AnalyticsPage() {
           views: 0,
           clicks: 0,
           visitors: new Set(),
-          scrolls: [],
-          times: []
+          scrolls: []
         })
       }
 
@@ -306,8 +312,6 @@ export default function AnalyticsPage() {
         day.clicks++
       } else if (event.event_type === 'scroll') {
         day.scrolls.push(event.event_data?.scroll_depth || 0)
-      } else if (event.event_type === 'time_on_page') {
-        day.times.push(event.event_data?.time_seconds || 0)
       }
     })
 
@@ -317,9 +321,6 @@ export default function AnalyticsPage() {
         views: data.views,
         clicks: data.clicks,
         visitors: data.visitors.size,
-        avgTime: data.times.length > 0 
-          ? Math.round(data.times.reduce((a, b) => a + b, 0) / data.times.length)
-          : 0,
         avgScroll: data.scrolls.length > 0
           ? Math.round(data.scrolls.reduce((a, b) => a + b, 0) / data.scrolls.length)
           : 0,
@@ -340,7 +341,6 @@ export default function AnalyticsPage() {
       clicks: number
       visitors: Set<string>
       scrolls: number[]
-      times: number[]
       sessionScrolls: Map<string, number[]> // Para calcular bounce rate corretamente
     }>()
 
@@ -369,7 +369,6 @@ export default function AnalyticsPage() {
           clicks: 0,
           visitors: new Set(),
           scrolls: [],
-          times: [],
           sessionScrolls: new Map()
         })
       }
@@ -380,7 +379,21 @@ export default function AnalyticsPage() {
         page.views++
         page.visitors.add(event.session_id)
       } else if (event.event_type === 'click') {
-        page.clicks++
+        // Contar apenas cliques em elementos funcionais
+        const element = event.event_data?.element || 'unknown'
+        const functionalElements = [
+          'service-link',
+          'related-service-link',
+          'comparison-cta',
+          'contact-button',
+          'whatsapp-button',
+          'email-button',
+          'instagram-button',
+          'cta-contact',
+        ]
+        if (functionalElements.includes(element)) {
+          page.clicks++
+        }
       } else if (event.event_type === 'scroll') {
         const scrollDepth = event.event_data?.scroll_depth || 0
         page.scrolls.push(scrollDepth)
@@ -389,8 +402,6 @@ export default function AnalyticsPage() {
           page.sessionScrolls.set(event.session_id, [])
         }
         page.sessionScrolls.get(event.session_id)!.push(scrollDepth)
-      } else if (event.event_type === 'time_on_page') {
-        page.times.push(event.event_data?.time_seconds || 0)
       }
     })
 
@@ -437,9 +448,6 @@ export default function AnalyticsPage() {
           views: data.views,
           clicks: data.clicks,
           visitors: data.visitors.size,
-          avgTime: data.times.length > 0
-            ? Math.round(data.times.reduce((a, b) => a + b, 0) / data.times.length)
-            : 0,
           avgScroll: data.scrolls.length > 0
             ? Math.round(data.scrolls.reduce((a, b) => a + b, 0) / data.scrolls.length)
             : 0,
@@ -609,16 +617,28 @@ export default function AnalyticsPage() {
     const sessionsData: SessionData[] = Array.from(sessionMap.entries())
       .map(([sessionId, sessionData]) => {
         const views = sessionData.events.filter(e => e.event_type === 'page_view')
-        const clicks = sessionData.events.filter(e => e.event_type === 'click')
+        
+        // Filtrar apenas cliques em elementos funcionais
+        const functionalElements = [
+          'service-link',
+          'related-service-link',
+          'comparison-cta',
+          'contact-button',
+          'whatsapp-button',
+          'email-button',
+          'instagram-button',
+          'cta-contact',
+        ]
+        const clicks = sessionData.events.filter(e => {
+          if (e.event_type !== 'click') return false
+          const element = e.event_data?.element || 'unknown'
+          return functionalElements.includes(element)
+        })
+        
         const scrolls = sessionData.events.filter(e => e.event_type === 'scroll')
-        const times = sessionData.events.filter(e => e.event_type === 'time_on_page')
 
         const maxScroll = scrolls.length > 0
-          ? Math.max(...scrolls.map(s => s.event_data?.scroll_depth || 0))
-          : 0
-
-        const totalTime = times.length > 0
-          ? Math.max(...times.map(t => t.event_data?.time_seconds || 0))
+          ? Math.max(...scrolls.map((s: any) => s.event_data?.scroll_depth || 0))
           : 0
 
         // Determinar nome da página corretamente
@@ -634,7 +654,7 @@ export default function AnalyticsPage() {
             // Formatar slug como nome
             pageName = sessionData.pageSlug
               .split('-')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
               .join(' ')
           } else {
             pageName = 'Serviço desconhecido'
@@ -647,7 +667,7 @@ export default function AnalyticsPage() {
           sessionId,
           pageName,
           startTime: sessionData.startTime,
-          duration: totalTime,
+          duration: 0, // Removido - não está funcionando bem
           scrollDepth: maxScroll,
           clicks: clicks.length,
           pageViews: views.length,
@@ -660,6 +680,7 @@ export default function AnalyticsPage() {
   }
 
   // Calcular detalhes de cliques por elemento
+  // Mostrar apenas elementos realmente clicáveis e funcionais
   const calculateClickDetails = (data: any[]) => {
     const clickMap = new Map<string, {
       element: string
@@ -668,7 +689,24 @@ export default function AnalyticsPage() {
       count: number
     }>()
 
-    const clickEvents = data.filter(e => e.event_type === 'click')
+    // Elementos funcionais que devem ser rastreados
+    const functionalElements = [
+      'service-link',           // Links para páginas de serviços
+      'related-service-link',   // Links para serviços relacionados
+      'comparison-cta',         // CTA de comparação
+      'contact-button',         // Botões de contato (WhatsApp, Email, Instagram)
+      'whatsapp-button',        // Botão WhatsApp
+      'email-button',           // Botão Email
+      'instagram-button',       // Botão Instagram
+      'cta-contact',           // CTA de contato
+    ]
+
+    const clickEvents = data.filter(e => {
+      if (e.event_type !== 'click') return false
+      const element = e.event_data?.element || 'unknown'
+      // Filtrar apenas elementos funcionais
+      return functionalElements.includes(element)
+    })
     
     clickEvents.forEach(event => {
       const element = event.event_data?.element || 'unknown'
@@ -691,18 +729,30 @@ export default function AnalyticsPage() {
         }
       }
 
-      const key = `${event.page_type}_${event.page_id || event.page_slug || 'homepage'}_${element}_${text}`
+      // Criar chave única baseada no elemento e URL/texto para evitar duplicações
+      const url = event.event_data?.url || ''
+      const uniqueKey = `${event.page_type}_${event.page_id || event.page_slug || 'homepage'}_${element}_${url || text}`
       
-      if (!clickMap.has(key)) {
-        clickMap.set(key, {
+      if (!clickMap.has(uniqueKey)) {
+        // Limpar texto para exibição (remover duplicações e formatação)
+        let displayText = text
+        if (element === 'service-link' && displayText) {
+          // Remover "Ver detalhes" e duplicações do texto
+          displayText = displayText
+            .replace(/\.Ver detalhes/gi, '')
+            .replace(/Ver detalhes/gi, '')
+            .trim()
+        }
+        
+        clickMap.set(uniqueKey, {
           element,
-          text: text || element,
+          text: displayText || element,
           pageName,
           count: 0
         })
       }
       
-      clickMap.get(key)!.count++
+      clickMap.get(uniqueKey)!.count++
     })
 
     const details = Array.from(clickMap.values())
@@ -842,7 +892,7 @@ export default function AnalyticsPage() {
 
         {/* Resumo Principal - Cards */}
         {summary && (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
               <div className="flex items-center justify-between mb-3">
                 <Eye className="w-7 h-7 text-blue-500" />
@@ -865,14 +915,6 @@ export default function AnalyticsPage() {
               </div>
               <p className="text-2xl font-bold text-gray-900">{summary.uniqueVisitors.toLocaleString()}</p>
               <p className="text-sm text-gray-500">Visitantes</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <Clock className="w-7 h-7 text-orange-500" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">{summary.averageTimeOnPage}s</p>
-              <p className="text-sm text-gray-500">Tempo médio</p>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
@@ -938,7 +980,6 @@ export default function AnalyticsPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visualizações</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visitantes</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliques</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tempo Médio</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Scroll Médio</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bounce Rate</th>
                   </tr>
@@ -955,7 +996,6 @@ export default function AnalyticsPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{page.views}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{page.visitors}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{page.clicks}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{page.avgTime}s</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{page.avgScroll}%</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{page.bounceRate}%</td>
                     </tr>
@@ -983,7 +1023,6 @@ export default function AnalyticsPage() {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Página</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Início</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duração</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Scroll</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliques</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visualizações</th>
@@ -996,7 +1035,6 @@ export default function AnalyticsPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {new Date(session.startTime).toLocaleString('pt-BR')}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{session.duration}s</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{session.scrollDepth}%</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{session.clicks}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{session.pageViews}</td>
