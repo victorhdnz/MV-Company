@@ -41,11 +41,19 @@
     @apply text-foreground antialiased;
     background-color: #ffffff;
     overflow-x: hidden;
+    overflow-y: auto;
+    /* Garantir que o scroll sempre funcione no mobile */
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
   
   html {
     background-color: #ffffff;
     overflow-x: hidden;
+    overflow-y: auto;
+    /* Garantir que o scroll sempre funcione no mobile */
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 
   h1 {

@@ -49,7 +49,7 @@ export const SplineSection = memo(function SplineSection({
         style={{ minHeight: '600px' }}
       >
         <div className="container mx-auto max-w-7xl">
-          <div className="w-full h-[600px] md:h-[700px] bg-black/[0.96] relative overflow-hidden rounded-lg border border-gray-800 shadow-lg pointer-events-auto">
+          <div className="w-full h-[600px] md:h-[700px] bg-black/[0.96] relative overflow-hidden rounded-lg border border-gray-800 shadow-lg">
             <Spotlight
               className="-top-40 left-0 md:left-60 md:-top-20"
               fill="white"
@@ -67,9 +67,25 @@ export const SplineSection = memo(function SplineSection({
               </div>
 
               {/* Right content - Spline Scene */}
-              <div className="flex-1 relative min-h-[300px] md:min-h-0" style={{ willChange: 'auto' }}>
+              <div 
+                className="flex-1 relative min-h-[300px] md:min-h-0" 
+                style={{ 
+                  willChange: 'auto',
+                  // Garantir que não bloqueie scroll enquanto carrega
+                  touchAction: shouldLoad && inView ? 'none' : 'auto',
+                  pointerEvents: shouldLoad && inView ? 'auto' : 'auto'
+                }}
+              >
                 {shouldLoad && inView ? (
-                  <div style={{ width: '100%', height: '100%', contain: 'layout style paint' }}>
+                  <div 
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      contain: 'layout style paint',
+                      // Permitir scroll vertical mesmo quando Spline está carregado
+                      touchAction: 'pan-y pinch-zoom'
+                    }}
+                  >
                     <SplineScene 
                       scene={sceneUrl}
                       className="w-full h-full"

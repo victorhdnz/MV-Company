@@ -5,12 +5,27 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-export function FixedLogo() {
-  const [siteLogo, setSiteLogo] = useState<string | null>(null)
-  const [siteName, setSiteName] = useState<string>('MV Company')
+interface FixedLogoProps {
+  logo?: string | null
+  siteName?: string
+}
+
+export function FixedLogo({ logo: initialLogo, siteName: initialSiteName }: FixedLogoProps) {
+  const [siteLogo, setSiteLogo] = useState<string | null>(initialLogo || null)
+  const [siteName, setSiteName] = useState<string>(initialSiteName || 'MV Company')
   const [opacity, setOpacity] = useState<number>(1)
 
   useEffect(() => {
+    // Se já temos o logo do servidor, não precisa buscar novamente
+    if (initialLogo) {
+      setSiteLogo(initialLogo)
+      if (initialSiteName) {
+        setSiteName(initialSiteName)
+      }
+      return
+    }
+
+    // Só buscar do cliente se não foi passado como prop
     const loadLogo = async () => {
       try {
         const supabase = createClient()
@@ -40,7 +55,7 @@ export function FixedLogo() {
     }
 
     loadLogo()
-  }, [])
+  }, [initialLogo, initialSiteName])
 
   // Efeito para ajustar transparência baseado no scroll
   useEffect(() => {
@@ -89,7 +104,10 @@ export function FixedLogo() {
             fill
             className="object-contain"
             priority
+            unoptimized={siteLogo.startsWith('http')}
             sizes="(max-width: 768px) 80px, (max-width: 1024px) 96px, 112px"
+            // Garantir que a imagem seja carregada imediatamente
+            loading="eager"
           />
         </div>
       </Link>

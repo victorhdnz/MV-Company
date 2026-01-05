@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/Footer'
 import { PageTransition } from '@/components/layout/PageTransition'
 import { MainBackground } from '@/components/layout/MainBackground'
 import { ConditionalWhatsAppFloat } from '@/components/layout/ConditionalWhatsAppFloat'
+import { ScrollEnabler } from '@/components/layout/ScrollEnabler'
 import { Toaster } from 'react-hot-toast'
 import { getSiteUrl } from '@/lib/utils/siteUrl'
 import { createServerClient } from '@/lib/supabase/server'
@@ -241,6 +242,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
+        <ScrollEnabler />
         <NotFoundProvider>
           <MainBackground />
           <Header />

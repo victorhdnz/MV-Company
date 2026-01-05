@@ -249,9 +249,16 @@ export default async function ServicePage({ params }: { params: { slug: string }
     cta: () => <ServiceCTA content={content} siteSettings={siteSettings} />,
   }
 
+  // Extrair logo do siteSettings para passar como prop (carregamento imediato)
+  let siteLogo = siteSettings?.site_logo || null
+  if (!siteLogo && siteSettings?.homepage_content?.hero_logo) {
+    siteLogo = siteSettings.homepage_content.hero_logo
+  }
+  const siteName = siteSettings?.site_name || 'MV Company'
+
   return (
     <ServicePageTracker serviceId={service.id} serviceSlug={service.slug}>
-      <FixedLogo />
+      <FixedLogo logo={siteLogo} siteName={siteName} />
       <div className="min-h-screen bg-black">
         {/* Botão para voltar à homepage */}
         <div className="bg-black text-white py-8 md:py-12 px-4 relative">
@@ -303,7 +310,10 @@ export default async function ServicePage({ params }: { params: { slug: string }
           if (sectionVisibility[sectionId] === false) return null
           return <div key={sectionId}>{renderer()}</div>
         })}
-        <NavigationTabs variant="service" />
+        <NavigationTabs 
+          variant="service" 
+          pricingEnabled={servicesPricingEnabled && pricing.pricing_enabled === true} 
+        />
       </div>
     </ServicePageTracker>
   )

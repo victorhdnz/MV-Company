@@ -168,9 +168,20 @@ export default async function Home() {
     sectionVisibility = { ...sectionVisibility, pricing: false }
   }
 
+  // Verificar se pricing está habilitado (sectionVisibility.pricing E pricing.pricing_enabled)
+  const pricing = homepageContent.pricing || {}
+  const pricingEnabled = sectionVisibility.pricing === true && pricing.pricing_enabled === true
+
+  // Extrair logo do siteSettings para passar como prop (carregamento imediato)
+  let siteLogo = siteSettings?.site_logo || null
+  if (!siteLogo && homepageContent?.hero_logo) {
+    siteLogo = homepageContent.hero_logo
+  }
+  const siteName = siteSettings?.site_name || 'MV Company'
+
   return (
     <HomepageTracker>
-      <FixedLogo />
+      <FixedLogo logo={siteLogo} siteName={siteName} />
       <div className="min-h-screen bg-black">
         <HomepageSections
           homepageContent={homepageContent}
@@ -179,7 +190,7 @@ export default async function Home() {
           sectionVisibility={sectionVisibility}
           sectionOrder={sectionOrder}
         />
-        <NavigationTabs variant="homepage" />
+        <NavigationTabs variant="homepage" pricingEnabled={pricingEnabled} />
       </div>
     </HomepageTracker>
   )

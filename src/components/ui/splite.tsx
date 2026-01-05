@@ -17,10 +17,21 @@ export function SplineScene({ scene, className }: SplineSceneProps) {
         </div>
       }
     >
-      <Spline
-        scene={scene}
-        className={className}
-      />
+      <div 
+        style={{ 
+          width: '100%', 
+          height: '100%',
+          // Permitir scroll vertical mesmo quando Spline está interativo
+          touchAction: 'pan-y pinch-zoom',
+          // Garantir que não bloqueie eventos de scroll
+          pointerEvents: 'auto'
+        }}
+      >
+        <Spline
+          scene={scene}
+          className={className}
+        />
+      </div>
     </Suspense>
   )
 }
