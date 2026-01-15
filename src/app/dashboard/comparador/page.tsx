@@ -171,7 +171,7 @@ export default function ComparadorDashboardPage() {
   const loadCompanies = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('company_comparisons')
         .select('*')
         .order('created_at', { ascending: true })
@@ -388,7 +388,7 @@ export default function ComparadorDashboardPage() {
         }
 
         // Verificar se já existe uma empresa com este ID
-        const { data: existing } = await supabase
+        const { data: existing } = await (supabase as any)
           .from('company_comparisons')
           .select('id')
           .eq('id', companyId)
@@ -407,7 +407,7 @@ export default function ComparadorDashboardPage() {
 
         if (existing) {
           // Atualizar empresa existente
-          const { error } = await supabase
+          const { error } = await (supabase as any)
             .from('company_comparisons')
             .update({
               name: company.name,
@@ -423,7 +423,7 @@ export default function ComparadorDashboardPage() {
           if (error) throw error
         } else {
           // Criar nova empresa
-          const { error } = await supabase
+          const { error } = await (supabase as any)
             .from('company_comparisons')
             .insert({
               id: companyId,

@@ -47,7 +47,7 @@ export default function EditComparacaoPage({ params }: EditComparacaoPageProps) 
   const loadComparison = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('company_comparisons')
         .select('*')
         .eq('id', params.id)
@@ -134,7 +134,7 @@ export default function EditComparacaoPage({ params }: EditComparacaoPageProps) 
     try {
       setSaving(true)
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('company_comparisons')
         .update({
           ...formData,

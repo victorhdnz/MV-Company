@@ -80,7 +80,7 @@ export default function NovaComparacao() {
     try {
       setLoading(true)
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('company_comparisons')
         .insert({
           ...formData,
