@@ -9,10 +9,8 @@ import { motion } from 'framer-motion'
 import { 
   BookOpen, 
   Play, 
-  Clock, 
   Crown, 
   Lock,
-  CheckCircle2,
   ChevronRight,
   Star
 } from 'lucide-react'
@@ -24,11 +22,11 @@ interface Course {
   description: string | null
   thumbnail_url: string | null
   instructor_name: string | null
-  duration_hours: number
-  lessons_count: number
-  plan_required: 'gogh_essencial' | 'gogh_pro' | 'all'
-  is_featured: boolean
-  is_published: boolean
+  course_type: 'canva' | 'capcut' | 'strategy' | 'other'
+  modules: any[]
+  is_premium_only: boolean
+  is_active: boolean
+  order_index: number
 }
 
 interface CourseProgress {
@@ -51,12 +49,12 @@ export default function CoursesPage() {
       if (!user) return
 
       try {
-        // Buscar cursos publicados
+        // Buscar cursos ativos
         const { data: coursesData, error } = await supabase
           .from('courses')
           .select('*')
-          .eq('is_published', true)
-          .order('order_position', { ascending: true })
+          .eq('is_active', true)
+          .order('order_index', { ascending: true })
 
         if (error) throw error
         setCourses(coursesData || [])
@@ -99,15 +97,15 @@ export default function CoursesPage() {
 
   // Verificar se usuário tem acesso ao curso
   const hasAccessToCourse = (course: Course) => {
-    if (course.plan_required === 'all') return true
-    if (course.plan_required === 'gogh_essencial') return !!subscription
-    if (course.plan_required === 'gogh_pro') return isPro
-    return false
+    // Se não é premium_only, todos com assinatura podem acessar
+    if (!course.is_premium_only) return !!subscription
+    // Se é premium_only, apenas Pro
+    return isPro
   }
 
-  // Separar cursos em destaque e outros
-  const featuredCourses = courses.filter(c => c.is_featured)
-  const otherCourses = courses.filter(c => !c.is_featured)
+  // Separar cursos por tipo
+  const featuredCourses = courses.filter(c => c.course_type === 'strategy')
+  const otherCourses = courses.filter(c => c.course_type !== 'strategy')
 
   if (loading) {
     return (
@@ -270,12 +268,12 @@ function CourseCard({
             </div>
           </div>
         )}
-        {course.plan_required === 'gogh_pro' && (
-          <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-1 bg-amber-500 text-white text-xs font-medium rounded-full">
-            <Crown className="w-3 h-3" />
-            Pro
-          </span>
-        )}
+                {course.is_premium_only && (
+                  <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-1 bg-amber-500 text-white text-xs font-medium rounded-full">
+                    <Crown className="w-3 h-3" />
+                    Pro
+                  </span>
+                )}
       </div>
 
       {/* Content */}
@@ -290,12 +288,11 @@ function CourseCard({
         {/* Meta */}
         <div className="flex items-center gap-4 mt-4 text-sm text-gogh-grayDark">
           <span className="flex items-center gap-1">
-            <Clock className="w-4 h-4" />
-            {course.duration_hours}h
-          </span>
-          <span className="flex items-center gap-1">
             <Play className="w-4 h-4" />
-            {course.lessons_count} aulas
+            {course.modules?.length || 0} módulos
+          </span>
+          <span className="capitalize text-xs bg-gogh-grayLight px-2 py-0.5 rounded">
+            {course.course_type}
           </span>
         </div>
 
@@ -350,7 +347,7 @@ function CourseCardCompact({
             <h3 className="font-semibold text-gogh-black group-hover:text-gogh-yellow transition-colors line-clamp-1">
               {course.title}
             </h3>
-            {course.plan_required === 'gogh_pro' && (
+            {course.is_premium_only && (
               <Crown className="w-4 h-4 text-amber-500 flex-shrink-0" />
             )}
           </div>
@@ -368,12 +365,11 @@ function CourseCardCompact({
       <div className="flex items-center justify-between mt-4 pt-4 border-t border-gogh-grayLight">
         <div className="flex items-center gap-3 text-xs text-gogh-grayDark">
           <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            {course.duration_hours}h
-          </span>
-          <span className="flex items-center gap-1">
             <Play className="w-3 h-3" />
-            {course.lessons_count} aulas
+            {course.modules?.length || 0} módulos
+          </span>
+          <span className="capitalize bg-gogh-grayLight px-2 py-0.5 rounded">
+            {course.course_type}
           </span>
         </div>
 

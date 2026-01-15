@@ -250,31 +250,12 @@ CREATE POLICY "Users can send messages to own tickets" ON support_messages
   );
 
 
--- 9. COURSES - Adicionar colunas que faltam se a tabela existir
+-- 9. COURSES - A tabela já existe, apenas adicionar colunas que faltam
 -- =====================================================
--- Verificar se a tabela courses existe e adicionar colunas
+-- Adicionar colunas que podem estar faltando na tabela courses existente
 DO $$
 BEGIN
-  -- Criar tabela se não existir
-  CREATE TABLE IF NOT EXISTS courses (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    slug TEXT UNIQUE NOT NULL,
-    title TEXT NOT NULL,
-    description TEXT,
-    thumbnail_url TEXT,
-    instructor_name TEXT,
-    instructor_avatar TEXT,
-    duration_hours DECIMAL(4,1) DEFAULT 0,
-    lessons_count INTEGER DEFAULT 0,
-    plan_required TEXT CHECK (plan_required IN ('gogh_essencial', 'gogh_pro', 'all')) DEFAULT 'all',
-    is_featured BOOLEAN DEFAULT FALSE,
-    is_published BOOLEAN DEFAULT FALSE,
-    order_position INTEGER DEFAULT 0,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-  );
-  
-  -- Adicionar colunas que podem estar faltando
+  -- Adicionar colunas novas que não existem na versão antiga
   BEGIN
     ALTER TABLE courses ADD COLUMN IF NOT EXISTS instructor_name TEXT;
   EXCEPTION WHEN duplicate_column THEN NULL;
@@ -316,12 +297,12 @@ BEGIN
   END;
 END$$;
 
--- Inserir cursos padrão (ignorar se slug já existe)
-INSERT INTO courses (slug, title, description, instructor_name, duration_hours, plan_required, is_published, order_position) VALUES
-('canva-basico', 'Canva do Zero ao Avançado', 'Aprenda a criar designs profissionais no Canva, desde o básico até técnicas avançadas.', 'Gogh Lab', 8.5, 'all', true, 1),
-('capcut-edicao', 'Edição de Vídeo com CapCut', 'Domine a edição de vídeos para redes sociais usando o CapCut Pro.', 'Gogh Lab', 6.0, 'all', true, 2),
-('reels-virais', 'Criação de Reels Virais', 'Aprenda técnicas e tendências para criar Reels que viralizam.', 'Gogh Lab', 4.0, 'gogh_pro', true, 3),
-('ia-conteudo', 'IA para Criadores de Conteúdo', 'Use inteligência artificial para turbinar sua produção de conteúdo.', 'Gogh Lab', 5.0, 'gogh_pro', true, 4)
+-- Inserir cursos padrão (incluindo course_type que é obrigatório na tabela existente)
+INSERT INTO courses (slug, title, description, course_type, instructor_name, is_premium_only, is_active, order_index) VALUES
+('canva-basico', 'Canva do Zero ao Avançado', 'Aprenda a criar designs profissionais no Canva, desde o básico até técnicas avançadas.', 'canva', 'Gogh Lab', false, true, 1),
+('capcut-edicao', 'Edição de Vídeo com CapCut', 'Domine a edição de vídeos para redes sociais usando o CapCut Pro.', 'capcut', 'Gogh Lab', false, true, 2),
+('reels-virais', 'Criação de Reels Virais', 'Aprenda técnicas e tendências para criar Reels que viralizam.', 'strategy', 'Gogh Lab', true, true, 3),
+('ia-conteudo', 'IA para Criadores de Conteúdo', 'Use inteligência artificial para turbinar sua produção de conteúdo.', 'strategy', 'Gogh Lab', true, true, 4)
 ON CONFLICT (slug) DO NOTHING;
 
 
