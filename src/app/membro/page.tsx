@@ -48,7 +48,7 @@ export default function MemberDashboard() {
         periodStart.setDate(1)
         periodStart.setHours(0, 0, 0, 0)
 
-        const { data: usageData } = await supabase
+        const { data: usageData } = await (supabase as any)
           .from('user_usage')
           .select('feature_key, usage_count')
           .eq('user_id', user.id)
