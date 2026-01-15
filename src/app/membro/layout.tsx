@@ -128,13 +128,19 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
 
   // Verificar autenticação e assinatura
   useEffect(() => {
+    // Aguardar um pouco para garantir que a sessão foi carregada
     if (!loading) {
-      if (!isAuthenticated) {
-        router.push('/login?redirect=' + pathname)
-      } else if (!hasActiveSubscription && !isPublicPage) {
-        // Se não tem assinatura e não está em página pública, redirecionar para conta
-        router.push('/membro/conta')
-      }
+      // Pequeno delay para garantir que cookies foram atualizados
+      const checkAuth = setTimeout(() => {
+        if (!isAuthenticated) {
+          router.push('/login?redirect=' + encodeURIComponent(pathname))
+        } else if (!hasActiveSubscription && !isPublicPage) {
+          // Se não tem assinatura e não está em página pública, redirecionar para conta
+          router.push('/membro/conta')
+        }
+      }, 300) // Pequeno delay para garantir sincronização
+      
+      return () => clearTimeout(checkAuth)
     }
   }, [loading, isAuthenticated, hasActiveSubscription, router, pathname, isPublicPage])
 

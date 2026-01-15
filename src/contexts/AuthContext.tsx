@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Buscar perfil do usuário
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('id', userId)
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Buscar assinatura ativa
   const fetchSubscription = async (userId: string): Promise<UserSubscription | null> => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('subscriptions')
         .select('id, plan_id, status, billing_cycle, current_period_end, cancel_at_period_end')
         .eq('user_id', userId)
@@ -150,6 +150,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Inicialização e listeners
   useEffect(() => {
     let isMounted = true
+    let retryCount = 0
+    const maxRetries = 3
     
     // Timeout de segurança para não ficar loading infinito
     const timeoutId = setTimeout(() => {
@@ -159,13 +161,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }, 10000) // 10 segundos de timeout
 
-    // Buscar sessão inicial
-    const initializeAuth = async () => {
+    // Buscar sessão inicial com retry
+    const initializeAuth = async (retry = 0) => {
       try {
+        // Pequeno delay para garantir que cookies foram atualizados pelo middleware
+        if (retry > 0) {
+          await new Promise(resolve => setTimeout(resolve, 500 * retry))
+        }
+        
         const { data: { session: currentSession }, error } = await supabase.auth.getSession()
         
         if (error) {
           console.error('Error getting session:', error)
+          // Se der erro e ainda tiver tentativas, tentar novamente
+          if (retry < maxRetries && isMounted) {
+            setTimeout(() => initializeAuth(retry + 1), 1000)
+            return
+          }
         }
         
         if (isMounted) {
@@ -178,8 +190,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error('Error initializing auth:', error)
+        // Se der erro e ainda tiver tentativas, tentar novamente
+        if (retry < maxRetries && isMounted) {
+          setTimeout(() => initializeAuth(retry + 1), 1000)
+          return
+        }
       } finally {
-        if (isMounted) {
+        if (isMounted && retry === 0) {
           setLoading(false)
         }
       }
@@ -191,6 +208,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         if (!isMounted) return
+        
+        console.log('[AuthContext] Auth state changed:', event, currentSession?.user?.email)
         
         setSession(currentSession)
         setUser(currentSession?.user || null)

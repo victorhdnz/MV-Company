@@ -56,16 +56,27 @@ export const useAuth = () => {
     let mounted = true
     let timeoutId: NodeJS.Timeout | null = null
 
-    const getUser = async () => {
+    const getUser = async (retry = 0) => {
       if (!mounted) return
       
       setLoading(true)
       
       try {
+        // Pequeno delay para garantir que cookies foram atualizados pelo middleware
+        if (retry > 0) {
+          await new Promise(resolve => setTimeout(resolve, 500 * retry))
+        }
+        
         // Verificar sessão de forma simples
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (!mounted) return
+        
+        // Se der erro e ainda tiver tentativas, tentar novamente
+        if (error && retry < 2) {
+          setTimeout(() => getUser(retry + 1), 1000)
+          return
+        }
         
         if (session?.user) {
           // Atualizar user imediatamente
@@ -76,7 +87,7 @@ export const useAuth = () => {
           const loadProfileAsync = async (): Promise<void> => {
             try {
               // Buscar profile sem timeout para garantir que carregue
-              const { data: profile, error: profileError } = await supabase
+              const { data: profile, error: profileError } = await (supabase as any)
                 .from('profiles')
                 .select('id, email, full_name, avatar_url, role, phone, created_at, updated_at')
                 .eq('id', session.user.id)

@@ -56,8 +56,11 @@ export async function middleware(req: NextRequest) {
   )
 
   // Atualizar sessão (isso é necessário para manter os cookies de auth válidos)
-  await supabase.auth.getSession()
-
+  const { data: { session } } = await supabase.auth.getSession()
+  
+  // Se não há sessão e está tentando acessar área protegida, não bloquear aqui
+  // Deixar as páginas decidirem o que fazer (algumas podem ser públicas)
+  
   return res
 }
 
