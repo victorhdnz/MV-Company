@@ -27,7 +27,8 @@ export function GoogleLoginButton({
       // Usar domínio de produção (goghlab.com.br) como padrão
       // Isso evita ter que reconfigurar o Google OAuth depois
       const productionUrl = 'https://goghlab.com.br'
-      const redirectUrl = redirectTo || `${productionUrl}/auth/callback`
+      // Passar o destino como parâmetro para redirecionar após login
+      const redirectUrl = redirectTo || `${productionUrl}/auth/callback?next=/dashboard`
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',

@@ -9,6 +9,8 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get('code')
   const error = requestUrl.searchParams.get('error')
   const errorDescription = requestUrl.searchParams.get('error_description')
+  // Destino após login (padrão: homepage)
+  const next = requestUrl.searchParams.get('next') || '/'
 
   // Se já veio com erro do OAuth provider
   if (error) {
@@ -59,9 +61,8 @@ export async function GET(request: Request) {
         })
     }
 
-    // Redirecionar para home com parâmetro de sucesso
-    // O returnUrl será recuperado no cliente via localStorage
-    return NextResponse.redirect(`${getSiteUrl()}?auth=success`)
+    // Redirecionar para o destino especificado (ou homepage)
+    return NextResponse.redirect(`${getSiteUrl()}${next}?auth=success`)
   } catch (error: any) {
     console.error('Erro no callback:', error)
     return NextResponse.redirect(`${getSiteUrl()}/login?error=unexpected_error`)
