@@ -43,36 +43,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = createClient()
 
   // Buscar perfil do usuário
-  const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
+  const fetchProfile = async (userId: string): Promise<Profile | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
 
-    if (error) {
-      console.error('Error fetching profile:', error)
+      if (error) {
+        // PGRST116 = not found, que é esperado se o profile ainda não existe
+        if (error.code !== 'PGRST116') {
+          console.error('Error fetching profile:', error)
+        }
+        return null
+      }
+      return data
+    } catch (err) {
+      console.error('Exception fetching profile:', err)
       return null
     }
-    return data
   }
 
   // Buscar assinatura ativa
-  const fetchSubscription = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('subscriptions')
-      .select('id, plan_id, status, billing_cycle, current_period_end, cancel_at_period_end')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .gte('current_period_end', new Date().toISOString())
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
+  const fetchSubscription = async (userId: string): Promise<UserSubscription | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('id, plan_id, status, billing_cycle, current_period_end, cancel_at_period_end')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .gte('current_period_end', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching subscription:', error)
+      if (error) {
+        // PGRST116 = not found, que é esperado se não tem assinatura
+        if (error.code !== 'PGRST116') {
+          console.error('Error fetching subscription:', error)
+        }
+        return null
+      }
+      return data as UserSubscription | null
+    } catch (err) {
+      console.error('Exception fetching subscription:', err)
+      return null
     }
-    return data as UserSubscription | null
   }
 
   // Atualizar dados do usuário
@@ -132,17 +149,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Inicialização e listeners
   useEffect(() => {
+    let isMounted = true
+    
+    // Timeout de segurança para não ficar loading infinito
+    const timeoutId = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn('Auth loading timeout - forcing completion')
+        setLoading(false)
+      }
+    }, 10000) // 10 segundos de timeout
+
     // Buscar sessão inicial
     const initializeAuth = async () => {
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession()
-        setSession(currentSession)
-        setUser(currentSession?.user || null)
-        await updateUserData(currentSession?.user || null)
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('Error getting session:', error)
+        }
+        
+        if (isMounted) {
+          setSession(currentSession)
+          setUser(currentSession?.user || null)
+          
+          if (currentSession?.user) {
+            await updateUserData(currentSession.user)
+          }
+        }
       } catch (error) {
         console.error('Error initializing auth:', error)
       } finally {
-        setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
@@ -151,6 +190,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listener para mudanças de auth
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        if (!isMounted) return
+        
         setSession(currentSession)
         setUser(currentSession?.user || null)
         
@@ -164,6 +205,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     )
 
     return () => {
+      isMounted = false
+      clearTimeout(timeoutId)
       authSubscription.unsubscribe()
     }
   }, [])
