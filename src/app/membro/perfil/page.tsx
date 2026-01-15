@@ -70,7 +70,7 @@ export default function ProfilePage() {
       if (!user) return
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from('user_niche_profiles')
           .select('*')
           .eq('user_id', user.id)
@@ -103,7 +103,7 @@ export default function ProfilePage() {
     setSaving(true)
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_niche_profiles')
         .upsert({
           user_id: user.id,
