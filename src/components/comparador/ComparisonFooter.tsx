@@ -29,7 +29,7 @@ export function ComparisonFooter() {
 
   const loadFooterContent = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('site_settings')
         .select('value')
         .eq('key', 'general')
