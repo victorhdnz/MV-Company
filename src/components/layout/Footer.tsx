@@ -75,7 +75,7 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-x-12 gap-y-8">
           {/* Brand */}
           <div>
-            <h3 className="text-2xl font-bold mb-4">{siteSettings?.site_name || 'MV Company'}</h3>
+            <h3 className="text-2xl font-bold mb-4 text-[#F7C948]">{siteSettings?.site_name || 'Gogh Lab'}</h3>
             <p className="text-gray-400 mb-4">
               {siteSettings?.footer_text || 'Produtos de qualidade com design moderno e elegante.'}
             </p>
@@ -96,12 +96,12 @@ export const Footer = () => {
 
           {/* Links */}
           <div>
-            <h4 className="text-lg font-semibold mb-6">Links Rápidos</h4>
+            <h4 className="text-lg font-semibold mb-6 text-white">Links Rápidos</h4>
             <ul className="space-y-3">
               <li>
                 <Link
                   href="/produtos"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-[#F7C948] transition-colors"
                 >
                   Produtos
                 </Link>
@@ -109,7 +109,7 @@ export const Footer = () => {
               <li>
                 <Link
                   href="#sobre"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-[#F7C948] transition-colors"
                 >
                   Sobre Nós
                 </Link>
@@ -117,7 +117,7 @@ export const Footer = () => {
               <li>
                 <Link
                   href="#contato"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-[#F7C948] transition-colors"
                 >
                   Contato
                 </Link>
@@ -128,12 +128,12 @@ export const Footer = () => {
 
           {/* Políticas */}
           <div>
-            <h4 className="text-lg font-semibold mb-6">Informações</h4>
+            <h4 className="text-lg font-semibold mb-6 text-white">Informações</h4>
             <ul className="space-y-3">
               <li>
                 <Link
                   href="/termos"
-                  className="text-gray-400 hover:text-white transition-colors font-medium"
+                  className="text-gray-400 hover:text-[#F7C948] transition-colors font-medium"
                 >
                   Termos
                 </Link>
@@ -143,17 +143,17 @@ export const Footer = () => {
 
           {/* Contato */}
           <div>
-            <h4 className="text-lg font-semibold mb-6">Contato</h4>
+            <h4 className="text-lg font-semibold mb-6 text-white">Contato</h4>
             <ul className="space-y-3">
               <li className="flex items-center space-x-2 text-gray-400">
-                <Phone size={18} />
-                <a href={`https://wa.me/${siteSettings?.contact_whatsapp?.replace(/\D/g, '') || '5534984136291'}`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                <Phone size={18} className="text-[#F7C948]" />
+                <a href={`https://wa.me/${siteSettings?.contact_whatsapp?.replace(/\D/g, '') || '5534984136291'}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#F7C948] transition-colors">
                   {siteSettings?.contact_whatsapp || '(34) 98413-6291'}
                 </a>
               </li>
               <li className="flex items-center space-x-2 text-gray-400">
-                <Mail size={18} />
-                <a href={`mailto:${siteSettings?.contact_email || 'contato.goghlab@gmail.com'}`} className="hover:text-white transition-colors">
+                <Mail size={18} className="text-[#F7C948]" />
+                <a href={`mailto:${siteSettings?.contact_email || 'contato.goghlab@gmail.com'}`} className="hover:text-[#F7C948] transition-colors">
                   {siteSettings?.contact_email || 'contato.goghlab@gmail.com'}
                 </a>
               </li>
@@ -165,9 +165,9 @@ export const Footer = () => {
                   href={siteSettings.instagram_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                  className="p-2 bg-[#F7C948]/10 hover:bg-[#F7C948]/30 border border-[#F7C948]/30 rounded-full transition-colors"
                 >
-                  <Instagram size={20} />
+                  <Instagram size={20} className="text-[#F7C948]" />
                 </a>
               )}
               {siteSettings?.facebook_url && (
@@ -175,18 +175,18 @@ export const Footer = () => {
                   href={siteSettings.facebook_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                  className="p-2 bg-[#F7C948]/10 hover:bg-[#F7C948]/30 border border-[#F7C948]/30 rounded-full transition-colors"
                 >
-                  <Facebook size={20} />
+                  <Facebook size={20} className="text-[#F7C948]" />
                 </a>
               )}
             </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+        <div className="border-t border-[#F7C948]/20 mt-8 pt-8 text-center text-gray-400">
           <p>
-            © {currentYear} {siteSettings?.site_name || 'MV Company'}. {siteSettings?.copyright_text || 'Todos os direitos reservados.'}
+            © {currentYear} <span className="text-[#F7C948]">{siteSettings?.site_name || 'Gogh Lab'}</span>. {siteSettings?.copyright_text || 'Todos os direitos reservados.'}
           </p>
         </div>
       </div>

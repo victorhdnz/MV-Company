@@ -15,10 +15,10 @@ export const CustomServiceCard = ({ card }: CustomServiceCardProps) => {
   // Isso evita duplicação de cliques
 
   const cardContent = (
-    <div className="relative h-[300px] md:h-[350px] rounded-3xl overflow-hidden bg-gray-900 border border-gray-800 hover:border-gray-700 hover:shadow-2xl transition-all duration-300 cursor-pointer group">
+    <div className="relative h-[300px] md:h-[350px] rounded-3xl overflow-hidden bg-[#0A0A0A] border border-gray-800 hover:border-[#F7C948]/50 hover:shadow-2xl hover:shadow-[#F7C948]/10 transition-all duration-300 cursor-pointer group">
       {/* Gradient Background - Similar to Compare section */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_50%)]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1A] via-[#0A0A0A] to-black" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(247,201,72,0.03),transparent_50%)]" />
       
       {/* Background Image - Optional, subtle */}
       {card.image && (
@@ -49,7 +49,7 @@ export const CustomServiceCard = ({ card }: CustomServiceCardProps) => {
           </div>
           
           {/* CTA Button */}
-          <div className="flex items-center gap-2 text-white/90 group-hover:text-white transition-colors">
+          <div className="flex items-center gap-2 text-white/90 group-hover:text-[#F7C948] transition-colors">
             <span className="text-sm font-medium">{card.buttonText || 'Saiba Mais'}</span>
             <ArrowRight 
               size={18} 

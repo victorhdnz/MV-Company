@@ -96,10 +96,10 @@ export const WhatsAppFloat = ({
                   animate={{ opacity: 1, x: 0, scale: 1 }}
                   exit={{ opacity: 0, x: 10, scale: 0.8 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg whitespace-nowrap shadow-lg"
+                  className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-[#0A0A0A] text-white text-sm px-3 py-2 rounded-lg whitespace-nowrap shadow-lg border border-[#F7C948]/30"
                 >
                   Fale conosco no WhatsApp
-                  <div className="absolute left-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-l-4 border-l-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent" />
+                  <div className="absolute left-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-l-4 border-l-[#0A0A0A] border-t-4 border-t-transparent border-b-4 border-b-transparent" />
                 </motion.div>
               )}
             </AnimatePresence>

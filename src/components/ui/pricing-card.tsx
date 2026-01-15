@@ -70,7 +70,7 @@ export interface PricingComponentProps extends React.HTMLAttributes<HTMLDivEleme
 /** Renders a single feature row with an icon. */
 const FeatureItem: React.FC<{ feature: Feature }> = ({ feature }) => {
   const Icon = feature.isIncluded ? Check : X
-  const iconColor = feature.isIncluded ? "text-white" : "text-gray-500"
+  const iconColor = feature.isIncluded ? "text-[#F7C948]" : "text-gray-500" // Amarelo Gogh Lab
 
   return (
     <li className="flex items-start space-x-3 py-2">
@@ -121,17 +121,17 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
         <ToggleGroupItem
           value="monthly"
           aria-label="Cobrança Mensal"
-          className="px-6 py-1.5 text-sm font-medium text-gray-300 data-[state=on]:bg-white data-[state=on]:text-black data-[state=on]:shadow-sm data-[state=on]:border data-[state=on]:border-gray-600 rounded-md transition-colors"
+          className="px-6 py-1.5 text-sm font-medium text-gray-300 data-[state=on]:bg-[#F7C948] data-[state=on]:text-[#0A0A0A] data-[state=on]:shadow-sm data-[state=on]:border data-[state=on]:border-[#E5A800] rounded-md transition-colors"
         >
           Mensal
         </ToggleGroupItem>
         <ToggleGroupItem
           value="annually"
           aria-label="Cobrança Anual"
-          className="px-6 py-1.5 text-sm font-medium text-gray-300 data-[state=on]:bg-white data-[state=on]:text-black data-[state=on]:shadow-sm data-[state=on]:border data-[state=on]:border-gray-600 rounded-md transition-colors relative"
+          className="px-6 py-1.5 text-sm font-medium text-gray-300 data-[state=on]:bg-[#F7C948] data-[state=on]:text-[#0A0A0A] data-[state=on]:shadow-sm data-[state=on]:border data-[state=on]:border-[#E5A800] rounded-md transition-colors relative"
         >
           Anual
-          <span className="absolute -top-3 right-0 text-xs font-semibold text-white bg-gray-800 border border-gray-700 px-1.5 rounded-full whitespace-nowrap">
+          <span className="absolute -top-3 right-0 text-xs font-semibold text-[#0A0A0A] bg-[#F7C948] border border-[#E5A800] px-1.5 rounded-full whitespace-nowrap">
             Economize {annualDiscountPercent}%
           </span>
         </ToggleGroupItem>
@@ -159,16 +159,16 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
           <Card
             key={plan.id}
             className={cn(
-              "flex flex-col transition-all duration-300 shadow-md hover:shadow-xl bg-gray-900 border border-gray-800 text-white",
+              "flex flex-col transition-all duration-300 shadow-md hover:shadow-xl bg-[#0A0A0A] border border-gray-800 text-white",
               "transform hover:scale-[1.02] hover:-translate-y-1",
-              isFeatured && "ring-2 ring-white shadow-xl md:scale-[1.02] hover:scale-[1.05]"
+              isFeatured && "ring-2 ring-[#F7C948] shadow-xl md:scale-[1.02] hover:scale-[1.05] border-[#F7C948]"
             )}
           >
             <CardHeader className="p-6 pb-4">
               <div className="flex justify-between items-start">
                 <CardTitle className="text-2xl font-bold text-white">{plan.name}</CardTitle>
                 {isFeatured && (
-                  <span className="text-xs font-semibold px-3 py-1 bg-white text-black rounded-full">
+                  <span className="text-xs font-semibold px-3 py-1 bg-[#F7C948] text-[#0A0A0A] rounded-full">
                     Mais Popular
                   </span>
                 )}
@@ -222,7 +222,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                       <>
                         {availableCategories.slice(0, 5).map((category) => (
                           <li key={category.id} className="flex items-start space-x-3 py-2">
-                            <Check className="h-4 w-4 flex-shrink-0 mt-0.5 text-white" aria-hidden="true" />
+                            <Check className="h-4 w-4 flex-shrink-0 mt-0.5 text-[#F7C948]" aria-hidden="true" />
                             <span className="text-sm text-white">{category.name}</span>
                           </li>
                         ))}
@@ -267,8 +267,8 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                 className={cn(
                   "w-full transition-all duration-200",
                   isFeatured
-                    ? "bg-white hover:bg-gray-100 text-black shadow-lg"
-                    : "bg-gray-800 text-white hover:bg-gray-700 border border-gray-700"
+                    ? "bg-[#F7C948] hover:bg-[#E5A800] text-[#0A0A0A] shadow-lg font-semibold"
+                    : "bg-transparent text-white hover:bg-[#F7C948] hover:text-[#0A0A0A] border-2 border-gray-600 hover:border-[#F7C948]"
                 )}
                 size="lg"
                 aria-label={`Select ${plan.name} plan for ${currentPrice} ${priceSuffix}`}
@@ -348,7 +348,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                           )}
                         >
                           <div className="flex items-start gap-2">
-                            <Check className="h-4 w-4 flex-shrink-0 text-white mt-0.5" aria-hidden="true" />
+                            <Check className="h-4 w-4 flex-shrink-0 text-[#F7C948] mt-0.5" aria-hidden="true" />
                             <span className="text-sm text-gray-300 leading-relaxed">{text}</span>
                           </div>
                         </td>
@@ -366,7 +366,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                         >
                           {hasCategory && text ? (
                             <div className="flex items-start gap-2">
-                              <Check className="h-4 w-4 flex-shrink-0 text-white mt-0.5" aria-hidden="true" />
+                              <Check className="h-4 w-4 flex-shrink-0 text-[#F7C948] mt-0.5" aria-hidden="true" />
                               <span className="text-sm text-gray-300 leading-relaxed">{text}</span>
                             </div>
                           ) : (
@@ -393,7 +393,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                     const isIncluded = !!(categoryValue?.text && categoryValue.text.trim() !== '')
                     
                     const Icon = isIncluded ? Check : X
-                    const iconColor = isIncluded ? "text-white" : "text-gray-500"
+                    const iconColor = isIncluded ? "text-[#F7C948]" : "text-gray-500"
 
                     return (
                       <td
@@ -518,7 +518,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                               )}
                             >
                               <div className="flex items-start gap-2">
-                                <Check className="h-4 w-4 flex-shrink-0 text-white mt-0.5" aria-hidden="true" />
+                                <Check className="h-4 w-4 flex-shrink-0 text-[#F7C948] mt-0.5" aria-hidden="true" />
                                 <span className="text-sm text-gray-300 leading-relaxed">{text}</span>
                               </div>
                             </td>
@@ -535,7 +535,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                             >
                               {hasCategory && text ? (
                                 <div className="flex items-start gap-2">
-                                  <Check className="h-4 w-4 flex-shrink-0 text-white mt-0.5" aria-hidden="true" />
+                                  <Check className="h-4 w-4 flex-shrink-0 text-[#F7C948] mt-0.5" aria-hidden="true" />
                                   <span className="text-sm text-gray-300 leading-relaxed">{text}</span>
                                 </div>
                               ) : (

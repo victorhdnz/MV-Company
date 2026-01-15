@@ -18,10 +18,10 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
       href={`/portfolio/${service.slug}`} 
       className="block group"
     >
-      <div className="relative h-[300px] md:h-[350px] rounded-3xl overflow-hidden bg-gray-900 border border-gray-800 hover:border-gray-700 hover:shadow-2xl transition-all duration-300 cursor-pointer">
+      <div className="relative h-[300px] md:h-[350px] rounded-3xl overflow-hidden bg-[#0A0A0A] border border-gray-800 hover:border-[#F7C948]/50 hover:shadow-2xl hover:shadow-[#F7C948]/10 transition-all duration-300 cursor-pointer">
         {/* Gradient Background - Similar to Compare section */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1A] via-[#0A0A0A] to-black" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(247,201,72,0.03),transparent_50%)]" />
         
         {/* Background Image - Optional, subtle */}
         {service.cover_image && (
@@ -40,7 +40,7 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
         <div className="relative h-full flex flex-col justify-between p-6 md:p-8">
           {/* Top Section - Icon/Logo */}
           <div className="flex items-start justify-between">
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/15 transition-all duration-300">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-[#F7C948]/10 backdrop-blur-md border border-[#F7C948]/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-[#F7C948]/20 transition-all duration-300">
               {service.cover_image ? (
                 <Image
                   src={service.cover_image}
@@ -54,8 +54,8 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
               )}
             </div>
             {service.is_featured && (
-              <div className="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full">
-                <span className="text-white text-xs font-semibold">Destaque</span>
+              <div className="px-3 py-1 bg-[#F7C948] backdrop-blur-md border border-[#E5A800] rounded-full">
+                <span className="text-[#0A0A0A] text-xs font-semibold">Destaque</span>
               </div>
             )}
           </div>
@@ -74,7 +74,7 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
             </div>
             
             {/* CTA Button - Appears on hover */}
-            <div className="flex items-center gap-2 text-white/90 group-hover:text-white transition-colors">
+            <div className="flex items-center gap-2 text-white/90 group-hover:text-[#F7C948] transition-colors">
               <span className="text-sm font-medium">Ver detalhes</span>
               <ArrowRight 
                 size={18} 

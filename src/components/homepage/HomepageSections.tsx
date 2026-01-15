@@ -179,15 +179,15 @@ export function HomepageSections({
         <section id="comparison-section" className="py-16 md:py-24 px-4 scroll-mt-24">
           <div className="container mx-auto max-w-4xl">
             <Link href={homepageContent.comparison_cta_link || "/comparar"} prefetch={true}>
-              <div className="relative h-[300px] md:h-[400px] rounded-3xl overflow-hidden bg-gray-900 border border-gray-800 hover:border-gray-700 transition-all duration-300 group">
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_50%)]" />
+              <div className="relative h-[300px] md:h-[400px] rounded-3xl overflow-hidden bg-[#0A0A0A] border border-gray-800 hover:border-[#F7C948] transition-all duration-300 group">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1A] via-[#0A0A0A] to-black" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(247,201,72,0.05),transparent_50%)]" />
                 <div className="relative h-full flex flex-col justify-center items-center p-8 text-center">
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <GitCompare size={40} className="text-white" />
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-[#F7C948]/10 backdrop-blur-md border border-[#F7C948]/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <GitCompare size={40} className="text-[#F7C948]" />
                   </div>
                   <h2 className="text-3xl md:text-4xl font-semibold text-white mb-4 tracking-tight">
-                    {homepageContent.comparison_cta_title || 'Compare a MV Company'}
+                    {homepageContent.comparison_cta_title || 'Compare a Gogh Lab'}
                   </h2>
                   {homepageContent.comparison_cta_description && (
                     <p className="text-white/80 text-lg md:text-xl font-light max-w-2xl">
@@ -292,7 +292,7 @@ export function HomepageSections({
     
     return (
       <FadeInSection>
-        <section id="contact-section" className="py-16 md:py-24 px-4 bg-gray-900/50">
+        <section id="contact-section" className="py-16 md:py-24 px-4 bg-[#0A0A0A]/50">
           <div className="container mx-auto max-w-4xl text-center">
             <h2 className="text-3xl md:text-5xl font-semibold text-white mb-4 tracking-tight">
               {homepageContent.contact_title || 'Fale Conosco'}

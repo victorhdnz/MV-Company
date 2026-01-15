@@ -10,7 +10,7 @@ interface SocialButtonProps {
 }
 
 export function SocialButton({ type, href, text, className = '' }: SocialButtonProps) {
-  const baseClasses = "group relative w-full sm:w-auto min-w-[200px] bg-gray-800/80 border-2 border-gray-700/50 text-white px-8 py-4 rounded-full font-semibold hover:border-gray-600 hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-105 overflow-hidden"
+  const baseClasses = "group relative w-full sm:w-auto min-w-[200px] bg-[#0A0A0A]/80 border-2 border-[#F7C948]/30 text-white px-8 py-4 rounded-full font-semibold hover:border-[#F7C948] hover:bg-[#F7C948]/10 transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-sm shadow-lg hover:shadow-[#F7C948]/20 hover:scale-105 overflow-hidden"
   
   const icons = {
     whatsapp: (
