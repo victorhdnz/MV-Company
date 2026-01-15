@@ -84,7 +84,7 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
   useEffect(() => {
     const loadLogo = async () => {
       try {
-        const { data } = await supabase
+        const { data } = await (supabase as any)
           .from('site_settings')
           .select('value')
           .eq('key', 'hero_logo')
