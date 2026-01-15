@@ -51,7 +51,7 @@ export default function AccountPage() {
     setSaving(true)
     try {
       // Tentar update primeiro
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('profiles')
         .update({
           full_name: fullName || null,
@@ -65,7 +65,7 @@ export default function AccountPage() {
       if (error) {
         // Se não encontrou o profile, criar um novo
         if (error.code === 'PGRST116') {
-          const { error: insertError } = await supabase
+          const { error: insertError } = await (supabase as any)
             .from('profiles')
             .insert({
               id: user.id,
