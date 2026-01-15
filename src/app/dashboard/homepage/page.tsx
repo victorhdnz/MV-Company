@@ -134,6 +134,107 @@ interface HomepageSettings {
   section_visibility?: Record<string, boolean>
 }
 
+// Componente para cada plataforma com seu próprio estado de upload
+interface PlatformLogoItemProps {
+  platform: { id: string; name: string; logoUrl: string; enabled: boolean }
+  index: number
+  onUpdate: (platform: { id: string; name: string; logoUrl: string; enabled: boolean }) => void
+  onRemove: () => void
+  onUpload: (index: number, file: File, setUploading: (uploading: boolean) => void) => void
+}
+
+function PlatformLogoItem({ platform, index, onUpdate, onRemove, onUpload }: PlatformLogoItemProps) {
+  const [uploading, setUploading] = useState(false)
+
+  return (
+    <div className="bg-gray-50 p-3 rounded-lg border">
+      <div className="flex items-start gap-3">
+        {/* Preview da Logo */}
+        <div className="w-16 h-16 bg-white rounded-lg border flex items-center justify-center overflow-hidden flex-shrink-0">
+          {uploading ? (
+            <div className="animate-spin w-6 h-6 border-2 border-gogh-yellow border-t-transparent rounded-full" />
+          ) : platform.logoUrl ? (
+            <img 
+              src={platform.logoUrl} 
+              alt={platform.name} 
+              className="w-full h-full object-contain p-1"
+            />
+          ) : (
+            <span className="text-2xl">🖼️</span>
+          )}
+        </div>
+
+        <div className="flex-1 space-y-2">
+          {/* Checkbox + Nome */}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={platform.enabled}
+              onChange={(e) => onUpdate({ ...platform, enabled: e.target.checked })}
+              className="w-4 h-4 text-gogh-yellow rounded border-gray-300 focus:ring-gogh-yellow"
+            />
+            <input
+              type="text"
+              value={platform.name}
+              onChange={(e) => onUpdate({ ...platform, name: e.target.value })}
+              placeholder="Nome da plataforma"
+              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gogh-yellow"
+            />
+          </div>
+
+          {/* Upload de Logo */}
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) {
+                  onUpload(index, file, setUploading)
+                }
+                // Limpar o input
+                e.target.value = ''
+              }}
+              className="hidden"
+              id={`platform-logo-${platform.id}`}
+              disabled={uploading}
+            />
+            <label
+              htmlFor={`platform-logo-${platform.id}`}
+              className={`text-xs px-2 py-1 rounded cursor-pointer transition-colors ${
+                uploading 
+                  ? 'bg-gray-300 cursor-not-allowed' 
+                  : 'bg-gray-200 hover:bg-gray-300'
+              }`}
+            >
+              {uploading ? '⏳ Enviando...' : '📤 Upload Logo'}
+            </label>
+            {platform.logoUrl && !uploading && (
+              <button
+                type="button"
+                onClick={() => onUpdate({ ...platform, logoUrl: '' })}
+                className="text-xs text-red-500 hover:text-red-700"
+              >
+                Remover Logo
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Botão Remover */}
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-red-500 hover:text-red-700 p-1"
+          title="Remover plataforma"
+        >
+          🗑️
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // Mapeamento de seções
 const sectionIcons: Record<string, string> = {
   hero: '🎯',
@@ -1096,30 +1197,34 @@ export default function HomepageEditorPage() {
           </div>
         )
       case 'trusted_by':
-        const handlePlatformLogoUpload = async (index: number, file: File) => {
+        const handlePlatformLogoUpload = async (index: number, file: File, setUploading: (uploading: boolean) => void) => {
+          setUploading(true)
           try {
             const formDataUpload = new FormData()
             formDataUpload.append('file', file)
-            formDataUpload.append('upload_preset', 'ml_default')
+            formDataUpload.append('folder', 'logos')
+            formDataUpload.append('preserveTransparency', 'true')
             
-            const response = await fetch(
-              `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-              {
-                method: 'POST',
-                body: formDataUpload,
-              }
-            )
-            
-            if (!response.ok) throw new Error('Erro no upload')
+            const response = await fetch('/api/upload', {
+              method: 'POST',
+              body: formDataUpload,
+            })
             
             const data = await response.json()
+            
+            if (!response.ok || !data.success) {
+              throw new Error(data.error || 'Erro no upload')
+            }
+            
             const updated = [...(formData.trusted_by_platforms || [])]
-            updated[index] = { ...updated[index], logoUrl: data.secure_url }
+            updated[index] = { ...updated[index], logoUrl: data.url }
             setFormData({ ...formData, trusted_by_platforms: updated })
             toast.success('Logo enviado com sucesso!')
-          } catch (error) {
+          } catch (error: any) {
             console.error('Erro ao fazer upload:', error)
-            toast.error('Erro ao enviar logo. Tente novamente.')
+            toast.error(error.message || 'Erro ao enviar logo. Tente novamente.')
+          } finally {
+            setUploading(false)
           }
         }
 
@@ -1171,95 +1276,21 @@ export default function HomepageEditorPage() {
 
                   <div className="space-y-3 max-h-96 overflow-y-auto">
                     {formData.trusted_by_platforms?.map((platform, index) => (
-                      <div key={platform.id} className="bg-gray-50 p-3 rounded-lg border">
-                        <div className="flex items-start gap-3">
-                          {/* Preview da Logo */}
-                          <div className="w-16 h-16 bg-white rounded-lg border flex items-center justify-center overflow-hidden flex-shrink-0">
-                            {platform.logoUrl ? (
-                              <img 
-                                src={platform.logoUrl} 
-                                alt={platform.name} 
-                                className="w-full h-full object-contain p-1"
-                              />
-                            ) : (
-                              <span className="text-2xl">🖼️</span>
-                            )}
-                          </div>
-
-                          <div className="flex-1 space-y-2">
-                            {/* Checkbox + Nome */}
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                checked={platform.enabled}
-                                onChange={(e) => {
-                                  const updated = [...(formData.trusted_by_platforms || [])]
-                                  updated[index] = { ...updated[index], enabled: e.target.checked }
-                                  setFormData({ ...formData, trusted_by_platforms: updated })
-                                }}
-                                className="w-4 h-4 text-gogh-yellow rounded border-gray-300 focus:ring-gogh-yellow"
-                              />
-                              <input
-                                type="text"
-                                value={platform.name}
-                                onChange={(e) => {
-                                  const updated = [...(formData.trusted_by_platforms || [])]
-                                  updated[index] = { ...updated[index], name: e.target.value }
-                                  setFormData({ ...formData, trusted_by_platforms: updated })
-                                }}
-                                placeholder="Nome da plataforma"
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gogh-yellow"
-                              />
-                            </div>
-
-                            {/* Upload de Logo */}
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0]
-                                  if (file) handlePlatformLogoUpload(index, file)
-                                }}
-                                className="hidden"
-                                id={`platform-logo-${platform.id}`}
-                              />
-                              <label
-                                htmlFor={`platform-logo-${platform.id}`}
-                                className="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded cursor-pointer transition-colors"
-                              >
-                                📤 Upload Logo
-                              </label>
-                              {platform.logoUrl && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const updated = [...(formData.trusted_by_platforms || [])]
-                                    updated[index] = { ...updated[index], logoUrl: '' }
-                                    setFormData({ ...formData, trusted_by_platforms: updated })
-                                  }}
-                                  className="text-xs text-red-500 hover:text-red-700"
-                                >
-                                  Remover Logo
-                                </button>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Botão Remover */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const updated = formData.trusted_by_platforms?.filter((_, i) => i !== index) || []
-                              setFormData({ ...formData, trusted_by_platforms: updated })
-                            }}
-                            className="text-red-500 hover:text-red-700 p-1"
-                            title="Remover plataforma"
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </div>
+                      <PlatformLogoItem
+                        key={platform.id}
+                        platform={platform}
+                        index={index}
+                        onUpdate={(updatedPlatform) => {
+                          const updated = [...(formData.trusted_by_platforms || [])]
+                          updated[index] = updatedPlatform
+                          setFormData({ ...formData, trusted_by_platforms: updated })
+                        }}
+                        onRemove={() => {
+                          const updated = formData.trusted_by_platforms?.filter((_, i) => i !== index) || []
+                          setFormData({ ...formData, trusted_by_platforms: updated })
+                        }}
+                        onUpload={handlePlatformLogoUpload}
+                      />
                     ))}
                   </div>
                 </div>
