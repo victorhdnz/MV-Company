@@ -86,7 +86,7 @@ export default function DashboardAvaliacoesPage() {
 
   const toggleTestimonialStatus = async (testimonialId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('service_testimonials')
         .update({ is_active: !currentStatus })
         .eq('id', testimonialId)
@@ -104,7 +104,7 @@ export default function DashboardAvaliacoesPage() {
     if (!confirm('Tem certeza que deseja excluir esta avaliação?')) return
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('service_testimonials')
         .delete()
         .eq('id', testimonialId)
