@@ -389,24 +389,15 @@ export default function HomepageEditorPage() {
     award_standalone_description: 'A Gogh Lab é pioneira em oferecer uma solução completa com agentes de IA, cursos profissionais e acesso às melhores ferramentas de criação — tudo em uma única assinatura.',
   })
 
+  // Verificar se tem acesso
+  const hasAccess = isEditor || emailIsAdmin
+  
   useEffect(() => {
-    // Aguardar loading terminar
-    if (authLoading) return
-    
-    // Verificar autorização (por role ou por email admin)
-    const hasAccess = isEditor || emailIsAdmin
-    
-    if (!isAuthenticated) {
-      // Não autenticado - ir para login do dashboard
-      router.push('/dashboard')
-    } else if (!hasAccess) {
-      // Autenticado mas sem permissão
-      router.push('/dashboard')
-    } else {
-      // Tem acesso - carregar dados
+    // Só carregar settings se tiver acesso e não estiver carregando auth
+    if (!authLoading && isAuthenticated && hasAccess) {
       loadSettings()
     }
-  }, [isAuthenticated, isEditor, authLoading, emailIsAdmin, router])
+  }, [isAuthenticated, hasAccess, authLoading])
 
   const loadSettings = async () => {
     setLoading(true)
@@ -1554,7 +1545,41 @@ export default function HomepageEditorPage() {
     }
   }
 
-  if (authLoading || loading) {
+  // Loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+      </div>
+    )
+  }
+
+  // Não autenticado - mostrar mensagem (não redirecionar)
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Você precisa estar logado para acessar esta página.</p>
+          <a href="/dashboard" className="text-blue-600 hover:underline">Ir para o login</a>
+        </div>
+      </div>
+    )
+  }
+
+  // Sem permissão - mostrar mensagem
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Você não tem permissão para acessar esta página.</p>
+          <a href="/dashboard" className="text-blue-600 hover:underline">Voltar ao Dashboard</a>
+        </div>
+      </div>
+    )
+  }
+
+  // Carregando dados
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>

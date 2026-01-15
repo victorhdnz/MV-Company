@@ -55,18 +55,15 @@ export default function MembrosPage() {
   const [editingPlan, setEditingPlan] = useState<string>('')
   const [saving, setSaving] = useState(false)
 
+  // Verificar se tem acesso
+  const hasAccess = isEditor || emailIsAdmin
+  
   useEffect(() => {
-    if (authLoading) return
-    
-    const hasAccess = isEditor || emailIsAdmin
-    
-    if (!isAuthenticated || !hasAccess) {
-      router.push('/dashboard')
-      return
+    // Só carregar dados se tiver acesso
+    if (!authLoading && isAuthenticated && hasAccess) {
+      loadMembers()
     }
-    
-    loadMembers()
-  }, [isAuthenticated, isEditor, authLoading, emailIsAdmin, router])
+  }, [isAuthenticated, hasAccess, authLoading])
 
   const loadMembers = async () => {
     try {
@@ -232,7 +229,46 @@ export default function MembrosPage() {
     )
   }
 
-  if (authLoading || loading) {
+  // Loading auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <DashboardNavigation title="Gerenciar Membros" />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-20">
+            <LoadingSpinner size="md" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Não autenticado
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Você precisa estar logado.</p>
+          <a href="/dashboard" className="text-blue-600 hover:underline">Ir para o login</a>
+        </div>
+      </div>
+    )
+  }
+
+  // Sem permissão
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Você não tem permissão.</p>
+          <a href="/dashboard" className="text-blue-600 hover:underline">Voltar</a>
+        </div>
+      </div>
+    )
+  }
+
+  // Carregando dados
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <DashboardNavigation title="Gerenciar Membros" />

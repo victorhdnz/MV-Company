@@ -79,17 +79,14 @@ export default function AnalyticsPage() {
     count: number
   }>>([])
 
+  // Verificar se tem acesso
+  const hasAccess = isEditor || emailIsAdmin
+  
   useEffect(() => {
-    if (authLoading) return
-    
-    const hasAccess = isEditor || emailIsAdmin
-    
-    if (!isAuthenticated || !hasAccess) {
-      router.push('/dashboard')
-      return
+    if (!authLoading && isAuthenticated && hasAccess) {
+      loadPages()
     }
-    loadPages()
-  }, [isAuthenticated, isEditor, authLoading, emailIsAdmin, router])
+  }, [isAuthenticated, hasAccess, authLoading])
 
   useEffect(() => {
     if (pages.length > 0 || pageType === 'homepage' || pageType === 'all') {
@@ -765,7 +762,41 @@ export default function AnalyticsPage() {
     setClickDetails(details)
   }
 
-  if (authLoading || loading) {
+  // Loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <LoadingSpinner size="md" />
+      </div>
+    )
+  }
+
+  // Não autenticado
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Você precisa estar logado.</p>
+          <a href="/dashboard" className="text-blue-600 hover:underline">Ir para o login</a>
+        </div>
+      </div>
+    )
+  }
+
+  // Sem permissão
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Você não tem permissão.</p>
+          <a href="/dashboard" className="text-blue-600 hover:underline">Voltar</a>
+        </div>
+      </div>
+    )
+  }
+
+  // Carregando dados
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <LoadingSpinner size="md" />

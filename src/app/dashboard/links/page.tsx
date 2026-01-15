@@ -17,18 +17,14 @@ export default function LinkAggregatorsDashboard() {
   const [aggregators, setAggregators] = useState<LinkAggregator[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (authLoading) return;
-    
-    const hasAccess = isEditor || emailIsAdmin;
-    
-    if (!isAuthenticated || !hasAccess) {
-      router.push('/dashboard');
-      return;
-    }
+  // Verificar se tem acesso
+  const hasAccess = isEditor || emailIsAdmin;
 
-    loadAggregators();
-  }, [isAuthenticated, isEditor, authLoading, emailIsAdmin, router]);
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && hasAccess) {
+      loadAggregators();
+    }
+  }, [isAuthenticated, hasAccess, authLoading]);
 
   const loadAggregators = async () => {
     try {
@@ -92,7 +88,41 @@ export default function LinkAggregatorsDashboard() {
     return `${window.location.origin}/links/${slug}`;
   };
 
-  if (authLoading || loading) {
+  // Loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <LoadingSpinner size="md" />
+      </div>
+    );
+  }
+
+  // Não autenticado
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Você precisa estar logado.</p>
+          <a href="/dashboard" className="text-blue-600 hover:underline">Ir para o login</a>
+        </div>
+      </div>
+    );
+  }
+
+  // Sem permissão
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Você não tem permissão.</p>
+          <a href="/dashboard" className="text-blue-600 hover:underline">Voltar</a>
+        </div>
+      </div>
+    );
+  }
+
+  // Carregando dados
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <LoadingSpinner size="md" />
