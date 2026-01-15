@@ -41,7 +41,7 @@ export default function LinkAggregatorsDashboard() {
 
       if (error) throw error;
 
-      setAggregators((data || []).map(item => ({
+      setAggregators((data || []).map((item: any) => ({
         id: item.id,
         user_id: item.user_id,
         name: item.name,
