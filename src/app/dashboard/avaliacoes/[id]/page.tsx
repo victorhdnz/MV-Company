@@ -104,12 +104,20 @@ export default function EditAvaliacaoPage({ params }: EditAvaliacaoPageProps) {
     try {
       setSaving(true)
 
+      const updateData = {
+        service_id: formData.service_id || null,
+        client_name: formData.client_name,
+        client_company: formData.client_company,
+        client_photo: formData.client_photo,
+        rating: formData.rating,
+        testimonial_text: formData.testimonial_text,
+        is_featured: formData.is_featured,
+        is_active: formData.is_active,
+      }
+      
       const { error } = await supabase
         .from('service_testimonials')
-        .update({
-          ...formData,
-          service_id: formData.service_id || null,
-        })
+        .update(updateData as any)
         .eq('id', params.id)
 
       if (error) throw error
