@@ -18,9 +18,9 @@ export const useAuth = () => {
   const ensureProfileExists = useCallback(async (userId: string, userEmail: string, userMetadata: any) => {
     try {
       // Verificar se o profile existe
-      const { data: existingProfile, error: checkError } = await supabase
+      const { data: existingProfile, error: checkError } = await (supabase as any)
         .from('profiles')
-        .select('id')
+        .select('id, email, full_name, avatar_url, role, phone, created_at, updated_at')
         .eq('id', userId)
         .single()
 
@@ -46,7 +46,7 @@ export const useAuth = () => {
         return newProfile as AppUser
       }
 
-      return existingProfile as AppUser
+      return existingProfile ? (existingProfile as AppUser) : null
     } catch (error) {
       return null
     }
