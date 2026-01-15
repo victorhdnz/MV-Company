@@ -47,7 +47,7 @@ export default function AgentsPage() {
 
       try {
         // Buscar agentes ativos
-        const { data: agentsData, error: agentsError } = await supabase
+        const { data: agentsData, error: agentsError } = await (supabase as any)
           .from('ai_agents')
           .select('*')
           .eq('is_active', true)
@@ -57,7 +57,7 @@ export default function AgentsPage() {
         setAgents(agentsData || [])
 
         // Buscar conversas recentes do usuário
-        const { data: conversationsData, error: conversationsError } = await supabase
+        const { data: conversationsData, error: conversationsError } = await (supabase as any)
           .from('ai_conversations')
           .select(`
             id,
@@ -78,7 +78,7 @@ export default function AgentsPage() {
 
         if (conversationsError) throw conversationsError
         
-        const formattedConversations = conversationsData?.map(conv => ({
+        const formattedConversations = conversationsData?.map((conv: any) => ({
           ...conv,
           agent: conv.ai_agents as unknown as AIAgent
         })) || []
@@ -105,7 +105,7 @@ export default function AgentsPage() {
 
     try {
       // Criar nova conversa
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('ai_conversations')
         .insert({
           user_id: user.id,
