@@ -4,9 +4,7 @@ import { cookies } from 'next/headers'
 import Stripe from 'stripe'
 
 // Inicializar Stripe (a chave será configurada nas variáveis de ambiente)
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-12-18.acacia',
-})
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '')
 
 export async function POST(request: Request) {
   try {
