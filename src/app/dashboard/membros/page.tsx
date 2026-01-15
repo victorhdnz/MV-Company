@@ -139,7 +139,7 @@ export default function MembrosPage() {
       if (editingPlan === '') {
         // Remover plano - deletar assinatura se existir
         if (member.subscription) {
-          const { error } = await supabase
+          const { error } = await (supabase as any)
             .from('subscriptions')
             .delete()
             .eq('id', member.subscription.id)
@@ -150,7 +150,7 @@ export default function MembrosPage() {
         // Atualizar ou criar assinatura
         if (member.subscription) {
           // Atualizar existente
-          const { error } = await supabase
+          const { error } = await (supabase as any)
             .from('subscriptions')
             .update({
               plan_id: editingPlan,
@@ -161,7 +161,7 @@ export default function MembrosPage() {
           if (error) throw error
         } else {
           // Criar nova (assinatura manual sem Stripe)
-          const { error } = await supabase
+          const { error } = await (supabase as any)
             .from('subscriptions')
             .insert({
               user_id: memberId,
