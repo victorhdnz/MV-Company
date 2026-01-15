@@ -75,7 +75,7 @@ export default function ChatPage() {
 
       try {
         // Buscar conversa com agente
-        const { data: convData, error: convError } = await supabase
+        const { data: convData, error: convError } = await (supabase as any)
           .from('ai_conversations')
           .select(`
             *,
@@ -94,7 +94,7 @@ export default function ChatPage() {
         setConversation(convData as unknown as Conversation)
 
         // Buscar mensagens
-        const { data: messagesData, error: messagesError } = await supabase
+        const { data: messagesData, error: messagesError } = await (supabase as any)
           .from('ai_messages')
           .select('*')
           .eq('conversation_id', conversationId)
@@ -108,7 +108,7 @@ export default function ChatPage() {
         periodStart.setDate(1)
         periodStart.setHours(0, 0, 0, 0)
 
-        const { data: usageData } = await supabase
+        const { data: usageData } = await (supabase as any)
           .from('user_usage')
           .select('usage_count')
           .eq('user_id', user.id)
