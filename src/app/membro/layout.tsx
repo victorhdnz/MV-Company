@@ -161,15 +161,12 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
   }
 
   const handleSignOut = async () => {
-    try {
-      setSigningOut(true)
-      await supabase.auth.signOut()
-      // Usar window.location para garantir que a página recarregue completamente
-      window.location.href = '/'
-    } catch (error) {
-      console.error('Erro ao sair:', error)
-      setSigningOut(false)
-    }
+    setSigningOut(true)
+    // Primeiro redirecionar, depois fazer signOut
+    // Isso evita que a página fique presa esperando o signOut
+    await supabase.auth.signOut()
+    // Forçar redirect imediatamente
+    window.location.replace('/')
   }
 
   return (
@@ -197,7 +194,7 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
         <div className="flex flex-col h-full">
           {/* Logo / Header */}
           <div className="p-6 border-b border-gogh-grayLight">
-            <Link href="/" className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
               {siteLogo ? (
                 <Image
                   src={siteLogo}
@@ -211,8 +208,8 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
                   <Sparkles className="w-6 h-6 text-gogh-black" />
                 </div>
               )}
-              <p className="text-xs text-gogh-grayDark">Área de Membros</p>
-            </Link>
+              <p className="text-sm font-medium text-gogh-black">Área de Membros</p>
+            </div>
           </div>
 
           {/* User Info */}
