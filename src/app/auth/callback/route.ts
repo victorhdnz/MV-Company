@@ -4,6 +4,9 @@ import { NextResponse } from 'next/server'
 import { Database } from '@/types/database.types'
 import { getSiteUrl } from '@/lib/utils/siteUrl'
 
+// Forçar renderização dinâmica
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
@@ -11,35 +14,43 @@ export async function GET(request: Request) {
   const errorDescription = requestUrl.searchParams.get('error_description')
   // Destino após login (padrão: homepage)
   const next = requestUrl.searchParams.get('next') || '/'
+  
+  const siteUrl = getSiteUrl()
+  console.log('[Auth Callback] Site URL:', siteUrl, 'Next:', next)
 
   // Se já veio com erro do OAuth provider
   if (error) {
-    return NextResponse.redirect(`${getSiteUrl()}/login?error=${error}`)
+    console.error('[Auth Callback] OAuth error:', error, errorDescription)
+    return NextResponse.redirect(`${siteUrl}/login?error=${error}`)
   }
 
   if (!code) {
-    return NextResponse.redirect(`${getSiteUrl()}/login?error=no_code`)
+    console.error('[Auth Callback] No code received')
+    return NextResponse.redirect(`${siteUrl}/login?error=no_code`)
   }
 
   try {
-    const supabase = createRouteHandlerClient<Database>({ cookies })
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore })
     
     // Trocar código por sessão
     const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
     
     if (sessionError) {
-      console.error('Erro ao trocar código por sessão:', sessionError)
-      return NextResponse.redirect(`${getSiteUrl()}/login?error=session_exchange_failed`)
+      console.error('[Auth Callback] Session exchange error:', sessionError)
+      return NextResponse.redirect(`${siteUrl}/login?error=session_exchange_failed`)
     }
 
     if (!sessionData?.session?.user) {
-      return NextResponse.redirect(`${getSiteUrl()}/login?error=no_user`)
+      console.error('[Auth Callback] No user in session')
+      return NextResponse.redirect(`${siteUrl}/login?error=no_user`)
     }
 
     const user = sessionData.session.user
+    console.log('[Auth Callback] User authenticated:', user.email)
     
     // Aguardar um pouco para dar tempo do trigger criar o profile
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 500))
     
     // Verificar se o profile já existe
     const { data: existingProfile, error: profileCheckError } = await supabase
@@ -50,22 +61,26 @@ export async function GET(request: Request) {
 
     // Se o profile não existe, criar manualmente
     if (!existingProfile && profileCheckError?.code === 'PGRST116') {
+      console.log('[Auth Callback] Creating profile for:', user.email)
       await supabase
         .from('profiles')
         .insert({
           id: user.id,
           email: user.email || '',
-          full_name: null, // Deixar em branco para o usuário preencher depois
+          full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
           avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
           role: 'customer'
         })
     }
 
-    // Redirecionar para o destino especificado (ou homepage)
-    return NextResponse.redirect(`${getSiteUrl()}${next}?auth=success`)
+    // Redirecionar para o destino especificado
+    const redirectUrl = next.startsWith('/') ? `${siteUrl}${next}` : next
+    console.log('[Auth Callback] Redirecting to:', redirectUrl)
+    
+    return NextResponse.redirect(redirectUrl)
   } catch (error: any) {
-    console.error('Erro no callback:', error)
-    return NextResponse.redirect(`${getSiteUrl()}/login?error=unexpected_error`)
+    console.error('[Auth Callback] Exception:', error)
+    return NextResponse.redirect(`${siteUrl}/login?error=unexpected_error`)
   }
 }
 

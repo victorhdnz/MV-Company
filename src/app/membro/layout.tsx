@@ -27,7 +27,8 @@ interface MemberLayoutProps {
   children: ReactNode
 }
 
-const menuItems = [
+// Itens do menu que requerem assinatura
+const subscriberMenuItems = [
   { 
     href: '/membro', 
     label: 'Dashboard', 
@@ -58,13 +59,15 @@ const menuItems = [
     icon: User,
     description: 'Configure seu perfil para IA'
   },
-  { 
-    href: '/membro/conta', 
-    label: 'Minha Conta', 
-    icon: Settings,
-    description: 'Plano e informações pessoais'
-  },
 ]
+
+// Item de conta (sempre visível)
+const accountMenuItem = { 
+  href: '/membro/conta', 
+  label: 'Minha Conta', 
+  icon: Settings,
+  description: 'Plano e informações pessoais'
+}
 
 export default function MemberLayout({ children }: MemberLayoutProps) {
   const { user, profile, subscription, loading, isAuthenticated, hasActiveSubscription, signOut } = useAuth()
@@ -95,17 +98,21 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
     }
   }
 
+  // Páginas que podem ser acessadas sem assinatura ativa
+  const publicMemberPages = ['/membro/conta']
+  const isPublicPage = publicMemberPages.some(page => pathname === page || pathname.startsWith(page + '/'))
+
   // Verificar autenticação e assinatura
   useEffect(() => {
     if (!loading) {
       if (!isAuthenticated) {
-        router.push('/login?redirect=/membro')
-      } else if (!hasActiveSubscription) {
-        // Redirecionar para homepage onde tem os planos bonitos
-        router.push('/#pricing')
+        router.push('/login?redirect=' + pathname)
+      } else if (!hasActiveSubscription && !isPublicPage) {
+        // Se não tem assinatura e não está em página pública, redirecionar para conta
+        router.push('/membro/conta')
       }
     }
-  }, [loading, isAuthenticated, hasActiveSubscription, router])
+  }, [loading, isAuthenticated, hasActiveSubscription, router, pathname, isPublicPage])
 
   // Loading state
   if (loading) {
@@ -119,8 +126,13 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
     )
   }
 
-  // Não autenticado ou sem assinatura - aguardar redirecionamento
-  if (!isAuthenticated || !hasActiveSubscription) {
+  // Não autenticado - aguardar redirecionamento
+  if (!isAuthenticated) {
+    return null
+  }
+
+  // Sem assinatura em página que requer assinatura - aguardar redirecionamento
+  if (!hasActiveSubscription && !isPublicPage) {
     return null
   }
 
@@ -201,7 +213,8 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {menuItems.map((item) => {
+            {/* Itens que requerem assinatura */}
+            {hasActiveSubscription && subscriberMenuItems.map((item) => {
               const isActive = pathname === item.href || 
                 (item.href !== '/membro' && pathname.startsWith(item.href))
               
@@ -229,6 +242,33 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
                 </Link>
               )
             })}
+
+            {/* Item de conta (sempre visível) */}
+            {(() => {
+              const isActive = pathname === accountMenuItem.href || pathname.startsWith(accountMenuItem.href + '/')
+              return (
+                <Link
+                  href={accountMenuItem.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`
+                    flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
+                    ${isActive 
+                      ? 'bg-gogh-yellow text-gogh-black shadow-sm' 
+                      : 'text-gogh-grayDark hover:bg-gogh-grayLight hover:text-gogh-black'
+                    }
+                  `}
+                >
+                  <accountMenuItem.icon className={`w-5 h-5 ${isActive ? 'text-gogh-black' : ''}`} />
+                  <div className="flex-1">
+                    <p className="font-medium">{accountMenuItem.label}</p>
+                    <p className={`text-xs ${isActive ? 'text-gogh-black/70' : 'text-gogh-grayDark'}`}>
+                      {accountMenuItem.description}
+                    </p>
+                  </div>
+                  {isActive && <ChevronRight className="w-4 h-4" />}
+                </Link>
+              )
+            })()}
           </nav>
 
           {/* Bottom Actions */}

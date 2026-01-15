@@ -17,6 +17,7 @@ import {
   BarChart3,
   Sparkles,
   Link as LinkIcon,
+  Users,
 } from 'lucide-react'
 import Link from 'next/link'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -173,6 +174,20 @@ function DashboardContent() {
           href: '/dashboard/comparador',
           icon: GitCompare,
           color: 'bg-orange-500',
+        },
+      ],
+    },
+    {
+      title: 'Membros',
+      description: 'Gerencie usuários cadastrados e seus planos',
+      icon: Users,
+      items: [
+        {
+          title: 'Gerenciar Membros',
+          description: 'Ver usuários, planos e alterar manualmente assinaturas',
+          href: '/dashboard/membros',
+          icon: Users,
+          color: 'bg-emerald-500',
         },
       ],
     },
