@@ -34,8 +34,15 @@ async function getSiteDescription(): Promise<string> {
 
     const { data, error } = await Promise.race([queryPromise, timeoutPromise])
 
-    if (error && error.code !== 'PGRST116' && error.message !== 'Timeout') {
-      console.error('Erro ao buscar descrição do site:', error)
+    if (error) {
+      const errorMessage = 'message' in error ? error.message : String(error)
+      if (errorMessage !== 'Timeout') {
+        if ('code' in error && error.code !== 'PGRST116') {
+          console.error('Erro ao buscar descrição do site:', error)
+        } else if (!('code' in error)) {
+          console.error('Erro ao buscar descrição do site:', error)
+        }
+      }
     }
 
     if (data?.site_description) {
@@ -69,8 +76,15 @@ async function getSiteName(): Promise<string> {
 
     const { data, error } = await Promise.race([queryPromise, timeoutPromise])
 
-    if (error && error.code !== 'PGRST116' && error.message !== 'Timeout') {
-      console.error('Erro ao buscar nome do site:', error)
+    if (error) {
+      const errorMessage = 'message' in error ? error.message : String(error)
+      if (errorMessage !== 'Timeout') {
+        if ('code' in error && error.code !== 'PGRST116') {
+          console.error('Erro ao buscar nome do site:', error)
+        } else if (!('code' in error)) {
+          console.error('Erro ao buscar nome do site:', error)
+        }
+      }
     }
 
     if (data?.site_name) {
@@ -95,7 +109,7 @@ async function getSiteTitle(): Promise<string | null> {
       .limit(1)
       .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') {
+    if (error && 'code' in error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar título do site:', error)
       // Tentar buscar qualquer registro como fallback
       const { data: fallbackData } = await supabase
@@ -137,7 +151,7 @@ async function getSiteLogo(): Promise<string | null> {
       .eq('key', 'general')
       .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') {
+    if (error && 'code' in error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar logo do site:', error)
       return null
     }
