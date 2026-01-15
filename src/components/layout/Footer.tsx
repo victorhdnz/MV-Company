@@ -28,7 +28,7 @@ export const Footer = () => {
   useEffect(() => {
     const loadSiteSettings = async () => {
       try {
-        const supabase = createClient()
+        const supabase = createClient() as any
         const { data, error } = await supabase
           .from('site_settings')
           .select('*')
