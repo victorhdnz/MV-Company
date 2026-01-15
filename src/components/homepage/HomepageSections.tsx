@@ -16,6 +16,7 @@ import { PricingSection } from './PricingSection'
 import { HomepageVideo } from './HomepageVideo'
 import { Highlighter } from '@/components/ui/highlighter'
 import { AuroraText } from '@/components/ui/aurora-text'
+import { FeaturesSectionWithHoverEffects } from '@/components/ui/feature-section-with-hover-effects'
 
 interface HomepageSectionsProps {
   homepageContent: any
@@ -341,11 +342,24 @@ export function HomepageSections({
     )
   }
 
+  // Função para renderizar seção de Features (Benefícios com hover effects)
+  const renderFeaturesSection = () => {
+    if (homepageContent.features_enabled === false || sectionVisibility.features === false) return null
+    
+    return (
+      <FeaturesSectionWithHoverEffects
+        title={homepageContent.features_title || "Tudo o que você precisa em um só lugar"}
+        subtitle={homepageContent.features_subtitle || "Ferramentas profissionais, agentes de IA e cursos completos para transformar sua presença digital"}
+      />
+    )
+  }
+
   // Mapear seções para funções de renderização
   const sectionRenderers: Record<string, () => JSX.Element | null> = {
     hero: renderHeroSection,
     video: renderVideoSection,
     services: renderServicesSection,
+    features: renderFeaturesSection,
     comparison: renderComparisonSection,
     notifications: renderNotificationsSection,
     testimonials: renderTestimonialsSection,
@@ -357,7 +371,7 @@ export function HomepageSections({
   // Garantir que sectionOrder seja um array válido
   const validSectionOrder = Array.isArray(sectionOrder) && sectionOrder.length > 0 
     ? sectionOrder 
-    : ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'spline', 'contact']
+    : ['hero', 'features', 'services', 'comparison', 'notifications', 'testimonials', 'spline', 'pricing', 'contact']
   
   return (
     <>

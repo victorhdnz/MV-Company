@@ -48,7 +48,7 @@ export default function PricingEditorPage() {
   const [formData, setFormData] = useState<PricingSettings>({
     pricing_enabled: true,
     pricing_title: 'Escolha seu plano e comece a criar',
-    pricing_description: 'Acesse todos os agentes de IA, crie conteúdos incríveis e transforme sua presença digital com autonomia total.',
+    pricing_description: 'Acesse todos os agentes de IA, cursos completos e ferramentas premium. Transforme sua presença digital com autonomia total.',
     pricing_annual_discount: 20, // 20% de desconto no plano anual
     pricing_whatsapp_number: '',
     pricing_plans: [

@@ -155,7 +155,7 @@ function DashboardContent() {
         },
         {
           title: 'Planos de Assinatura',
-          description: 'Configure planos mensais e anuais com preços e mensagens WhatsApp',
+          description: 'Configure planos, preços, categorias e integração com Stripe',
           href: '/dashboard/pricing',
           icon: Sparkles,
           color: 'bg-yellow-500',

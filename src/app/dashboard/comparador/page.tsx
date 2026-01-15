@@ -109,6 +109,14 @@ export default function ComparadorDashboardPage() {
       topic_values: [],
       is_active: true,
     },
+    {
+      id: generateUUID(),
+      name: '',
+      logo: '',
+      description: '',
+      topic_values: [],
+      is_active: true,
+    },
   ])
 
   const supabase = createClient()
@@ -167,15 +175,15 @@ export default function ComparadorDashboardPage() {
         .from('company_comparisons')
         .select('*')
         .order('created_at', { ascending: true })
-        .limit(2)
+        .limit(3)
 
       if (error) throw error
 
-      const loadedCompanies = (data as CompanyComparison[] || []).slice(0, 2)
+      const loadedCompanies = (data as CompanyComparison[] || []).slice(0, 3)
       
       const updatedCompanies = [...companies]
       loadedCompanies.forEach((company, index) => {
-        if (index < 2) {
+        if (index < 3) {
           // Converter comparison_topics antigo para topic_values
           const topicValues: CompanyTopicValue[] = []
           if (company.comparison_topics && Array.isArray(company.comparison_topics)) {
