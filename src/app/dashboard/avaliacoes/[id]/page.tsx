@@ -59,16 +59,17 @@ export default function EditAvaliacaoPage({ params }: EditAvaliacaoPageProps) {
 
       if (error) throw error
 
-      setTestimonial(data as ServiceTestimonial)
+      const testimonialData = data as ServiceTestimonial
+      setTestimonial(testimonialData)
       setFormData({
-        service_id: data.service_id || '',
-        client_name: data.client_name || '',
-        client_company: data.client_company || '',
-        client_photo: data.client_photo || '',
-        rating: data.rating || 5,
-        testimonial_text: data.testimonial_text || '',
-        is_featured: data.is_featured || false,
-        is_active: data.is_active !== false,
+        service_id: testimonialData.service_id || '',
+        client_name: testimonialData.client_name || '',
+        client_company: testimonialData.client_company || '',
+        client_photo: testimonialData.client_photo || '',
+        rating: testimonialData.rating || 5,
+        testimonial_text: testimonialData.testimonial_text || '',
+        is_featured: testimonialData.is_featured || false,
+        is_active: testimonialData.is_active !== false,
       })
     } catch (error: any) {
       console.error('Erro ao carregar avaliação:', error)
