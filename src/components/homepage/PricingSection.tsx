@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { PricingComponent, PriceTier, BillingCycle, FeatureCategory } from '@/components/ui/pricing-card'
-import { FadeInSection } from '@/components/ui/FadeInSection'
+import { FadeInElement } from '@/components/ui/FadeInElement'
 
 interface PricingSectionProps {
   enabled?: boolean
@@ -44,8 +44,8 @@ export function PricingSection({
   }
 
   return (
-    <FadeInSection>
-      <section id="pricing-section" className="py-16 md:py-24 px-4 bg-[#F5F1E8]">
+    <section id="pricing-section" className="py-16 md:py-24 px-4 bg-[#F5F1E8]">
+      <FadeInElement>
         <PricingComponent
           plans={plans}
           billingCycle={billingCycle}
@@ -56,8 +56,8 @@ export function PricingSection({
           annualDiscountPercent={annualDiscount}
           featureCategories={featureCategories}
         />
-      </section>
-    </FadeInSection>
+      </FadeInElement>
+    </section>
   )
 }
 

@@ -3,7 +3,7 @@
 import { AnimatedList } from '@/components/ui/animated-list'
 import { Bell, Mail, MessageCircle, Heart, UserPlus, TrendingUp, CheckCircle, ShoppingCart } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { FadeInSection } from '@/components/ui/FadeInSection'
+import { FadeInElement } from '@/components/ui/FadeInElement'
 
 export interface NotificationItem {
   id: string
@@ -98,22 +98,26 @@ export function NotificationsSection({
   if (!validNotifications || validNotifications.length === 0) return null
 
   return (
-    <FadeInSection>
-      <section className="py-16 md:py-24 px-4 bg-[#F5F1E8]">
-        <div className="container mx-auto max-w-4xl">
-          {title && (
-            <div className="text-center mb-12">
+    <section className="py-16 md:py-24 px-4 bg-[#F5F1E8]">
+      <div className="container mx-auto max-w-4xl">
+        {title && (
+          <div className="text-center mb-12">
+            <FadeInElement>
               <h2 className="text-3xl md:text-5xl font-bold text-[#0A0A0A] mb-4">
                 {title}
               </h2>
-              {description && (
+            </FadeInElement>
+            {description && (
+              <FadeInElement delay={0.1}>
                 <p className="text-gray-600 text-lg max-w-2xl mx-auto">
                   {description}
                 </p>
-              )}
-            </div>
-          )}
+              </FadeInElement>
+            )}
+          </div>
+        )}
 
+        <FadeInElement delay={0.2}>
           <div className="relative flex h-[500px] w-full flex-col overflow-hidden p-2">
             <AnimatedList delay={delay}>
               {validNotifications.map((item) => (
@@ -126,9 +130,9 @@ export function NotificationsSection({
             <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-[#F5F1E8] to-transparent"></div>
             <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-[#F5F1E8] to-transparent"></div>
           </div>
-        </div>
-      </section>
-    </FadeInSection>
+        </FadeInElement>
+      </div>
+    </section>
   )
 }
 

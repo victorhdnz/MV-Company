@@ -8,7 +8,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { GitCompare } from 'lucide-react'
 import { SocialButton } from '@/components/ui/SocialButton'
-import { FadeInSection } from '@/components/ui/FadeInSection'
+import { FadeInElement } from '@/components/ui/FadeInElement'
 import { NotificationsSection } from './NotificationsSection'
 import { TestimonialsSection } from './TestimonialsSection'
 import { SplineSection } from './SplineSection'
@@ -73,23 +73,23 @@ export function HomepageSections({
     if (homepageContent.hero_enabled === false || sectionVisibility.hero === false) return null
     
     return (
-      <FadeInSection>
-        <section className="relative bg-[#F5F1E8] text-[#0A0A0A] py-16 md:py-24 px-4 overflow-hidden">
-          {homepageContent.hero_background_image && (
-            <div className="absolute inset-0 z-0 opacity-20">
-              <Image
-                src={homepageContent.hero_background_image}
-                alt="Background"
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-          )}
-          <div className="container mx-auto max-w-6xl text-center relative z-10 pt-24 md:pt-32">
-            {homepageContent.hero_subtitle && (() => {
-              const { firstPart, secondPart } = splitTextForHighlights(homepageContent.hero_subtitle)
-              return (
+      <section className="relative bg-[#F5F1E8] text-[#0A0A0A] py-16 md:py-24 px-4 overflow-hidden">
+        {homepageContent.hero_background_image && (
+          <div className="absolute inset-0 z-0 opacity-20">
+            <Image
+              src={homepageContent.hero_background_image}
+              alt="Background"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
+        <div className="container mx-auto max-w-6xl text-center relative z-10 pt-24 md:pt-32">
+          {homepageContent.hero_subtitle && (() => {
+            const { firstPart, secondPart } = splitTextForHighlights(homepageContent.hero_subtitle)
+            return (
+              <FadeInElement delay={0}>
                 <p className="text-2xl md:text-3xl lg:text-4xl text-[#0A0A0A] max-w-4xl mx-auto font-bold mb-6 leading-tight">
                   <span className="inline-block relative z-0 mb-2 md:mb-0">
                     <Highlighter action="underline" color="#F7C948" isView={true}>
@@ -108,18 +108,20 @@ export function HomepageSections({
                     </>
                   )}
                 </p>
-              )
-            })()}
-            {homepageContent.hero_description && (
+              </FadeInElement>
+            )
+          })()}
+          {homepageContent.hero_description && (
+            <FadeInElement delay={0.2}>
               <p className="text-xl md:text-2xl lg:text-3xl text-[#0A0A0A] max-w-3xl mx-auto font-bold">
                 <AuroraText colors={["#F7C948", "#E5A800", "#0A0A0A", "#F7C948", "#E5A800"]} speed={1}>
                   {homepageContent.hero_description}
                 </AuroraText>
               </p>
-            )}
-          </div>
-        </section>
-      </FadeInSection>
+            </FadeInElement>
+          )}
+        </div>
+      </section>
     )
   }
 
@@ -128,45 +130,49 @@ export function HomepageSections({
     if (homepageContent.services_enabled === false || sectionVisibility.services === false) return null
     
     return (
-      <FadeInSection>
-        <section id="servicos" className="py-16 md:py-24 px-4 bg-[#F5F1E8]">
-          <div className="container mx-auto max-w-7xl">
-            {(homepageContent.services_title || homepageContent.services_description) && (
-              <div className="text-center mb-12">
-                {homepageContent.services_title && (
+      <section id="servicos" className="py-16 md:py-24 px-4 bg-[#F5F1E8]">
+        <div className="container mx-auto max-w-7xl">
+          {(homepageContent.services_title || homepageContent.services_description) && (
+            <div className="text-center mb-12">
+              {homepageContent.services_title && (
+                <FadeInElement>
                   <h2 className="text-3xl md:text-5xl font-semibold text-[#0A0A0A] mb-4 tracking-tight">
                     {homepageContent.services_title}
                   </h2>
-                )}
-                {homepageContent.services_description && (
+                </FadeInElement>
+              )}
+              {homepageContent.services_description && (
+                <FadeInElement delay={0.1}>
                   <p className="text-lg text-gray-600 max-w-3xl mx-auto">
                     {homepageContent.services_description}
                   </p>
-                )}
-              </div>
-            )}
+                </FadeInElement>
+              )}
+            </div>
+          )}
 
-            {/* SEMPRE usar cards customizados se existirem (independentes dos serviços do banco) */}
-            {homepageContent.services_cards && Array.isArray(homepageContent.services_cards) && homepageContent.services_cards.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {homepageContent.services_cards.map((card: CustomServiceCardType) => (
-                  <CustomServiceCard key={card.id} card={card} />
-                ))}
+          {/* SEMPRE usar cards customizados se existirem (independentes dos serviços do banco) */}
+          {homepageContent.services_cards && Array.isArray(homepageContent.services_cards) && homepageContent.services_cards.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {homepageContent.services_cards.map((card: CustomServiceCardType, index: number) => (
+                <FadeInElement key={card.id} delay={0.1 * index}>
+                  <CustomServiceCard card={card} />
+                </FadeInElement>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <div className="inline-block bg-[#F7C948]/20 rounded-full p-6 mb-4">
+                <span className="text-5xl">🚀</span>
               </div>
-            ) : (
-              <div className="text-center py-20">
-                <div className="inline-block bg-[#F7C948]/20 rounded-full p-6 mb-4">
-                  <span className="text-5xl">🚀</span>
-                </div>
-                <h2 className="text-2xl font-semibold text-[#0A0A0A] mb-2">Nenhum card de serviço configurado</h2>
-                <p className="text-gray-600">
-                  Adicione cards de serviços no editor da homepage.
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
-      </FadeInSection>
+              <h2 className="text-2xl font-semibold text-[#0A0A0A] mb-2">Nenhum card de serviço configurado</h2>
+              <p className="text-gray-600">
+                Adicione cards de serviços no editor da homepage.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
     )
   }
 
@@ -175,9 +181,9 @@ export function HomepageSections({
     if (homepageContent.comparison_cta_enabled === false || sectionVisibility.comparison === false) return null
     
     return (
-      <FadeInSection>
-        <section id="comparison-section" className="py-16 md:py-24 px-4 scroll-mt-24 bg-[#F5F1E8]">
-          <div className="container mx-auto max-w-4xl">
+      <section id="comparison-section" className="py-16 md:py-24 px-4 scroll-mt-24 bg-[#F5F1E8]">
+        <div className="container mx-auto max-w-4xl">
+          <FadeInElement>
             <Link href={homepageContent.comparison_cta_link || "/comparar"} prefetch={true}>
               <div className="relative h-[300px] md:h-[400px] rounded-3xl overflow-hidden bg-white border border-[#F7C948]/30 hover:border-[#F7C948] hover:shadow-xl transition-all duration-300 group">
                 <div className="absolute inset-0 bg-gradient-to-br from-white via-[#FBF8F3] to-[#F5F1E8]" />
@@ -197,9 +203,9 @@ export function HomepageSections({
                 </div>
               </div>
             </Link>
-          </div>
-        </section>
-      </FadeInSection>
+          </FadeInElement>
+        </div>
+      </section>
     )
   }
 
@@ -291,17 +297,21 @@ export function HomepageSections({
     if (homepageContent.contact_enabled === false || sectionVisibility.contact === false) return null
     
     return (
-      <FadeInSection>
-        <section id="contact-section" className="py-16 md:py-24 px-4 bg-[#F5F1E8]">
-          <div className="container mx-auto max-w-4xl text-center">
+      <section id="contact-section" className="py-16 md:py-24 px-4 bg-[#F5F1E8]">
+        <div className="container mx-auto max-w-4xl text-center">
+          <FadeInElement>
             <h2 className="text-3xl md:text-5xl font-semibold text-[#0A0A0A] mb-4 tracking-tight">
               {homepageContent.contact_title || 'Fale Conosco'}
             </h2>
-            {homepageContent.contact_description && (
+          </FadeInElement>
+          {homepageContent.contact_description && (
+            <FadeInElement delay={0.1}>
               <p className="text-gray-600 text-lg md:text-xl mb-12 font-light max-w-2xl mx-auto">
                 {homepageContent.contact_description}
               </p>
-            )}
+            </FadeInElement>
+          )}
+          <FadeInElement delay={0.2}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               {homepageContent.contact_whatsapp_enabled !== false && (homepageContent.contact_whatsapp_number || siteSettings?.contact_whatsapp) && (
                 <SocialButton
@@ -325,9 +335,9 @@ export function HomepageSections({
                 />
               )}
             </div>
-          </div>
-        </section>
-      </FadeInSection>
+          </FadeInElement>
+        </div>
+      </section>
     )
   }
 

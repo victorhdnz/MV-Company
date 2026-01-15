@@ -2,7 +2,7 @@
 
 import { SplineScene } from '@/components/ui/splite'
 import { Spotlight } from '@/components/ui/spotlight'
-import { FadeInSection } from '@/components/ui/FadeInSection'
+import { FadeInElement } from '@/components/ui/FadeInElement'
 import { useInView } from 'react-intersection-observer'
 import { useState, useEffect, memo } from 'react'
 
@@ -42,13 +42,13 @@ export const SplineSection = memo(function SplineSection({
   if (enabled === false) return null
 
   return (
-    <FadeInSection>
-      <section 
-        ref={ref}
-        className="relative bg-[#F5F1E8] text-[#0A0A0A] py-16 md:py-24 px-4"
-        style={{ minHeight: '600px' }}
-      >
-        <div className="container mx-auto max-w-7xl">
+    <section 
+      ref={ref}
+      className="relative bg-[#F5F1E8] text-[#0A0A0A] py-16 md:py-24 px-4"
+      style={{ minHeight: '600px' }}
+    >
+      <div className="container mx-auto max-w-7xl">
+        <FadeInElement>
           <div className="w-full h-[600px] md:h-[700px] bg-[#0A0A0A] relative overflow-hidden rounded-3xl border border-[#F7C948]/30 shadow-xl">
             <Spotlight
               className="-top-40 left-0 md:left-60 md:-top-20"
@@ -100,9 +100,9 @@ export const SplineSection = memo(function SplineSection({
               </div>
             </div>
           </div>
-        </div>
-      </section>
-    </FadeInSection>
+        </FadeInElement>
+      </div>
+    </section>
   )
 })
 
