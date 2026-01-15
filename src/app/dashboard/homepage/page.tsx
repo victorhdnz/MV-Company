@@ -249,9 +249,14 @@ export default function HomepageEditorPage() {
             testimonialsItems = prev.testimonials_items
           }
           
+          // Sincronizar hero_logo com site_logo (priorizar site_logo se existir)
+          // Isso garante que a logo global do site seja usada no editor
+          const heroLogo = data.site_logo || content.hero_logo || null
+          
           return {
             ...prev,
             ...content,
+            hero_logo: heroLogo,
             services_cards: servicesCards,
             notifications_items: notificationsItems,
             testimonials_items: testimonialsItems,
@@ -364,10 +369,20 @@ export default function HomepageEditorPage() {
         section_visibility: sectionVisibility,
       }
       
+      // Preparar campos para atualizar
+      const fieldsToUpdate: Record<string, any> = {
+        homepage_content: contentToSave
+      }
+      
+      // IMPORTANTE: Sincronizar hero_logo com site_logo (logo fixa global)
+      // Quando a logo do hero é alterada, também atualiza a logo global do site
+      if (formData.hero_logo !== undefined) {
+        fieldsToUpdate.site_logo = formData.hero_logo || null
+      }
+      
       const { success, error } = await saveSiteSettings({
-        fieldsToUpdate: {
-          homepage_content: contentToSave
-        },
+        fieldsToUpdate,
+        forceUpdate: true, // Forçar update para permitir limpar a logo (null)
       })
 
       if (!success) {
