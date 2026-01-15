@@ -330,6 +330,10 @@ export const useAuth = () => {
   const emailIsAdmin = isAdminEmail(user?.email)
   const isAdmin = profile?.role === 'admin' || emailIsAdmin
   const isEditor = profile?.role === 'admin' || profile?.role === 'editor' || emailIsAdmin
+  
+  // Flag para indicar se a verificação de permissões está completa
+  // Só está pronto quando: não está carregando E (tem profile OU já verificou pelo email)
+  const permissionsReady = !loading && (profile !== null || emailIsAdmin)
 
   return {
     user,
@@ -341,6 +345,8 @@ export const useAuth = () => {
     isAdmin,
     isEditor,
     isAuthenticated: !!user,
+    permissionsReady, // Nova flag para verificar se as permissões estão prontas
+    emailIsAdmin, // Expor para uso direto nas páginas
   }
 }
 

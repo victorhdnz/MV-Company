@@ -59,7 +59,8 @@ export function NavigationTabs({ variant, pricingEnabled = true, className }: Na
       if (isAuthenticated && hasActiveSubscription) {
         router.push('/membro')
       } else if (isAuthenticated) {
-        router.push('/membro/assinar')
+        // Usuário logado mas sem assinatura - ir para planos
+        router.push('/#pricing')
       } else {
         router.push('/login')
       }

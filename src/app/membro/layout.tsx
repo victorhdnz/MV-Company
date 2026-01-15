@@ -54,9 +54,15 @@ const menuItems = [
   },
   { 
     href: '/membro/perfil', 
-    label: 'Meu Perfil', 
+    label: 'Perfil de Nicho', 
     icon: User,
-    description: 'Configure seu perfil de nicho'
+    description: 'Configure seu perfil para IA'
+  },
+  { 
+    href: '/membro/conta', 
+    label: 'Minha Conta', 
+    icon: Settings,
+    description: 'Plano e informações pessoais'
   },
 ]
 
