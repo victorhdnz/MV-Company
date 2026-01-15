@@ -26,7 +26,7 @@ export function ConditionalWhatsAppFloat() {
   useEffect(() => {
     const loadConfig = async () => {
       try {
-        const supabase = createClient()
+        const supabase = createClient() as any
         const isComparador = pathname?.startsWith('/comparar')
         const isServicePage = pathname?.startsWith('/portfolio/') && pathname !== '/portfolio'
         
