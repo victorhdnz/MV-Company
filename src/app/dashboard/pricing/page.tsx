@@ -118,14 +118,29 @@ export default function PricingEditorPage() {
 
       if (data?.homepage_content?.pricing) {
         const pricing = data.homepage_content.pricing
-        setFormData(prev => ({
-          ...prev,
-          ...pricing,
-          pricing_plans: pricing.pricing_plans || prev.pricing_plans,
-        }))
+        
+        setFormData(prev => {
+          // Garantir que apenas 2 planos sejam carregados
+          let plans = pricing.pricing_plans || []
+          
+          // Se tiver mais de 2 planos, manter apenas os 2 primeiros
+          if (plans.length > 2) {
+            plans = plans.slice(0, 2)
+          }
+          // Se tiver menos de 2, usar os padrões
+          if (plans.length < 2) {
+            plans = prev.pricing_plans
+          }
+          
+          return {
+            ...prev,
+            ...pricing,
+            pricing_plans: plans,
+          }
+        })
       }
 
-          // Carregar categorias de recursos
+      // Carregar categorias de recursos
       if (data?.homepage_content?.pricing?.feature_categories) {
         const categories = data.homepage_content.pricing.feature_categories as FeatureCategory[]
         setFeatureCategories(categories.sort((a, b) => a.order - b.order))
