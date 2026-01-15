@@ -590,7 +590,7 @@ export default function HomepageEditorPage() {
                   label="Título Principal"
                   value={formData.video_title || ''}
                   onChange={(e) => setFormData({ ...formData, video_title: e.target.value })}
-                  placeholder="Ex: Conheça a MV Company"
+                  placeholder="Ex: Conheça a Gogh Lab"
                 />
                 <div>
                   <label className="block text-sm font-medium mb-2">Subtítulo</label>
@@ -660,7 +660,7 @@ export default function HomepageEditorPage() {
                   label="Título do CTA"
                   value={formData.comparison_cta_title || ''}
                   onChange={(e) => setFormData({ ...formData, comparison_cta_title: e.target.value })}
-                  placeholder="Ex: Compare a MV Company..."
+                  placeholder="Ex: Compare a Gogh Lab..."
                 />
                 <div>
                   <label className="block text-sm font-medium mb-2">Descrição</label>
@@ -754,7 +754,7 @@ export default function HomepageEditorPage() {
                   <textarea
                     value={formData.testimonials_description || ''}
                     onChange={(e) => setFormData({ ...formData, testimonials_description: e.target.value })}
-                    placeholder="Ex: Depoimentos reais de quem confia na MV Company"
+                    placeholder="Ex: Depoimentos reais de quem confia na Gogh Lab"
                     rows={3}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />

@@ -263,10 +263,10 @@ export default function EditComparacaoPage({ params }: EditComparacaoPageProps) 
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
-                      {/* MV Company */}
+                      {/* Gogh Lab */}
                       <div className="border border-gray-200 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-gray-900">MV Company</span>
+                          <span className="font-semibold text-gray-900">Gogh Lab</span>
                           <button
                             onClick={() => updateTopic(topic.id, 'mv_company', !topic.mv_company)}
                             className={`p-2 rounded-lg transition-colors ${

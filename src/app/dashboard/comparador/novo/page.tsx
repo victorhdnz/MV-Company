@@ -117,7 +117,7 @@ export default function NovaComparacao() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Nova Comparação</h1>
-            <p className="text-gray-600">Crie uma comparação entre MV Company e outra empresa</p>
+            <p className="text-gray-600">Crie uma comparação entre Gogh Lab e outra empresa</p>
           </div>
           <Button onClick={handleSave} isLoading={loading} size="lg">
             <Save size={18} className="mr-2" />
@@ -205,10 +205,10 @@ export default function NovaComparacao() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
-                      {/* MV Company */}
+                      {/* Gogh Lab */}
                       <div className="border border-gray-200 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-gray-900">MV Company</span>
+                          <span className="font-semibold text-gray-900">Gogh Lab</span>
                           <button
                             onClick={() => updateTopic(topic.id, 'mv_company', !topic.mv_company)}
                             className={`p-2 rounded-lg transition-colors ${

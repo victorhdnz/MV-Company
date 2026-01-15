@@ -92,7 +92,7 @@ export function HomepageSections({
               return (
                 <p className="text-2xl md:text-3xl lg:text-4xl text-white max-w-4xl mx-auto font-bold mb-6 leading-tight">
                   <span className="inline-block relative z-0 mb-2 md:mb-0">
-                    <Highlighter action="underline" color="#E5E7EB" isView={true}>
+                    <Highlighter action="underline" color="#F7C948" isView={true}>
                       {firstPart}
                     </Highlighter>
                   </span>
@@ -101,7 +101,7 @@ export function HomepageSections({
                       {homepageContent.hero_subtitle.includes(',') ? ',' : ' '}
                       {' '}
                       <span className="inline-block relative z-0 mt-2 md:mt-0">
-                        <Highlighter action="highlight" color="#9CA3AF" isView={true}>
+                        <Highlighter action="highlight" color="#F7C948" isView={true}>
                           {secondPart}
                         </Highlighter>
                       </span>
@@ -112,7 +112,7 @@ export function HomepageSections({
             })()}
             {homepageContent.hero_description && (
               <p className="text-xl md:text-2xl lg:text-3xl text-white max-w-3xl mx-auto font-bold">
-                <AuroraText colors={["#F9FAFB", "#E5E7EB", "#D1D5DB", "#9CA3AF", "#6B7280"]} speed={1}>
+                <AuroraText colors={["#FFFFFF", "#F7C948", "#FFD966", "#E5A800", "#FFFFFF"]} speed={1}>
                   {homepageContent.hero_description}
                 </AuroraText>
               </p>

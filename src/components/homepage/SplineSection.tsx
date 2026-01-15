@@ -71,9 +71,9 @@ export const SplineSection = memo(function SplineSection({
                 className="flex-1 relative min-h-[300px] md:min-h-0" 
                 style={{ 
                   willChange: 'auto',
-                  // Garantir que não bloqueie scroll enquanto carrega
-                  touchAction: shouldLoad && inView ? 'none' : 'auto',
-                  pointerEvents: shouldLoad && inView ? 'auto' : 'auto'
+                  // SEMPRE permitir scroll vertical no mobile
+                  touchAction: 'pan-y pinch-zoom',
+                  pointerEvents: 'auto'
                 }}
               >
                 {shouldLoad && inView ? (
@@ -82,8 +82,9 @@ export const SplineSection = memo(function SplineSection({
                       width: '100%', 
                       height: '100%', 
                       contain: 'layout style paint',
-                      // Permitir scroll vertical mesmo quando Spline está carregado
-                      touchAction: 'pan-y pinch-zoom'
+                      // SEMPRE permitir scroll vertical mesmo quando Spline está carregado
+                      touchAction: 'pan-y pinch-zoom',
+                      pointerEvents: 'auto'
                     }}
                   >
                     <SplineScene 

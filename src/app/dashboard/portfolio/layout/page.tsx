@@ -57,7 +57,7 @@ export default function ServiceDetailLayoutPage() {
     hero_subtitle: '',
 
     benefits_enabled: true,
-    benefits_title: 'O que você receberá dentro da MV Company',
+    benefits_title: 'O que você receberá dentro da Gogh Lab',
     benefits_items: [],
 
     cta_enabled: true,
@@ -237,7 +237,7 @@ export default function ServiceDetailLayoutPage() {
                   label="Título da Seção"
                   value={formData.benefits_title || ''}
                   onChange={(e) => setFormData({ ...formData, benefits_title: e.target.value })}
-                  placeholder="Ex: O que você receberá dentro da MV Company"
+                  placeholder="Ex: O que você receberá dentro da Gogh Lab"
                 />
                 <BenefitsManager
                   value={formData.benefits_items || []}

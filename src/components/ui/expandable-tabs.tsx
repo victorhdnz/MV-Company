@@ -97,11 +97,11 @@ export function ExpandableTabs({
             className={cn(
               "relative flex items-center rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-300",
               selected === index
-                ? "bg-white text-gray-900"
-                : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                ? "bg-[#F7C948] text-[#0A0A0A]" // Amarelo Gogh Lab
+                : "text-gray-400 hover:bg-gray-800 hover:text-[#F7C948]"
             )}
           >
-            <Icon size={20} className={selected === index ? "text-gray-900" : "text-gray-400"} />
+            <Icon size={20} className={selected === index ? "text-[#0A0A0A]" : "text-gray-400"} />
             <AnimatePresence initial={false}>
               {selected === index && (
                 <motion.span
@@ -110,7 +110,7 @@ export function ExpandableTabs({
                   animate="animate"
                   exit="exit"
                   transition={transition}
-                  className="overflow-hidden text-gray-900"
+                  className="overflow-hidden text-[#0A0A0A]"
                 >
                   {tab.title}
                 </motion.span>

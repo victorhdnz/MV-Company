@@ -228,7 +228,7 @@ function DashboardContent() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Administrativo</h1>
             <p className="text-gray-600">
-              Olá, <span className="font-medium">MV Company</span>
+              Olá, <span className="font-medium">Gogh Lab</span>
             </p>
           </div>
           <button

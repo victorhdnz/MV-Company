@@ -8,24 +8,35 @@ module.exports = {
   ],
   theme: {
         extend: {
-                colors: {
-                        primary: {
-                                DEFAULT: 'hsl(var(--primary))',
-                                light: '#1a1a1a',
-                                dark: '#000000',
-                                foreground: 'hsl(var(--primary-foreground))'
-                        },
-                        secondary: {
-                                DEFAULT: 'hsl(var(--secondary))',
-                                dark: '#f5f5f5',
-                                foreground: 'hsl(var(--secondary-foreground))'
-                        },
-                        accent: {
-                                DEFAULT: 'hsl(var(--accent))',
-                                light: '#FFE44D',
-                                dark: '#CCB000',
-                                foreground: 'hsl(var(--accent-foreground))'
-                        },
+		colors: {
+				// Paleta Gogh Lab
+				gogh: {
+					yellow: '#F7C948',      // Amarelo girassol (cor principal)
+					'yellow-light': '#FFD966',
+					'yellow-dark': '#E5A800',
+					black: '#0A0A0A',       // Preto (contraste)
+					'gray-dark': '#1A1A1A',
+					beige: '#F5F1E8',       // Bege (fundos)
+					'beige-light': '#FBF8F3',
+					white: '#FFFFFF',
+				},
+				primary: {
+					DEFAULT: 'hsl(var(--primary))',
+					light: '#1a1a1a',
+					dark: '#000000',
+					foreground: 'hsl(var(--primary-foreground))'
+				},
+				secondary: {
+					DEFAULT: 'hsl(var(--secondary))',
+					dark: '#f5f5f5',
+					foreground: 'hsl(var(--secondary-foreground))'
+				},
+				accent: {
+					DEFAULT: '#F7C948', // Amarelo girassol como accent
+					light: '#FFD966',
+					dark: '#E5A800',
+					foreground: 'hsl(var(--accent-foreground))'
+				},
                         background: 'hsl(var(--background))',
                         foreground: 'hsl(var(--foreground))',
                         card: {

@@ -53,9 +53,9 @@ export default function ComparadorDashboardPage() {
   const [editingMVCompany, setEditingMVCompany] = useState(false)
   const [topicsExpanded, setTopicsExpanded] = useState(true)
   
-  // MV Company state
+  // Gogh Lab state
   const [mvCompany, setMvCompany] = useState<MVCompany>({
-    name: 'MV Company',
+    name: 'Gogh Lab',
     logo: '',
     topic_values: [],
   })
@@ -64,7 +64,7 @@ export default function ComparadorDashboardPage() {
   const [globalTopics, setGlobalTopics] = useState<GlobalTopic[]>([])
 
   const [footerContent, setFooterContent] = useState({
-    title: 'Pronto para trabalhar com a MV Company?',
+    title: 'Pronto para trabalhar com o Gogh Lab?',
     subtitle: 'Entre em contato e descubra como podemos transformar seu negócio',
     whatsapp_enabled: true,
     whatsapp_number: '',
@@ -148,7 +148,7 @@ export default function ComparadorDashboardPage() {
     try {
       const { data, error } = await getSiteSettings()
       if (error) {
-        console.error('Erro ao carregar MV Company:', error)
+        console.error('Erro ao carregar Gogh Lab:', error)
         return
       }
       
@@ -156,7 +156,7 @@ export default function ComparadorDashboardPage() {
         setMvCompany(data.mv_company as MVCompany)
       }
     } catch (error) {
-      console.error('Erro ao carregar MV Company:', error)
+      console.error('Erro ao carregar Gogh Lab:', error)
     }
   }
 
@@ -311,15 +311,15 @@ export default function ComparadorDashboardPage() {
       })
 
       if (!success) {
-        toast.error(error?.message || 'Erro ao salvar MV Company')
+        toast.error(error?.message || 'Erro ao salvar Gogh Lab')
         return
       }
 
-      toast.success('MV Company salva com sucesso!')
+      toast.success('Gogh Lab salva com sucesso!')
       setEditingMVCompany(false)
     } catch (error) {
-      console.error('Erro ao salvar MV Company:', error)
-      toast.error('Erro ao salvar MV Company')
+      console.error('Erro ao salvar Gogh Lab:', error)
+      toast.error('Erro ao salvar Gogh Lab')
     } finally {
       setSaving(false)
     }
@@ -343,7 +343,7 @@ export default function ComparadorDashboardPage() {
         }
       }
 
-      // 2. Salvar MV Company
+      // 2. Salvar Gogh Lab
       const { success: mvSuccess, error: mvError } = await saveSiteSettings({
         fieldsToUpdate: {
           mv_company: mvCompany,
@@ -351,7 +351,7 @@ export default function ComparadorDashboardPage() {
       })
 
       if (!mvSuccess) {
-        toast.error(mvError?.message || 'Erro ao salvar MV Company')
+        toast.error(mvError?.message || 'Erro ao salvar Gogh Lab')
         return
       }
 
@@ -534,7 +534,7 @@ export default function ComparadorDashboardPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Comparador de Empresas</h1>
-            <p className="text-gray-600">Configure empresas, tópicos e compare com MV Company</p>
+            <p className="text-gray-600">Configure empresas, tópicos e compare com Gogh Lab</p>
           </div>
           <div className="flex gap-3">
             <Link href="/comparar" target="_blank">
@@ -563,7 +563,7 @@ export default function ComparadorDashboardPage() {
             <div className="p-6 border-t border-gray-200 space-y-4">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                 <p className="text-sm text-blue-800">
-                  <strong>💡 Dica:</strong> Crie os tópicos de comparação aqui. Depois, configure se cada empresa (incluindo MV Company) tem check (✓) ou X (✗) em cada tópico.
+                  <strong>💡 Dica:</strong> Crie os tópicos de comparação aqui. Depois, configure se cada empresa (incluindo Gogh Lab) tem check (✓) ou X (✗) em cada tópico.
                 </p>
               </div>
 
@@ -644,7 +644,7 @@ export default function ComparadorDashboardPage() {
                   label="Título do Rodapé"
                   value={footerContent.title}
                   onChange={(e) => setFooterContent({ ...footerContent, title: e.target.value })}
-                  placeholder="Ex: Pronto para trabalhar com a MV Company?"
+                  placeholder="Ex: Pronto para trabalhar com a Gogh Lab?"
                 />
                 <div>
                   <label className="block text-sm font-medium mb-2">Subtítulo</label>
@@ -742,9 +742,9 @@ export default function ComparadorDashboardPage() {
           )}
         </div>
 
-        {/* Companies Editor - MV Company + 2 Competitors */}
+        {/* Companies Editor - Gogh Lab + 2 Competitors */}
         <div className="space-y-6">
-          {/* MV Company - Now Editable */}
+          {/* Gogh Lab - Now Editable */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -756,14 +756,14 @@ export default function ComparadorDashboardPage() {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">MV Company</h2>
+                  <h2 className="text-xl font-bold text-gray-900">Gogh Lab</h2>
                   <p className="text-sm text-gray-500">Empresa principal</p>
                 </div>
               </div>
               {!editingMVCompany && (
                 <Button onClick={() => setEditingMVCompany(true)}>
                   <Edit2 size={18} className="mr-2" />
-                  Editar MV Company
+                  Editar Gogh Lab
                 </Button>
               )}
             </div>
@@ -774,7 +774,7 @@ export default function ComparadorDashboardPage() {
                   label="Nome da Empresa"
                   value={mvCompany.name}
                   onChange={(e) => setMvCompany({ ...mvCompany, name: e.target.value })}
-                  placeholder="Ex: MV Company"
+                  placeholder="Ex: Gogh Lab"
                 />
                 <div>
                   <label className="block text-sm font-medium mb-2">Logo da Empresa</label>
@@ -1007,7 +1007,7 @@ export default function ComparadorDashboardPage() {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-1">Salvar Todas as Alterações</h3>
               <p className="text-sm text-gray-500">
-                Salva tópicos globais, MV Company, empresas concorrentes e rodapé de uma vez
+                Salva tópicos globais, Gogh Lab, empresas concorrentes e rodapé de uma vez
               </p>
             </div>
             <Button
