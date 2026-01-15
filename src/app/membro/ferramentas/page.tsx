@@ -48,7 +48,7 @@ export default function ToolsPage() {
 
       try {
         // Buscar acessos já concedidos
-        const { data: accessData } = await supabase
+        const { data: accessData } = await (supabase as any)
           .from('tool_access_credentials')
           .select('*')
           .eq('user_id', user.id)
@@ -56,7 +56,7 @@ export default function ToolsPage() {
         setToolAccess(accessData || [])
 
         // Buscar tickets pendentes de ferramentas
-        const { data: ticketsData } = await supabase
+        const { data: ticketsData } = await (supabase as any)
           .from('support_tickets')
           .select('*')
           .eq('user_id', user.id)
@@ -89,7 +89,7 @@ export default function ToolsPage() {
       const toolName = toolType === 'canva' ? 'Canva Pro' : 'CapCut Pro'
       
       // Criar ticket de suporte
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('support_tickets')
         .insert({
           user_id: user.id,
@@ -102,10 +102,10 @@ export default function ToolsPage() {
       if (error) throw error
 
       // Criar mensagem inicial
-      await supabase
+      await (supabase as any)
         .from('support_messages')
         .insert({
-          ticket_id: (await supabase
+          ticket_id: (await (supabase as any)
             .from('support_tickets')
             .select('id')
             .eq('user_id', user.id)
@@ -120,7 +120,7 @@ export default function ToolsPage() {
       toast.success(`Solicitação enviada! Você receberá o acesso em até 24 horas.`)
       
       // Atualizar lista de tickets pendentes
-      const { data: ticketsData } = await supabase
+      const { data: ticketsData } = await (supabase as any)
         .from('support_tickets')
         .select('*')
         .eq('user_id', user.id)
