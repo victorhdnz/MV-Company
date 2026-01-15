@@ -103,9 +103,11 @@ export default function AnalyticsPage() {
         .eq('is_active', true)
         .order('created_at', { ascending: false })
 
-      const allPages = (services || []).map(s => ({ 
-        ...s, 
-        type: 'service',
+      const allPages = (services || []).map((s: { id: string; slug: string; name: string }) => ({ 
+        id: s.id,
+        slug: s.slug,
+        name: s.name,
+        type: 'service' as const,
         title: s.name 
       }))
       
