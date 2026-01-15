@@ -54,7 +54,7 @@ interface SessionData {
 
 export default function AnalyticsPage() {
   const router = useRouter()
-  const { isAuthenticated, isEditor, loading: authLoading, permissionsReady, emailIsAdmin } = useAuth()
+  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin } = useAuth()
   const supabase = createClient()
 
   // Estados
@@ -80,7 +80,7 @@ export default function AnalyticsPage() {
   }>>([])
 
   useEffect(() => {
-    if (!permissionsReady) return
+    if (authLoading) return
     
     const hasAccess = isEditor || emailIsAdmin
     
@@ -89,7 +89,7 @@ export default function AnalyticsPage() {
       return
     }
     loadPages()
-  }, [isAuthenticated, isEditor, permissionsReady, emailIsAdmin, router])
+  }, [isAuthenticated, isEditor, authLoading, emailIsAdmin, router])
 
   useEffect(() => {
     if (pages.length > 0 || pageType === 'homepage' || pageType === 'all') {

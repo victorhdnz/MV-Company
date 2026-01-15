@@ -44,7 +44,7 @@ const planOptions = [
 
 export default function MembrosPage() {
   const router = useRouter()
-  const { isAuthenticated, isEditor, loading: authLoading, permissionsReady, emailIsAdmin } = useAuth()
+  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin } = useAuth()
   const supabase = createClient()
 
   const [members, setMembers] = useState<Member[]>([])
@@ -56,7 +56,7 @@ export default function MembrosPage() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (!permissionsReady) return
+    if (authLoading) return
     
     const hasAccess = isEditor || emailIsAdmin
     
@@ -66,7 +66,7 @@ export default function MembrosPage() {
     }
     
     loadMembers()
-  }, [isAuthenticated, isEditor, permissionsReady, emailIsAdmin, router])
+  }, [isAuthenticated, isEditor, authLoading, emailIsAdmin, router])
 
   const loadMembers = async () => {
     try {

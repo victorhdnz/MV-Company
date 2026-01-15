@@ -11,14 +11,14 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 
 export default function LinkAggregatorsDashboard() {
-  const { isAuthenticated, isEditor, loading: authLoading, permissionsReady, emailIsAdmin } = useAuth();
+  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin } = useAuth();
   const router = useRouter();
   const supabase = createClient();
   const [aggregators, setAggregators] = useState<LinkAggregator[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!permissionsReady) return;
+    if (authLoading) return;
     
     const hasAccess = isEditor || emailIsAdmin;
     
@@ -28,7 +28,7 @@ export default function LinkAggregatorsDashboard() {
     }
 
     loadAggregators();
-  }, [isAuthenticated, isEditor, permissionsReady, emailIsAdmin, router]);
+  }, [isAuthenticated, isEditor, authLoading, emailIsAdmin, router]);
 
   const loadAggregators = async () => {
     try {

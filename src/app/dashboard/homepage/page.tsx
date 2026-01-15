@@ -268,7 +268,7 @@ const sectionLabels: Record<string, string> = {
 
 export default function HomepageEditorPage() {
   const router = useRouter()
-  const { isAuthenticated, isEditor, loading: authLoading, permissionsReady, emailIsAdmin } = useAuth()
+  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin } = useAuth()
   const supabase = createClient()
 
   const [loading, setLoading] = useState(true)
@@ -390,18 +390,23 @@ export default function HomepageEditorPage() {
   })
 
   useEffect(() => {
-    // Aguardar permissões estarem prontas antes de verificar
-    if (!permissionsReady) return
+    // Aguardar loading terminar
+    if (authLoading) return
     
     // Verificar autorização (por role ou por email admin)
     const hasAccess = isEditor || emailIsAdmin
     
-    if (!isAuthenticated || !hasAccess) {
+    if (!isAuthenticated) {
+      // Não autenticado - ir para login do dashboard
+      router.push('/dashboard')
+    } else if (!hasAccess) {
+      // Autenticado mas sem permissão
       router.push('/dashboard')
     } else {
+      // Tem acesso - carregar dados
       loadSettings()
     }
-  }, [isAuthenticated, isEditor, permissionsReady, emailIsAdmin, router])
+  }, [isAuthenticated, isEditor, authLoading, emailIsAdmin, router])
 
   const loadSettings = async () => {
     setLoading(true)
