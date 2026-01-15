@@ -4,12 +4,13 @@ import { cookies } from 'next/headers'
 import OpenAI from 'openai'
 import { Database } from '@/types/database.types'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
 export async function POST(request: Request) {
   try {
+    // Inicializar OpenAI dentro da função para evitar erro no build
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+
     const supabase = createRouteHandlerClient<Database>({ cookies })
     
     // Verificar autenticação
