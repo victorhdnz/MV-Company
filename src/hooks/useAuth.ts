@@ -27,7 +27,7 @@ export const useAuth = () => {
       // Se não existe, criar
       if (!existingProfile && checkError?.code === 'PGRST116') {
         // Selecionar apenas campos necessários após inserção
-        const { data: newProfile, error: insertError } = await supabase
+        const { data: newProfile, error: insertError } = await (supabase as any)
           .from('profiles')
           .insert({
             id: userId,
