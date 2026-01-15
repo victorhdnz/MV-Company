@@ -157,6 +157,9 @@ export default function HomepageEditorPage() {
   const [sectionOrder, setSectionOrder] = useState<string[]>([
     'hero',
     'video',
+    'trusted_by',
+    'features',
+    'award',
     'services',
     'comparison',
     'notifications',
@@ -368,12 +371,58 @@ export default function HomepageEditorPage() {
               order.push('pricing')
             }
           }
+          // Adicionar novas seções se não existirem
+          if (!order.includes('features')) {
+            // Adicionar 'features' após 'video' ou 'trusted_by'
+            const videoIndex = order.indexOf('video')
+            if (videoIndex >= 0) {
+              order.splice(videoIndex + 1, 0, 'features')
+            } else {
+              const heroIndex = order.indexOf('hero')
+              if (heroIndex >= 0) {
+                order.splice(heroIndex + 1, 0, 'features')
+              } else {
+                order.unshift('features')
+              }
+            }
+          }
+          if (!order.includes('trusted_by')) {
+            // Adicionar 'trusted_by' após 'video'
+            const videoIndex = order.indexOf('video')
+            if (videoIndex >= 0) {
+              order.splice(videoIndex + 1, 0, 'trusted_by')
+            } else {
+              const heroIndex = order.indexOf('hero')
+              if (heroIndex >= 0) {
+                order.splice(heroIndex + 1, 0, 'trusted_by')
+              } else {
+                order.unshift('trusted_by')
+              }
+            }
+          }
+          if (!order.includes('award')) {
+            // Adicionar 'award' após 'features'
+            const featuresIndex = order.indexOf('features')
+            if (featuresIndex >= 0) {
+              order.splice(featuresIndex + 1, 0, 'award')
+            } else {
+              const servicesIndex = order.indexOf('services')
+              if (servicesIndex >= 0) {
+                order.splice(servicesIndex, 0, 'award')
+              } else {
+                order.push('award')
+              }
+            }
+          }
           setSectionOrder(order)
         } else {
           // Se não houver ordem salva, usar a ordem padrão
           setSectionOrder([
             'hero',
             'video',
+            'trusted_by',
+            'features',
+            'award',
             'services',
             'comparison',
             'notifications',
@@ -384,7 +433,7 @@ export default function HomepageEditorPage() {
           ])
         }
         if (content.section_visibility) {
-          // Garantir que 'video', 'notifications', 'testimonials' e 'spline' tenham visibilidade definida
+          // Garantir que todas as seções tenham visibilidade definida
           const visibility = { ...content.section_visibility }
           if (visibility.video === undefined) {
             visibility.video = false // Desabilitado por padrão
@@ -400,6 +449,16 @@ export default function HomepageEditorPage() {
           }
           if (visibility.pricing === undefined) {
             visibility.pricing = false // Desabilitado por padrão até ser configurado
+          }
+          // Novas seções
+          if (visibility.features === undefined) {
+            visibility.features = true // Habilitado por padrão
+          }
+          if (visibility.trusted_by === undefined) {
+            visibility.trusted_by = true // Habilitado por padrão
+          }
+          if (visibility.award === undefined) {
+            visibility.award = true // Habilitado por padrão
           }
           setSectionVisibility(visibility)
         }
