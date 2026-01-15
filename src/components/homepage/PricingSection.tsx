@@ -9,7 +9,7 @@ interface PricingSectionProps {
   title?: string
   description?: string
   annualDiscount?: number
-  plans?: [PriceTier, PriceTier, PriceTier]
+  plans?: PriceTier[]
   whatsappNumber?: string
   featureCategories?: FeatureCategory[]
 }
@@ -27,20 +27,44 @@ export function PricingSection({
 
   if (!enabled || !plans) return null
 
-  const handlePlanSelect = (planId: string, cycle: BillingCycle, plan: PriceTier) => {
-    // Obter a mensagem apropriada baseada no ciclo de cobrança
-    const message = cycle === 'monthly' 
-      ? (plan.whatsappMessageMonthly || `Olá! Gostaria de contratar o plano ${plan.name} no plano mensal.`)
-      : (plan.whatsappMessageAnnually || `Olá! Gostaria de contratar o plano ${plan.name} no plano anual.`)
-    
-    // Obter número do WhatsApp (priorizar o configurado, senão usar padrão)
-    const phoneNumber = whatsappNumber?.replace(/\D/g, '') || '5534984136291'
-    
-    // Codificar a mensagem para URL
-    const encodedMessage = encodeURIComponent(message)
-    
-    // Redirecionar para WhatsApp
-    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank')
+  const handlePlanSelect = async (planId: string, cycle: BillingCycle, plan: PriceTier) => {
+    // Obter o Price ID do Stripe baseado no ciclo
+    const priceId = cycle === 'monthly' 
+      ? plan.stripePriceIdMonthly 
+      : plan.stripePriceIdAnnually
+
+    // Se tiver Price ID configurado, redirecionar para checkout do Stripe
+    if (priceId) {
+      try {
+        const response = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            priceId,
+            planId,
+            planName: plan.name,
+            billingCycle: cycle,
+          }),
+        })
+
+        const data = await response.json()
+
+        if (data.url) {
+          window.location.href = data.url
+        } else {
+          console.error('Erro ao criar sessão de checkout:', data.error)
+          alert('Erro ao processar pagamento. Tente novamente.')
+        }
+      } catch (error) {
+        console.error('Erro ao criar sessão de checkout:', error)
+        alert('Erro ao processar pagamento. Tente novamente.')
+      }
+    } else {
+      // Fallback: redirecionar para página de login/cadastro se não tiver Stripe configurado
+      window.location.href = `/login?plan=${planId}&cycle=${cycle}`
+    }
   }
 
   return (

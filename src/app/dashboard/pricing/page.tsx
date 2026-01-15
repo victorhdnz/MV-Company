@@ -31,8 +31,8 @@ interface PricingSettings {
   pricing_title?: string
   pricing_description?: string
   pricing_annual_discount?: number
-  pricing_plans?: [PriceTier, PriceTier, PriceTier]
-  pricing_whatsapp_number?: string
+  pricing_plans?: PriceTier[]
+  pricing_whatsapp_number?: string // Legado
   feature_categories?: FeatureCategory[]
 }
 
@@ -47,73 +47,50 @@ export default function PricingEditorPage() {
   const [featureCategories, setFeatureCategories] = useState<FeatureCategory[]>([])
   const [formData, setFormData] = useState<PricingSettings>({
     pricing_enabled: false,
-    pricing_title: 'Escolha o plano ideal para sua empresa',
-    pricing_description: 'Soluções completas de gestão digital para impulsionar seu negócio. Do básico ao enterprise, temos o plano certo para você.',
+    pricing_title: 'Escolha seu plano e comece a criar',
+    pricing_description: 'Acesse todos os agentes de IA, crie conteúdos incríveis e transforme sua presença digital com autonomia total.',
     pricing_annual_discount: 20,
     pricing_whatsapp_number: '',
     pricing_plans: [
       {
-        id: 'basico',
-        name: 'Básico',
-        description: 'Ideal para pequenas empresas que estão começando sua jornada digital.',
-        priceMonthly: 497,
-        priceAnnually: 4766,
+        id: 'gogh-essencial',
+        name: 'Gogh Essencial',
+        description: 'Acesso a todos os agentes de IA para criar conteúdos de vídeo, redes sociais e anúncios.',
+        priceMonthly: 97,
+        priceAnnually: 931,
         isPopular: false,
-        buttonLabel: 'Saiba mais',
+        buttonLabel: 'Começar agora',
         features: [
-          { name: 'Criação de site institucional', isIncluded: true },
-          { name: 'Gestão de redes sociais (3 plataformas)', isIncluded: true },
-          { name: 'Criação de conteúdo (8 posts/mês)', isIncluded: true },
-          { name: 'Relatórios mensais básicos', isIncluded: true },
+          { name: 'Agente de IA para Vídeos', isIncluded: true },
+          { name: 'Agente de IA para Redes Sociais', isIncluded: true },
+          { name: 'Agente de IA para Anúncios', isIncluded: true },
+          { name: 'Ideias e roteiros ilimitados', isIncluded: true },
           { name: 'Suporte por e-mail', isIncluded: true },
-          { name: 'Tráfego pago', isIncluded: false },
-          { name: 'Consultoria estratégica', isIncluded: false },
+          { name: 'Cursos de edição', isIncluded: false },
+          { name: 'Canva Pro + CapCut Pro', isIncluded: false },
         ],
-        whatsappMessageMonthly: 'Olá! Tenho interesse no plano Básico mensal. Gostaria de saber mais informações.',
-        whatsappMessageAnnually: 'Olá! Tenho interesse no plano Básico anual. Gostaria de saber mais informações.',
+        stripePriceIdMonthly: '', // Configurar no Stripe
+        stripePriceIdAnnually: '', // Configurar no Stripe
       },
       {
-        id: 'profissional',
-        name: 'Profissional',
-        description: 'Perfeito para empresas em crescimento que precisam de uma presença digital completa.',
-        priceMonthly: 997,
-        priceAnnually: 9565,
+        id: 'gogh-pro',
+        name: 'Gogh Pro',
+        description: 'Tudo do Essencial + cursos completos de edição + acesso ao Canva Pro e CapCut Pro.',
+        priceMonthly: 197,
+        priceAnnually: 1891,
         isPopular: true,
-        buttonLabel: 'Como iniciar',
+        buttonLabel: 'Assinar Pro',
         features: [
-          { name: 'Criação de site institucional', isIncluded: true },
-          { name: 'Gestão de redes sociais (5 plataformas)', isIncluded: true },
-          { name: 'Criação de conteúdo (16 posts/mês)', isIncluded: true },
-          { name: 'Tráfego pago (até R$ 1.000/mês)', isIncluded: true },
-          { name: 'Relatórios mensais detalhados', isIncluded: true },
-          { name: 'Suporte prioritário WhatsApp', isIncluded: true },
-          { name: 'Consultoria estratégica mensal', isIncluded: true },
-          { name: 'E-mail marketing', isIncluded: false },
+          { name: 'Tudo do plano Essencial', isIncluded: true },
+          { name: 'Cursos de edição de foto (Canva)', isIncluded: true },
+          { name: 'Cursos de edição de vídeo (CapCut)', isIncluded: true },
+          { name: 'Materiais e guias exclusivos', isIncluded: true },
+          { name: 'Acesso ao Canva Pro', isIncluded: true },
+          { name: 'Acesso ao CapCut Pro', isIncluded: true },
+          { name: 'Suporte prioritário', isIncluded: true },
         ],
-        whatsappMessageMonthly: 'Olá! Tenho interesse no plano Profissional mensal. Gostaria de saber como iniciar.',
-        whatsappMessageAnnually: 'Olá! Tenho interesse no plano Profissional anual. Gostaria de saber como iniciar.',
-      },
-      {
-        id: 'enterprise',
-        name: 'Enterprise',
-        description: 'Solução completa para grandes empresas que precisam de máxima performance e suporte dedicado.',
-        priceMonthly: 2497,
-        priceAnnually: 23965,
-        isPopular: false,
-        buttonLabel: 'Saiba mais',
-        features: [
-          { name: 'Criação de site institucional + e-commerce', isIncluded: true },
-          { name: 'Gestão de redes sociais (ilimitado)', isIncluded: true },
-          { name: 'Criação de conteúdo (ilimitado)', isIncluded: true },
-          { name: 'Tráfego pago (até R$ 5.000/mês)', isIncluded: true },
-          { name: 'Relatórios semanais detalhados', isIncluded: true },
-          { name: 'Suporte 24/7 dedicado', isIncluded: true },
-          { name: 'Consultoria estratégica semanal', isIncluded: true },
-          { name: 'E-mail marketing completo', isIncluded: true },
-          { name: 'Gerente de conta dedicado', isIncluded: true },
-        ],
-        whatsappMessageMonthly: 'Olá! Tenho interesse no plano Enterprise mensal. Gostaria de agendar uma conversa.',
-        whatsappMessageAnnually: 'Olá! Tenho interesse no plano Enterprise anual. Gostaria de agendar uma conversa.',
+        stripePriceIdMonthly: '', // Configurar no Stripe
+        stripePriceIdAnnually: '', // Configurar no Stripe
       },
     ],
   })
@@ -197,7 +174,7 @@ export default function PricingEditorPage() {
   const updatePlan = (index: number, field: keyof PriceTier, value: any) => {
     if (!formData.pricing_plans) return
     
-    const newPlans = [...formData.pricing_plans] as [PriceTier, PriceTier, PriceTier]
+    const newPlans = [...formData.pricing_plans]
     newPlans[index] = { ...newPlans[index], [field]: value }
     
     // Se o preço mensal foi alterado, calcular automaticamente o preço anual
@@ -216,7 +193,7 @@ export default function PricingEditorPage() {
   const updateFeature = (planIndex: number, featureIndex: number, field: keyof Feature, value: any) => {
     if (!formData.pricing_plans) return
     
-    const newPlans = [...formData.pricing_plans] as [PriceTier, PriceTier, PriceTier]
+    const newPlans = [...formData.pricing_plans]
     const newFeatures = [...newPlans[planIndex].features]
     newFeatures[featureIndex] = { ...newFeatures[featureIndex], [field]: value }
     newPlans[planIndex] = { ...newPlans[planIndex], features: newFeatures }
@@ -226,7 +203,7 @@ export default function PricingEditorPage() {
   const addFeature = (planIndex: number) => {
     if (!formData.pricing_plans) return
     
-    const newPlans = [...formData.pricing_plans] as [PriceTier, PriceTier, PriceTier]
+    const newPlans = [...formData.pricing_plans]
     newPlans[planIndex].features.push({ name: '', isIncluded: true })
     setFormData({ ...formData, pricing_plans: newPlans })
   }
@@ -234,7 +211,7 @@ export default function PricingEditorPage() {
   const removeFeature = (planIndex: number, featureIndex: number) => {
     if (!formData.pricing_plans) return
     
-    const newPlans = [...formData.pricing_plans] as [PriceTier, PriceTier, PriceTier]
+    const newPlans = [...formData.pricing_plans]
     newPlans[planIndex].features.splice(featureIndex, 1)
     setFormData({ ...formData, pricing_plans: newPlans })
   }
@@ -260,7 +237,7 @@ export default function PricingEditorPage() {
       const newPlans = formData.pricing_plans.map(plan => ({
         ...plan,
         category_values: (plan.category_values || []).filter(cv => cv.category_id !== categoryId),
-      })) as [PriceTier, PriceTier, PriceTier]
+      }))
       setFormData({ ...formData, pricing_plans: newPlans })
     }
   }
@@ -396,7 +373,7 @@ export default function PricingEditorPage() {
                             ...plan,
                             priceAnnually: Math.round(annualPrice)
                           }
-                        }) as [PriceTier, PriceTier, PriceTier] | undefined
+                        })
                         
                         return {
                           ...prev,
@@ -409,12 +386,11 @@ export default function PricingEditorPage() {
                     min="0"
                     max="100"
                   />
-                  <Input
-                    label="Número do WhatsApp para Redirecionamento"
-                    value={formData.pricing_whatsapp_number || ''}
-                    onChange={(e) => setFormData({ ...formData, pricing_whatsapp_number: e.target.value })}
-                    placeholder="Ex: 5534984136291"
-                  />
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="text-sm text-green-800">
+                      <strong>💳 Integração Stripe:</strong> Os Price IDs do Stripe serão configurados em cada plano abaixo. Após criar os produtos no Stripe, copie os Price IDs para os campos correspondentes.
+                    </p>
+                  </div>
                 </>
               )}
             </div>
@@ -577,27 +553,26 @@ export default function PricingEditorPage() {
                       onChange={(e) => updatePlan(planIndex, 'buttonLabel', e.target.value)}
                     />
                     
-                    {/* Mensagens WhatsApp */}
+                    {/* Stripe Price IDs */}
                     <div className="border-t pt-4 mt-4">
-                      <h4 className="font-semibold mb-3">Mensagens WhatsApp</h4>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Mensagem para Plano Mensal</label>
-                        <textarea
-                          value={plan.whatsappMessageMonthly || ''}
-                          onChange={(e) => updatePlan(planIndex, 'whatsappMessageMonthly', e.target.value)}
-                          placeholder="Mensagem que será enviada ao clicar no botão do plano mensal"
-                          rows={2}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                      <h4 className="font-semibold mb-3">💳 Configuração Stripe</h4>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                        <p className="text-xs text-blue-800">
+                          <strong>Como obter os Price IDs:</strong> No Stripe Dashboard, vá em Products → Crie o produto → Adicione os preços (mensal e anual) → Copie o ID de cada preço (começa com "price_").
+                        </p>
                       </div>
-                      <div className="mt-3">
-                        <label className="block text-sm font-medium mb-2">Mensagem para Plano Anual</label>
-                        <textarea
-                          value={plan.whatsappMessageAnnually || ''}
-                          onChange={(e) => updatePlan(planIndex, 'whatsappMessageAnnually', e.target.value)}
-                          placeholder="Mensagem que será enviada ao clicar no botão do plano anual"
-                          rows={2}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input
+                          label="Stripe Price ID (Mensal)"
+                          value={plan.stripePriceIdMonthly || ''}
+                          onChange={(e) => updatePlan(planIndex, 'stripePriceIdMonthly', e.target.value)}
+                          placeholder="price_xxxxxxxxxxxxx"
+                        />
+                        <Input
+                          label="Stripe Price ID (Anual)"
+                          value={plan.stripePriceIdAnnually || ''}
+                          onChange={(e) => updatePlan(planIndex, 'stripePriceIdAnnually', e.target.value)}
+                          placeholder="price_xxxxxxxxxxxxx"
                         />
                       </div>
                     </div>

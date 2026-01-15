@@ -35,9 +35,12 @@ export interface PriceTier {
   features: Feature[]
   // Valores das categorias de comparação (category_id -> text)
   category_values?: PlanCategoryValue[]
-  // Mensagens personalizadas para WhatsApp
+  // Mensagens personalizadas para WhatsApp (legado)
   whatsappMessageMonthly?: string
   whatsappMessageAnnually?: string
+  // Stripe Price IDs para checkout
+  stripePriceIdMonthly?: string
+  stripePriceIdAnnually?: string
 }
 
 export interface FeatureCategory {
@@ -47,8 +50,8 @@ export interface FeatureCategory {
 }
 
 export interface PricingComponentProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** The list of pricing tiers to display. Must contain exactly 3 tiers. */
-  plans: [PriceTier, PriceTier, PriceTier]
+  /** The list of pricing tiers to display. Can contain 2 or 3 tiers. */
+  plans: PriceTier[]
   /** The currently selected billing cycle. */
   billingCycle: BillingCycle
   /** Callback function when the user changes the billing cycle. */
@@ -98,9 +101,9 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
 }) => {
   const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false)
 
-  // Ensure exactly 3 plans are passed for the intended layout
-  if (plans.length !== 3) {
-    console.error("PricingComponent requires exactly 3 pricing tiers.")
+  // Ensure at least 1 plan is passed
+  if (!plans || plans.length === 0) {
+    console.error("PricingComponent requires at least 1 pricing tier.")
     return null
   }
 
@@ -147,8 +150,9 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
     : []
   
   // Render the list of pricing cards
+  const gridCols = plans.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' : 'md:grid-cols-3'
   const PricingCards = (
-    <div className="grid gap-8 md:grid-cols-3 md:gap-6 lg:gap-8">
+    <div className={`grid gap-8 ${gridCols} md:gap-6 lg:gap-8`}>
       {plans.map((plan) => {
         const isFeatured = plan.isPopular
         const currentPrice = billingCycle === 'monthly' ? plan.priceMonthly : plan.priceAnnually
