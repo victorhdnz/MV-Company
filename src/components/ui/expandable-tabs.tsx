@@ -98,10 +98,10 @@ export function ExpandableTabs({
               "relative flex items-center rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-300",
               selected === index
                 ? "bg-[#F7C948] text-[#0A0A0A]" // Amarelo Gogh Lab
-                : "text-gray-400 hover:bg-gray-800 hover:text-[#F7C948]"
+                : "text-gray-500 hover:bg-[#F7C948]/10 hover:text-[#0A0A0A]"
             )}
           >
-            <Icon size={20} className={selected === index ? "text-[#0A0A0A]" : "text-gray-400"} />
+            <Icon size={20} className={selected === index ? "text-[#0A0A0A]" : "text-gray-500"} />
             <AnimatePresence initial={false}>
               {selected === index && (
                 <motion.span

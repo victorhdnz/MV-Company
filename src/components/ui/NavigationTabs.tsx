@@ -85,7 +85,7 @@ export function NavigationTabs({ variant, pricingEnabled = true, className }: Na
       <ExpandableTabs
         tabs={tabs}
         onChange={handleTabChange}
-        className="bg-gray-900 border-gray-700"
+        className="bg-white border-[#F7C948]/30 shadow-lg"
       />
     </div>
   )

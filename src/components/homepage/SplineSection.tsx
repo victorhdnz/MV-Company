@@ -45,14 +45,14 @@ export const SplineSection = memo(function SplineSection({
     <FadeInSection>
       <section 
         ref={ref}
-        className="relative bg-black text-white py-16 md:py-24 px-4"
+        className="relative bg-[#F5F1E8] text-[#0A0A0A] py-16 md:py-24 px-4"
         style={{ minHeight: '600px' }}
       >
         <div className="container mx-auto max-w-7xl">
-          <div className="w-full h-[600px] md:h-[700px] bg-black/[0.96] relative overflow-hidden rounded-lg border border-gray-800 shadow-lg">
+          <div className="w-full h-[600px] md:h-[700px] bg-[#0A0A0A] relative overflow-hidden rounded-3xl border border-[#F7C948]/30 shadow-xl">
             <Spotlight
               className="-top-40 left-0 md:left-60 md:-top-20"
-              fill="white"
+              fill="#F7C948"
             />
             
             <div className="flex h-full flex-col md:flex-row relative z-10">
@@ -94,7 +94,7 @@ export const SplineSection = memo(function SplineSection({
                   </div>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-12 h-12 border-4 border-[#F7C948] border-t-transparent rounded-full animate-spin"></div>
                   </div>
                 )}
               </div>

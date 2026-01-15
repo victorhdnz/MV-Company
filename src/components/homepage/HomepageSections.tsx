@@ -74,7 +74,7 @@ export function HomepageSections({
     
     return (
       <FadeInSection>
-        <section className="relative bg-black text-white py-16 md:py-24 px-4 overflow-hidden">
+        <section className="relative bg-[#F5F1E8] text-[#0A0A0A] py-16 md:py-24 px-4 overflow-hidden">
           {homepageContent.hero_background_image && (
             <div className="absolute inset-0 z-0 opacity-20">
               <Image
@@ -90,7 +90,7 @@ export function HomepageSections({
             {homepageContent.hero_subtitle && (() => {
               const { firstPart, secondPart } = splitTextForHighlights(homepageContent.hero_subtitle)
               return (
-                <p className="text-2xl md:text-3xl lg:text-4xl text-white max-w-4xl mx-auto font-bold mb-6 leading-tight">
+                <p className="text-2xl md:text-3xl lg:text-4xl text-[#0A0A0A] max-w-4xl mx-auto font-bold mb-6 leading-tight">
                   <span className="inline-block relative z-0 mb-2 md:mb-0">
                     <Highlighter action="underline" color="#F7C948" isView={true}>
                       {firstPart}
@@ -111,8 +111,8 @@ export function HomepageSections({
               )
             })()}
             {homepageContent.hero_description && (
-              <p className="text-xl md:text-2xl lg:text-3xl text-white max-w-3xl mx-auto font-bold">
-                <AuroraText colors={["#FFFFFF", "#F7C948", "#FFD966", "#E5A800", "#FFFFFF"]} speed={1}>
+              <p className="text-xl md:text-2xl lg:text-3xl text-[#0A0A0A] max-w-3xl mx-auto font-bold">
+                <AuroraText colors={["#F7C948", "#E5A800", "#0A0A0A", "#F7C948", "#E5A800"]} speed={1}>
                   {homepageContent.hero_description}
                 </AuroraText>
               </p>
@@ -129,17 +129,17 @@ export function HomepageSections({
     
     return (
       <FadeInSection>
-        <section id="servicos" className="py-16 md:py-24 px-4">
+        <section id="servicos" className="py-16 md:py-24 px-4 bg-[#F5F1E8]">
           <div className="container mx-auto max-w-7xl">
             {(homepageContent.services_title || homepageContent.services_description) && (
               <div className="text-center mb-12">
                 {homepageContent.services_title && (
-                  <h2 className="text-3xl md:text-5xl font-semibold text-white mb-4 tracking-tight">
+                  <h2 className="text-3xl md:text-5xl font-semibold text-[#0A0A0A] mb-4 tracking-tight">
                     {homepageContent.services_title}
                   </h2>
                 )}
                 {homepageContent.services_description && (
-                  <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+                  <p className="text-lg text-gray-600 max-w-3xl mx-auto">
                     {homepageContent.services_description}
                   </p>
                 )}
@@ -155,11 +155,11 @@ export function HomepageSections({
               </div>
             ) : (
               <div className="text-center py-20">
-                <div className="inline-block bg-gray-900 rounded-full p-6 mb-4">
+                <div className="inline-block bg-[#F7C948]/20 rounded-full p-6 mb-4">
                   <span className="text-5xl">🚀</span>
                 </div>
-                <h2 className="text-2xl font-semibold text-white mb-2">Nenhum card de serviço configurado</h2>
-                <p className="text-gray-400">
+                <h2 className="text-2xl font-semibold text-[#0A0A0A] mb-2">Nenhum card de serviço configurado</h2>
+                <p className="text-gray-600">
                   Adicione cards de serviços no editor da homepage.
                 </p>
               </div>
@@ -176,21 +176,21 @@ export function HomepageSections({
     
     return (
       <FadeInSection>
-        <section id="comparison-section" className="py-16 md:py-24 px-4 scroll-mt-24">
+        <section id="comparison-section" className="py-16 md:py-24 px-4 scroll-mt-24 bg-[#F5F1E8]">
           <div className="container mx-auto max-w-4xl">
             <Link href={homepageContent.comparison_cta_link || "/comparar"} prefetch={true}>
-              <div className="relative h-[300px] md:h-[400px] rounded-3xl overflow-hidden bg-[#0A0A0A] border border-gray-800 hover:border-[#F7C948] transition-all duration-300 group">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1A] via-[#0A0A0A] to-black" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(247,201,72,0.05),transparent_50%)]" />
+              <div className="relative h-[300px] md:h-[400px] rounded-3xl overflow-hidden bg-white border border-[#F7C948]/30 hover:border-[#F7C948] hover:shadow-xl transition-all duration-300 group">
+                <div className="absolute inset-0 bg-gradient-to-br from-white via-[#FBF8F3] to-[#F5F1E8]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(247,201,72,0.1),transparent_50%)]" />
                 <div className="relative h-full flex flex-col justify-center items-center p-8 text-center">
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-[#F7C948]/10 backdrop-blur-md border border-[#F7C948]/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <GitCompare size={40} className="text-[#F7C948]" />
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-[#F7C948] backdrop-blur-md border border-[#E5A800] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                    <GitCompare size={40} className="text-[#0A0A0A]" />
                   </div>
-                  <h2 className="text-3xl md:text-4xl font-semibold text-white mb-4 tracking-tight">
+                  <h2 className="text-3xl md:text-4xl font-semibold text-[#0A0A0A] mb-4 tracking-tight">
                     {homepageContent.comparison_cta_title || 'Compare a Gogh Lab'}
                   </h2>
                   {homepageContent.comparison_cta_description && (
-                    <p className="text-white/80 text-lg md:text-xl font-light max-w-2xl">
+                    <p className="text-gray-600 text-lg md:text-xl font-light max-w-2xl">
                       {homepageContent.comparison_cta_description}
                     </p>
                   )}
