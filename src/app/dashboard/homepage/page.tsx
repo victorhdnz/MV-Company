@@ -403,7 +403,7 @@ export default function HomepageEditorPage() {
     setLoading(true)
     try {
       // Buscar dados diretamente do banco para garantir que temos site_logo
-      const { data: rawData, error: rawError } = await supabase
+      const { data: rawData, error: rawError } = await (supabase as any)
         .from('site_settings')
         .select('*')
         .eq('key', 'general')
@@ -658,7 +658,7 @@ export default function HomepageEditorPage() {
       }
       
       // FALLBACK: Atualizar campos diretamente caso o helper não funcione
-      const { error: directError } = await supabase
+      const { error: directError } = await (supabase as any)
         .from('site_settings')
         .update({ 
           site_logo: formData.hero_logo || null,
