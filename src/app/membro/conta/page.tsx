@@ -50,22 +50,38 @@ export default function AccountPage() {
     
     setSaving(true)
     try {
-      // Usar upsert para garantir que funcione mesmo se o profile não existir
-      const { error } = await supabase
+      // Tentar update primeiro
+      const { data, error } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id,
-          email: user.email || '',
+        .update({
           full_name: fullName || null,
           phone: phone || null,
           updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'id'
         })
+        .eq('id', user.id)
+        .select()
+        .single()
 
       if (error) {
-        console.error('Erro Supabase:', error)
-        throw error
+        // Se não encontrou o profile, criar um novo
+        if (error.code === 'PGRST116') {
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: user.id,
+              email: user.email || '',
+              full_name: fullName || null,
+              phone: phone || null
+            })
+          
+          if (insertError) {
+            console.error('Erro ao inserir:', insertError)
+            throw insertError
+          }
+        } else {
+          console.error('Erro ao atualizar:', error)
+          throw error
+        }
       }
       
       toast.success('Perfil atualizado com sucesso!')
