@@ -70,7 +70,7 @@ export default function MembrosPage() {
       setLoading(true)
       
       // Buscar todos os profiles
-      const { data: profiles, error: profilesError } = await supabase
+      const { data: profiles, error: profilesError } = await (supabase as any)
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false })
@@ -78,7 +78,7 @@ export default function MembrosPage() {
       if (profilesError) throw profilesError
 
       // Buscar todas as assinaturas ativas
-      const { data: subscriptions, error: subsError } = await supabase
+      const { data: subscriptions, error: subsError } = await (supabase as any)
         .from('subscriptions')
         .select('*')
         .in('status', ['active', 'trialing'])

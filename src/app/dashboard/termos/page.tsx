@@ -306,7 +306,7 @@ export default function DashboardTermsPage() {
   const loadTerms = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('site_terms')
         .select('*')
         .order('key')
@@ -323,14 +323,14 @@ export default function DashboardTermsPage() {
           icon: config.icon,
         }))
 
-        const { error: insertError } = await supabase
+        const { error: insertError } = await (supabase as any)
           .from('site_terms')
           .insert(defaultTerms)
 
         if (insertError && insertError.code !== '42P01') {
           console.error('Erro ao criar termos padrão:', insertError)
         } else {
-          const { data: newData } = await supabase
+          const { data: newData } = await (supabase as any)
             .from('site_terms')
             .select('*')
             .order('key')
@@ -342,7 +342,7 @@ export default function DashboardTermsPage() {
         }
       } else {
         // Verificar se todos os termos padrão existem
-        const existingKeys = data.map(t => t.key)
+        const existingKeys = data.map((t: any) => t.key)
         const missingTerms = TERMS_CONFIG.filter(config => !existingKeys.includes(config.key))
         
         if (missingTerms.length > 0) {
@@ -354,7 +354,7 @@ export default function DashboardTermsPage() {
             icon: config.icon,
           }))
 
-          const { error: insertError } = await supabase
+          const { error: insertError } = await (supabase as any)
             .from('site_terms')
             .insert(termsToInsert)
 
@@ -362,7 +362,7 @@ export default function DashboardTermsPage() {
             console.error('Erro ao criar termos faltantes:', insertError)
           } else {
             // Recarregar termos após inserir os faltantes
-            const { data: updatedData } = await supabase
+            const { data: updatedData } = await (supabase as any)
               .from('site_terms')
               .select('*')
               .order('key')
@@ -404,7 +404,7 @@ export default function DashboardTermsPage() {
       setSaving(true)
       const content = buildContentFromSections(sections)
       
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('site_terms')
         .update({
           title: term.title,
@@ -486,7 +486,7 @@ export default function DashboardTermsPage() {
       }
       
       // Verificar se já existe
-      const { data: existing, error: checkError } = await supabase
+      const { data: existing, error: checkError } = await (supabase as any)
         .from('site_terms')
         .select('key')
         .eq('key', key)
@@ -504,7 +504,7 @@ export default function DashboardTermsPage() {
       // Construir conteúdo a partir das seções criadas
       const content = buildContentFromNewTermSections(newTermSections, newTerm.title)
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('site_terms')
         .insert({
           key,
@@ -546,7 +546,7 @@ export default function DashboardTermsPage() {
     if (!confirm('Tem certeza que deseja excluir este termo? Esta ação não pode ser desfeita.')) return
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('site_terms')
         .delete()
         .eq('key', termKey)

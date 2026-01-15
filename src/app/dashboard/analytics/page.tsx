@@ -97,7 +97,7 @@ export default function AnalyticsPage() {
   // Carregar páginas (serviços)
   const loadPages = async () => {
     try {
-      const { data: services } = await supabase
+      const { data: services } = await (supabase as any)
         .from('services')
         .select('id, slug, name')
         .eq('is_active', true)
@@ -497,7 +497,7 @@ export default function AnalyticsPage() {
           rpcParams.p_page_id = selectedPageId
         }
 
-        const { data: deletedCount, error: rpcError } = await supabase
+        const { data: deletedCount, error: rpcError } = await (supabase as any)
           .rpc('delete_page_analytics', rpcParams)
 
         if (!rpcError && deletedCount !== null) {
@@ -517,7 +517,7 @@ export default function AnalyticsPage() {
       }
 
       // Método alternativo: deletar em lotes usando IDs
-      let selectQuery = supabase
+      let selectQuery = (supabase as any)
         .from('page_analytics')
         .select('id')
       
@@ -557,7 +557,7 @@ export default function AnalyticsPage() {
       for (let i = 0; i < ids.length; i += batchSize) {
         const batch = ids.slice(i, i + batchSize)
         try {
-          const { error: deleteError, count } = await supabase
+          const { error: deleteError, count } = await (supabase as any)
             .from('page_analytics')
             .delete({ count: 'exact' })
             .in('id', batch)
