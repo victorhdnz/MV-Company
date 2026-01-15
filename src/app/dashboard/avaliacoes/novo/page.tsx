@@ -66,11 +66,17 @@ export default function NovaAvaliacao() {
     try {
       setLoading(true)
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('service_testimonials')
         .insert({
-          ...formData,
           service_id: formData.service_id || null,
+          client_name: formData.client_name,
+          client_company: formData.client_company,
+          client_photo: formData.client_photo,
+          rating: formData.rating,
+          testimonial_text: formData.testimonial_text,
+          is_featured: formData.is_featured,
+          is_active: formData.is_active,
         })
 
       if (error) throw error
