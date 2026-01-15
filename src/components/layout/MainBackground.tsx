@@ -13,6 +13,15 @@ export function MainBackground() {
     
     if (!main) return
 
+    // Páginas que gerenciam seu próprio background (área de membros, login)
+    const memberRoutes = ['/membro', '/login', '/auth']
+    const isMemberRoute = memberRoutes.some(route => pathname.startsWith(route))
+    
+    if (isMemberRoute) {
+      // Não aplicar estilos - deixar o componente gerenciar
+      return
+    }
+
     // Se estiver na página inicial, usar preto como base (seções terão suas próprias cores)
     if (pathname === '/') {
       main.style.backgroundColor = '#000000'

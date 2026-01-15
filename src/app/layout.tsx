@@ -1,11 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
 import { PageTransition } from '@/components/layout/PageTransition'
-import { MainBackground } from '@/components/layout/MainBackground'
-import { ConditionalWhatsAppFloat } from '@/components/layout/ConditionalWhatsAppFloat'
+import { ConditionalLayout } from '@/components/layout/ConditionalLayout'
 import { ScrollEnabler } from '@/components/layout/ScrollEnabler'
 import { Toaster } from 'react-hot-toast'
 import { getSiteUrl } from '@/lib/utils/siteUrl'
@@ -246,15 +243,13 @@ export default function RootLayout({
         <ScrollEnabler />
         <Providers>
           <NotFoundProvider>
-            <MainBackground />
-            <Header />
-            <PageTransition>
-              <main className="min-h-screen relative">
-                {children}
-              </main>
-            </PageTransition>
-            <Footer />
-            <ConditionalWhatsAppFloat />
+            <ConditionalLayout>
+              <PageTransition>
+                <main className="min-h-screen relative">
+                  {children}
+                </main>
+              </PageTransition>
+            </ConditionalLayout>
             <Toaster
               position="top-right"
               toastOptions={{
