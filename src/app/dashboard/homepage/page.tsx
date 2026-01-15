@@ -97,6 +97,20 @@ interface HomepageSettings {
   spline_description?: string
   spline_scene_url?: string
 
+  // Seção Features (O que oferecemos)
+  features_enabled?: boolean
+  features_title?: string
+  features_description?: string
+
+  // Seção Trusted By (Plataformas que utilizamos)
+  trusted_by_enabled?: boolean
+  trusted_by_title?: string
+  trusted_by_subtitle?: string
+
+  // Seção Award (Medalha de pioneiros)
+  award_enabled?: boolean
+  award_with_video_enabled?: boolean
+
   section_order?: string[]
   section_visibility?: Record<string, boolean>
 }
@@ -105,6 +119,9 @@ interface HomepageSettings {
 const sectionIcons: Record<string, string> = {
   hero: '🎯',
   video: '🎥',
+  features: '✨',
+  trusted_by: '🤝',
+  award: '🏆',
   services: '📦',
   comparison: '⚖️',
   notifications: '🔔',
@@ -117,6 +134,9 @@ const sectionIcons: Record<string, string> = {
 const sectionLabels: Record<string, string> = {
   hero: 'Hero (Principal)',
   video: 'Vídeo (Sobre Nós)',
+  features: 'O Que Oferecemos (Features)',
+  trusted_by: 'Plataformas (Logo Carousel)',
+  award: 'Medalha de Pioneiros',
   services: 'Nossos Serviços',
   comparison: 'Comparação (CTA)',
   notifications: 'Notificações (Prova Social)',
@@ -204,6 +224,20 @@ export default function HomepageEditorPage() {
     spline_title: 'O Futuro da Sua Empresa',
     spline_description: 'Estamos aqui para ajudar sua empresa a evoluir e crescer no mundo digital. Com tecnologia de ponta e soluções inovadoras, transformamos sua presença online e impulsionamos seus resultados.',
     spline_scene_url: 'https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode',
+
+    // Features - O que oferecemos
+    features_enabled: true,
+    features_title: 'O que oferecemos',
+    features_description: 'Ferramentas e recursos completos para criadores de conteúdo',
+
+    // Trusted By - Plataformas que utilizamos
+    trusted_by_enabled: true,
+    trusted_by_title: 'Utilizamos as melhores ferramentas',
+    trusted_by_subtitle: 'Tecnologias de ponta para entregar resultados excepcionais',
+
+    // Award - Medalha de pioneiros
+    award_enabled: true,
+    award_with_video_enabled: true,
   })
 
   useEffect(() => {
@@ -822,6 +856,107 @@ export default function HomepageEditorPage() {
                     <a href="https://spline.design" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                       spline.design
                     </a>
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        )
+      case 'features':
+        return (
+          <div className="space-y-4">
+            <Switch
+              label="Habilitar Seção Features"
+              checked={formData.features_enabled ?? true}
+              onCheckedChange={(checked) => setFormData({ ...formData, features_enabled: checked })}
+            />
+            {formData.features_enabled && (
+              <>
+                <Input
+                  label="Título da Seção"
+                  value={formData.features_title || ''}
+                  onChange={(e) => setFormData({ ...formData, features_title: e.target.value })}
+                  placeholder="Ex: O que oferecemos"
+                />
+                <div>
+                  <label className="block text-sm font-medium mb-2">Descrição</label>
+                  <textarea
+                    value={formData.features_description || ''}
+                    onChange={(e) => setFormData({ ...formData, features_description: e.target.value })}
+                    placeholder="Ex: Ferramentas e recursos completos para criadores de conteúdo"
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-sm text-amber-800">
+                    <strong>✨ Dica:</strong> Esta seção exibe automaticamente os principais recursos da plataforma:
+                    CapCut Pro, Canva Pro, Agentes de IA, Cursos e mais.
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        )
+      case 'trusted_by':
+        return (
+          <div className="space-y-4">
+            <Switch
+              label="Habilitar Seção Plataformas"
+              checked={formData.trusted_by_enabled ?? true}
+              onCheckedChange={(checked) => setFormData({ ...formData, trusted_by_enabled: checked })}
+            />
+            {formData.trusted_by_enabled && (
+              <>
+                <Input
+                  label="Título da Seção"
+                  value={formData.trusted_by_title || ''}
+                  onChange={(e) => setFormData({ ...formData, trusted_by_title: e.target.value })}
+                  placeholder="Ex: Utilizamos as melhores ferramentas"
+                />
+                <Input
+                  label="Subtítulo"
+                  value={formData.trusted_by_subtitle || ''}
+                  onChange={(e) => setFormData({ ...formData, trusted_by_subtitle: e.target.value })}
+                  placeholder="Ex: Tecnologias de ponta para entregar resultados excepcionais"
+                />
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-sm text-amber-800">
+                    <strong>🤝 Informação:</strong> Esta seção exibe um carrossel animado com os logos das 
+                    plataformas e tecnologias utilizadas: Canva, CapCut, OpenAI, Stripe, Google, etc.
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        )
+      case 'award':
+        return (
+          <div className="space-y-4">
+            <Switch
+              label="Habilitar Medalha de Pioneiros"
+              checked={formData.award_enabled ?? true}
+              onCheckedChange={(checked) => setFormData({ ...formData, award_enabled: checked })}
+            />
+            {formData.award_enabled && (
+              <>
+                <Switch
+                  label="Mostrar medalha ao lado do vídeo"
+                  checked={formData.award_with_video_enabled ?? true}
+                  onCheckedChange={(checked) => setFormData({ ...formData, award_with_video_enabled: checked })}
+                />
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-sm text-amber-800">
+                    <strong>🏆 Informação:</strong> A medalha destaca a Gogh Lab como pioneira no Brasil em oferecer 
+                    uma plataforma completa com agentes de IA, cursos profissionais e acesso às melhores ferramentas 
+                    de criação em uma única assinatura.
+                  </p>
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>💡 Dica:</strong> Se a opção "Mostrar ao lado do vídeo" estiver ativa, a medalha 
+                    aparecerá ao lado direito da seção de vídeo (Sobre Nós). Caso contrário, aparecerá como 
+                    uma seção standalone.
                   </p>
                 </div>
               </>
