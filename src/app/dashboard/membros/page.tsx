@@ -235,7 +235,7 @@ export default function MembrosPage() {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <DashboardNavigation />
+        <DashboardNavigation title="Gerenciar Membros" />
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-20">
             <LoadingSpinner size="md" />
@@ -247,20 +247,9 @@ export default function MembrosPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardNavigation />
+      <DashboardNavigation title="Gerenciar Membros" subtitle="Visualize e gerencie os usuários cadastrados" />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Users className="w-8 h-8 text-gray-700" />
-            <h1 className="text-2xl font-bold text-gray-900">Gerenciar Membros</h1>
-          </div>
-          <p className="text-gray-600">
-            Visualize e gerencie os usuários cadastrados e seus planos
-          </p>
-        </div>
-
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-xl p-4 border border-gray-200">
