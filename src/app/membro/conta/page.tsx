@@ -43,24 +43,35 @@ export default function AccountPage() {
   }, [profile])
 
   const handleSaveProfile = async () => {
-    if (!user) return
+    if (!user) {
+      toast.error('Você precisa estar logado')
+      return
+    }
     
     setSaving(true)
     try {
+      // Usar upsert para garantir que funcione mesmo se o profile não existir
       const { error } = await supabase
         .from('profiles')
-        .update({
-          full_name: fullName,
-          phone: phone,
+        .upsert({
+          id: user.id,
+          email: user.email || '',
+          full_name: fullName || null,
+          phone: phone || null,
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'id'
         })
-        .eq('id', user.id)
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro Supabase:', error)
+        throw error
+      }
+      
       toast.success('Perfil atualizado com sucesso!')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar:', error)
-      toast.error('Erro ao salvar perfil')
+      toast.error(error?.message || 'Erro ao salvar perfil')
     } finally {
       setSaving(false)
     }

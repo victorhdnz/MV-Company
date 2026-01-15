@@ -22,6 +22,7 @@ import {
   ExternalLink
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { createClient } from '@/lib/supabase/client'
 
 interface MemberLayoutProps {
   children: ReactNode
@@ -70,11 +71,34 @@ const accountMenuItem = {
 }
 
 export default function MemberLayout({ children }: MemberLayoutProps) {
-  const { user, profile, subscription, loading, isAuthenticated, hasActiveSubscription, signOut } = useAuth()
+  const { user, profile, subscription, loading, isAuthenticated, hasActiveSubscription } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [openingPortal, setOpeningPortal] = useState(false)
+  const [siteLogo, setSiteLogo] = useState<string | null>(null)
+  const [signingOut, setSigningOut] = useState(false)
+  const supabase = createClient()
+
+  // Carregar logo do site
+  useEffect(() => {
+    const loadLogo = async () => {
+      try {
+        const { data } = await supabase
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'hero_logo')
+          .single()
+        
+        if (data?.value) {
+          setSiteLogo(data.value)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar logo:', error)
+      }
+    }
+    loadLogo()
+  }, [supabase])
 
   // Abrir portal de gerenciamento do Stripe
   const handleManageSubscription = async () => {
@@ -137,8 +161,15 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
   }
 
   const handleSignOut = async () => {
-    await signOut()
-    router.push('/')
+    try {
+      setSigningOut(true)
+      await supabase.auth.signOut()
+      // Usar window.location para garantir que a página recarregue completamente
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Erro ao sair:', error)
+      setSigningOut(false)
+    }
   }
 
   return (
@@ -167,13 +198,20 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
           {/* Logo / Header */}
           <div className="p-6 border-b border-gogh-grayLight">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gogh-yellow rounded-xl flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-gogh-black" />
-              </div>
-              <div>
-                <h1 className="font-bold text-gogh-black">Gogh Lab</h1>
-                <p className="text-xs text-gogh-grayDark">Área de Membros</p>
-              </div>
+              {siteLogo ? (
+                <Image
+                  src={siteLogo}
+                  alt="Logo"
+                  width={40}
+                  height={40}
+                  className="rounded-xl"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-gogh-yellow rounded-xl flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-gogh-black" />
+                </div>
+              )}
+              <p className="text-xs text-gogh-grayDark">Área de Membros</p>
             </Link>
           </div>
 
@@ -291,10 +329,15 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
             )}
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              disabled={signingOut}
+              className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
             >
-              <LogOut className="w-5 h-5" />
-              <span>Sair</span>
+              {signingOut ? (
+                <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <LogOut className="w-5 h-5" />
+              )}
+              <span>{signingOut ? 'Saindo...' : 'Sair'}</span>
             </button>
           </div>
         </div>
@@ -312,8 +355,17 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
               <Menu className="w-6 h-6 text-gogh-black" />
             </button>
             <Link href="/" className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-gogh-yellow" />
-              <span className="font-bold text-gogh-black">Gogh Lab</span>
+              {siteLogo ? (
+                <Image
+                  src={siteLogo}
+                  alt="Logo"
+                  width={32}
+                  height={32}
+                  className="rounded-lg"
+                />
+              ) : (
+                <Sparkles className="w-5 h-5 text-gogh-yellow" />
+              )}
             </Link>
             <div className="w-10" /> {/* Spacer */}
           </div>
