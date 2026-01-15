@@ -125,7 +125,7 @@ function EditCatalogContent() {
   const loadCatalog = async () => {
     if (!versionId) return
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('product_catalogs')
         .select('*')
         .eq('id', versionId)
@@ -186,7 +186,7 @@ function EditCatalogContent() {
         }
         
         // Salvar automaticamente a estrutura pré-definida
-        await supabase
+        await (supabase as any)
           .from('product_catalogs')
           .update({ content: defaultContent })
           .eq('id', versionId)
@@ -266,7 +266,7 @@ function EditCatalogContent() {
 
   const loadProducts = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('products')
         .select('*')
         .eq('is_active', true)
@@ -302,7 +302,7 @@ function EditCatalogContent() {
         sections: [],
       }
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('product_catalogs')
         .update({
           title: settings.title,
