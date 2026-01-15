@@ -1,0 +1,363 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { createClient } from '@/lib/supabase/client'
+import { motion } from 'framer-motion'
+import { 
+  Wrench, 
+  CheckCircle2, 
+  Clock, 
+  Send,
+  AlertCircle,
+  Palette,
+  Scissors,
+  ExternalLink,
+  MessageSquare
+} from 'lucide-react'
+import toast from 'react-hot-toast'
+
+interface ToolAccess {
+  id: string
+  tool_type: 'canva' | 'capcut'
+  email: string
+  access_granted_at: string
+  is_active: boolean
+}
+
+interface SupportTicket {
+  id: string
+  ticket_type: string
+  status: string
+  subject: string
+  created_at: string
+}
+
+export default function ToolsPage() {
+  const { user } = useAuth()
+  const [toolAccess, setToolAccess] = useState<ToolAccess[]>([])
+  const [pendingTickets, setPendingTickets] = useState<SupportTicket[]>([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState<string | null>(null)
+  
+  const supabase = createClient()
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) return
+
+      try {
+        // Buscar acessos já concedidos
+        const { data: accessData } = await supabase
+          .from('tool_access_credentials')
+          .select('*')
+          .eq('user_id', user.id)
+
+        setToolAccess(accessData || [])
+
+        // Buscar tickets pendentes de ferramentas
+        const { data: ticketsData } = await supabase
+          .from('support_tickets')
+          .select('*')
+          .eq('user_id', user.id)
+          .in('ticket_type', ['canva_access', 'capcut_access'])
+          .in('status', ['open', 'in_progress'])
+
+        setPendingTickets(ticketsData || [])
+      } catch (error) {
+        console.error('Error fetching tools data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [user])
+
+  // Verificar se já tem acesso ou ticket pendente
+  const hasCanvaAccess = toolAccess.some(t => t.tool_type === 'canva' && t.is_active)
+  const hasCapcutAccess = toolAccess.some(t => t.tool_type === 'capcut' && t.is_active)
+  const hasPendingCanva = pendingTickets.some(t => t.ticket_type === 'canva_access')
+  const hasPendingCapcut = pendingTickets.some(t => t.ticket_type === 'capcut_access')
+
+  // Solicitar acesso
+  const requestAccess = async (toolType: 'canva' | 'capcut') => {
+    if (!user) return
+    setSubmitting(toolType)
+
+    try {
+      const toolName = toolType === 'canva' ? 'Canva Pro' : 'CapCut Pro'
+      
+      // Criar ticket de suporte
+      const { error } = await supabase
+        .from('support_tickets')
+        .insert({
+          user_id: user.id,
+          ticket_type: `${toolType}_access`,
+          subject: `Solicitação de acesso ao ${toolName}`,
+          status: 'open',
+          priority: 'normal'
+        })
+
+      if (error) throw error
+
+      // Criar mensagem inicial
+      await supabase
+        .from('support_messages')
+        .insert({
+          ticket_id: (await supabase
+            .from('support_tickets')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('ticket_type', `${toolType}_access`)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single()).data?.id,
+          sender_id: user.id,
+          content: `Olá! Gostaria de solicitar acesso ao ${toolName}. Aguardo instruções para receber as credenciais.`
+        })
+
+      toast.success(`Solicitação enviada! Você receberá o acesso em até 24 horas.`)
+      
+      // Atualizar lista de tickets pendentes
+      const { data: ticketsData } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .eq('user_id', user.id)
+        .in('ticket_type', ['canva_access', 'capcut_access'])
+        .in('status', ['open', 'in_progress'])
+
+      setPendingTickets(ticketsData || [])
+    } catch (error) {
+      console.error('Error requesting access:', error)
+      toast.error('Erro ao enviar solicitação. Tente novamente.')
+    } finally {
+      setSubmitting(null)
+    }
+  }
+
+  const tools = [
+    {
+      id: 'canva',
+      name: 'Canva Pro',
+      description: 'Crie designs profissionais com templates premium, elementos exclusivos e recursos avançados de edição.',
+      icon: Palette,
+      color: 'from-purple-500 to-indigo-600',
+      bgColor: 'bg-purple-100',
+      iconColor: 'text-purple-600',
+      hasAccess: hasCanvaAccess,
+      hasPending: hasPendingCanva,
+      accessData: toolAccess.find(t => t.tool_type === 'canva'),
+      features: [
+        'Templates premium ilimitados',
+        'Remoção de fundo com 1 clique',
+        'Kit de marca',
+        'Magic Resize',
+        '100GB de armazenamento'
+      ]
+    },
+    {
+      id: 'capcut',
+      name: 'CapCut Pro',
+      description: 'Editor de vídeo profissional com efeitos avançados, templates virais e sem marca d\'água.',
+      icon: Scissors,
+      color: 'from-emerald-500 to-teal-600',
+      bgColor: 'bg-emerald-100',
+      iconColor: 'text-emerald-600',
+      hasAccess: hasCapcutAccess,
+      hasPending: hasPendingCapcut,
+      accessData: toolAccess.find(t => t.tool_type === 'capcut'),
+      features: [
+        'Sem marca d\'água',
+        'Efeitos e transições premium',
+        'Templates de tendência',
+        'Legendas automáticas',
+        'Exportação em 4K'
+      ]
+    }
+  ]
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-gogh-yellow border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gogh-grayDark">Carregando ferramentas...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gogh-black mb-2">
+          Ferramentas Pro
+        </h1>
+        <p className="text-gogh-grayDark">
+          Acesse as melhores ferramentas de criação incluídas na sua assinatura.
+        </p>
+      </div>
+
+      {/* Info Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-r from-gogh-yellow/20 to-amber-100 rounded-xl p-5 border border-gogh-yellow/30"
+      >
+        <div className="flex items-start gap-4">
+          <div className="p-2 bg-gogh-yellow rounded-lg">
+            <AlertCircle className="w-5 h-5 text-gogh-black" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gogh-black mb-1">Como funciona?</h3>
+            <p className="text-sm text-gogh-grayDark">
+              Ao solicitar acesso, nossa equipe irá adicionar você às contas Pro compartilhadas.
+              Você receberá um e-mail com as instruções de acesso em até <strong>24 horas úteis</strong>.
+              O acesso é válido enquanto sua assinatura estiver ativa.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Tools Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {tools.map((tool, index) => (
+          <motion.div
+            key={tool.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-white rounded-xl border border-gogh-grayLight shadow-sm overflow-hidden"
+          >
+            {/* Tool Header */}
+            <div className={`bg-gradient-to-r ${tool.color} p-6 text-white`}>
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                  <tool.icon className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">{tool.name}</h3>
+                  {tool.hasAccess && (
+                    <span className="inline-flex items-center gap-1 text-xs bg-white/20 px-2 py-0.5 rounded-full mt-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Acesso liberado
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Tool Content */}
+            <div className="p-6">
+              <p className="text-gogh-grayDark text-sm mb-4">
+                {tool.description}
+              </p>
+
+              {/* Features */}
+              <ul className="space-y-2 mb-6">
+                {tool.features.map((feature, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="w-4 h-4 text-gogh-yellow flex-shrink-0" />
+                    <span className="text-gogh-grayDark">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Action Button */}
+              {tool.hasAccess ? (
+                <div className="space-y-3">
+                  <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                    <div className="flex items-center gap-2 text-emerald-700 mb-2">
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span className="font-medium">Acesso Ativo</span>
+                    </div>
+                    <p className="text-sm text-emerald-600">
+                      Email: <span className="font-mono">{tool.accessData?.email}</span>
+                    </p>
+                    <p className="text-xs text-emerald-500 mt-1">
+                      Liberado em {new Date(tool.accessData?.access_granted_at || '').toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                  <a
+                    href={tool.id === 'canva' ? 'https://canva.com' : 'https://capcut.com'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gogh-black text-white rounded-lg hover:bg-gogh-black/90 transition-colors"
+                  >
+                    Acessar {tool.name}
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              ) : tool.hasPending ? (
+                <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                  <div className="flex items-center gap-2 text-amber-700 mb-2">
+                    <Clock className="w-5 h-5" />
+                    <span className="font-medium">Solicitação Pendente</span>
+                  </div>
+                  <p className="text-sm text-amber-600">
+                    Sua solicitação está sendo processada. Você receberá um e-mail com as instruções em breve.
+                  </p>
+                </div>
+              ) : (
+                <button
+                  onClick={() => requestAccess(tool.id as 'canva' | 'capcut')}
+                  disabled={submitting === tool.id}
+                  className={`
+                    w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all
+                    ${submitting === tool.id
+                      ? 'bg-gogh-grayLight text-gogh-grayDark cursor-not-allowed'
+                      : 'bg-gogh-yellow text-gogh-black hover:bg-gogh-yellow/80'
+                    }
+                  `}
+                >
+                  {submitting === tool.id ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-gogh-grayDark border-t-transparent rounded-full animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Solicitar Acesso
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Support Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="bg-white rounded-xl p-6 border border-gogh-grayLight shadow-sm"
+      >
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-gogh-grayLight rounded-xl">
+            <MessageSquare className="w-6 h-6 text-gogh-grayDark" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gogh-black mb-1">Precisa de ajuda?</h3>
+            <p className="text-sm text-gogh-grayDark mb-3">
+              Se você está tendo problemas com o acesso ou tem dúvidas sobre as ferramentas, 
+              entre em contato com nosso suporte.
+            </p>
+            <a
+              href="/membro/suporte"
+              className="inline-flex items-center gap-2 text-gogh-yellow hover:underline text-sm font-medium"
+            >
+              Abrir ticket de suporte
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+

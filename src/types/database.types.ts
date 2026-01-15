@@ -8,6 +8,15 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+// Tipos auxiliares para o sistema de membros
+export type PlanId = 'gogh_essencial' | 'gogh_pro'
+export type BillingCycle = 'monthly' | 'annual'
+export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'unpaid' | 'trialing' | 'incomplete'
+export type TicketType = 'canva_access' | 'capcut_access' | 'general' | 'bug_report' | 'feature_request'
+export type TicketStatus = 'open' | 'in_progress' | 'waiting_response' | 'resolved' | 'closed'
+export type TicketPriority = 'low' | 'normal' | 'high' | 'urgent'
+export type ToolType = 'canva' | 'capcut'
+
 export interface Database {
   public: {
     Tables: {
@@ -39,6 +48,517 @@ export interface Database {
           phone?: string | null
           avatar_url?: string | null
           role?: 'customer' | 'editor' | 'admin'
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          stripe_price_id: string
+          plan_id: PlanId
+          billing_cycle: BillingCycle
+          status: SubscriptionStatus
+          current_period_start: string
+          current_period_end: string
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          stripe_price_id: string
+          plan_id: PlanId
+          billing_cycle: BillingCycle
+          status?: SubscriptionStatus
+          current_period_start: string
+          current_period_end: string
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string
+          stripe_price_id?: string
+          plan_id?: PlanId
+          billing_cycle?: BillingCycle
+          status?: SubscriptionStatus
+          current_period_start?: string
+          current_period_end?: string
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      plan_features: {
+        Row: {
+          id: string
+          plan_id: PlanId
+          feature_key: string
+          feature_name: string
+          feature_description: string | null
+          monthly_limit: number | null
+          is_enabled: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          plan_id: PlanId
+          feature_key: string
+          feature_name: string
+          feature_description?: string | null
+          monthly_limit?: number | null
+          is_enabled?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          plan_id?: PlanId
+          feature_key?: string
+          feature_name?: string
+          feature_description?: string | null
+          monthly_limit?: number | null
+          is_enabled?: boolean
+          created_at?: string
+        }
+      }
+      user_usage: {
+        Row: {
+          id: string
+          user_id: string
+          feature_key: string
+          usage_count: number
+          period_start: string
+          period_end: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          feature_key: string
+          usage_count?: number
+          period_start: string
+          period_end: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          feature_key?: string
+          usage_count?: number
+          period_start?: string
+          period_end?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      ai_agents: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          description: string | null
+          avatar_url: string | null
+          system_prompt: string
+          model: string
+          is_active: boolean
+          is_premium: boolean
+          order_position: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          name: string
+          description?: string | null
+          avatar_url?: string | null
+          system_prompt: string
+          model?: string
+          is_active?: boolean
+          is_premium?: boolean
+          order_position?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          name?: string
+          description?: string | null
+          avatar_url?: string | null
+          system_prompt?: string
+          model?: string
+          is_active?: boolean
+          is_premium?: boolean
+          order_position?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      ai_conversations: {
+        Row: {
+          id: string
+          user_id: string
+          agent_id: string
+          title: string
+          is_archived: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          agent_id: string
+          title?: string
+          is_archived?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          agent_id?: string
+          title?: string
+          is_archived?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      ai_messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          role: 'user' | 'assistant' | 'system'
+          content: string
+          tokens_used: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          role: 'user' | 'assistant' | 'system'
+          content: string
+          tokens_used?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          role?: 'user' | 'assistant' | 'system'
+          content?: string
+          tokens_used?: number
+          created_at?: string
+        }
+      }
+      support_tickets: {
+        Row: {
+          id: string
+          user_id: string
+          ticket_type: TicketType
+          subject: string
+          status: TicketStatus
+          priority: TicketPriority
+          assigned_to: string | null
+          created_at: string
+          updated_at: string
+          resolved_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          ticket_type: TicketType
+          subject: string
+          status?: TicketStatus
+          priority?: TicketPriority
+          assigned_to?: string | null
+          created_at?: string
+          updated_at?: string
+          resolved_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          ticket_type?: TicketType
+          subject?: string
+          status?: TicketStatus
+          priority?: TicketPriority
+          assigned_to?: string | null
+          created_at?: string
+          updated_at?: string
+          resolved_at?: string | null
+        }
+      }
+      support_messages: {
+        Row: {
+          id: string
+          ticket_id: string
+          sender_id: string
+          content: string
+          attachments: Json
+          is_internal: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          ticket_id: string
+          sender_id: string
+          content: string
+          attachments?: Json
+          is_internal?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          ticket_id?: string
+          sender_id?: string
+          content?: string
+          attachments?: Json
+          is_internal?: boolean
+          created_at?: string
+        }
+      }
+      courses: {
+        Row: {
+          id: string
+          slug: string
+          title: string
+          description: string | null
+          thumbnail_url: string | null
+          instructor_name: string | null
+          instructor_avatar: string | null
+          duration_hours: number
+          lessons_count: number
+          plan_required: 'gogh_essencial' | 'gogh_pro' | 'all'
+          is_featured: boolean
+          is_published: boolean
+          order_position: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          title: string
+          description?: string | null
+          thumbnail_url?: string | null
+          instructor_name?: string | null
+          instructor_avatar?: string | null
+          duration_hours?: number
+          lessons_count?: number
+          plan_required?: 'gogh_essencial' | 'gogh_pro' | 'all'
+          is_featured?: boolean
+          is_published?: boolean
+          order_position?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          title?: string
+          description?: string | null
+          thumbnail_url?: string | null
+          instructor_name?: string | null
+          instructor_avatar?: string | null
+          duration_hours?: number
+          lessons_count?: number
+          plan_required?: 'gogh_essencial' | 'gogh_pro' | 'all'
+          is_featured?: boolean
+          is_published?: boolean
+          order_position?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      course_modules: {
+        Row: {
+          id: string
+          course_id: string
+          title: string
+          description: string | null
+          order_position: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          course_id: string
+          title: string
+          description?: string | null
+          order_position?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          course_id?: string
+          title?: string
+          description?: string | null
+          order_position?: number
+          created_at?: string
+        }
+      }
+      course_lessons: {
+        Row: {
+          id: string
+          course_id: string
+          module_id: string | null
+          title: string
+          description: string | null
+          video_url: string | null
+          duration_minutes: number
+          is_free_preview: boolean
+          order_position: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          course_id: string
+          module_id?: string | null
+          title: string
+          description?: string | null
+          video_url?: string | null
+          duration_minutes?: number
+          is_free_preview?: boolean
+          order_position?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          course_id?: string
+          module_id?: string | null
+          title?: string
+          description?: string | null
+          video_url?: string | null
+          duration_minutes?: number
+          is_free_preview?: boolean
+          order_position?: number
+          created_at?: string
+        }
+      }
+      user_course_progress: {
+        Row: {
+          id: string
+          user_id: string
+          course_id: string
+          lesson_id: string
+          completed: boolean
+          progress_percent: number
+          last_watched_at: string
+          completed_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          course_id: string
+          lesson_id: string
+          completed?: boolean
+          progress_percent?: number
+          last_watched_at?: string
+          completed_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          course_id?: string
+          lesson_id?: string
+          completed?: boolean
+          progress_percent?: number
+          last_watched_at?: string
+          completed_at?: string | null
+        }
+      }
+      user_niche_profiles: {
+        Row: {
+          id: string
+          user_id: string
+          business_name: string | null
+          niche: string | null
+          target_audience: string | null
+          brand_voice: string | null
+          content_pillars: Json
+          competitors: Json
+          goals: string | null
+          platforms: Json
+          additional_context: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          business_name?: string | null
+          niche?: string | null
+          target_audience?: string | null
+          brand_voice?: string | null
+          content_pillars?: Json
+          competitors?: Json
+          goals?: string | null
+          platforms?: Json
+          additional_context?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          business_name?: string | null
+          niche?: string | null
+          target_audience?: string | null
+          brand_voice?: string | null
+          content_pillars?: Json
+          competitors?: Json
+          goals?: string | null
+          platforms?: Json
+          additional_context?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      tool_access_credentials: {
+        Row: {
+          id: string
+          user_id: string
+          tool_type: ToolType
+          email: string
+          access_granted_at: string
+          is_active: boolean
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          tool_type: ToolType
+          email: string
+          access_granted_at?: string
+          is_active?: boolean
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          tool_type?: ToolType
+          email?: string
+          access_granted_at?: string
+          is_active?: boolean
+          notes?: string | null
           created_at?: string
           updated_at?: string
         }

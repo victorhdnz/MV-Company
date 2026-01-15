@@ -1,8 +1,9 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { DollarSign, MessageCircle } from 'lucide-react'
+import { DollarSign, MessageCircle, User } from 'lucide-react'
 import { ExpandableTabs } from './expandable-tabs'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface NavigationTabsProps {
   variant: 'homepage' | 'service'
@@ -12,14 +13,13 @@ interface NavigationTabsProps {
 
 export function NavigationTabs({ variant, pricingEnabled = true, className }: NavigationTabsProps) {
   const router = useRouter()
+  const { isAuthenticated, hasActiveSubscription, loading } = useAuth()
 
   const handleTabChange = (index: number | null) => {
     if (index === null) return
 
     // Determinar quais tabs estão disponíveis
-    const availableTabs = variant === 'homepage' 
-      ? (pricingEnabled ? ['pricing', 'contact'] : ['contact'])
-      : (pricingEnabled ? ['pricing', 'contact'] : ['contact'])
+    const availableTabs = buildAvailableTabs()
 
     // Mapear índice para seção baseado nas tabs disponíveis
     const section = availableTabs[index]
@@ -54,30 +54,53 @@ export function NavigationTabs({ variant, pricingEnabled = true, className }: Na
           })
         }
       }, 100)
+    } else if (section === 'account') {
+      // Navegar para área de membros ou login
+      if (isAuthenticated && hasActiveSubscription) {
+        router.push('/membro')
+      } else if (isAuthenticated) {
+        router.push('/membro/assinar')
+      } else {
+        router.push('/login')
+      }
     }
   }
 
-  // Construir tabs dinamicamente baseado em pricingEnabled
-  const homepageTabs = pricingEnabled
-    ? [
-        { title: 'Preço', icon: DollarSign },
-        { title: 'Contato', icon: MessageCircle },
-      ]
-    : [
-        { title: 'Contato', icon: MessageCircle },
-      ]
+  // Construir array de sections disponíveis
+  const buildAvailableTabs = () => {
+    const sections: string[] = []
+    if (pricingEnabled) sections.push('pricing')
+    sections.push('contact')
+    sections.push('account')
+    return sections
+  }
 
-  const serviceTabs = pricingEnabled
-    ? [
-        { title: 'Preço', icon: DollarSign },
-        { title: 'Contato', icon: MessageCircle },
-      ]
-    : [
-        { title: 'Contato', icon: MessageCircle },
-      ]
+  // Construir tabs dinamicamente
+  const buildTabs = () => {
+    const tabs: { title: string; icon: any }[] = []
+    
+    if (pricingEnabled) {
+      tabs.push({ title: 'Preço', icon: DollarSign })
+    }
+    tabs.push({ title: 'Contato', icon: MessageCircle })
+    
+    // Adicionar tab de conta com título dinâmico
+    if (!loading) {
+      if (isAuthenticated && hasActiveSubscription) {
+        tabs.push({ title: 'Minha Conta', icon: User })
+      } else if (isAuthenticated) {
+        tabs.push({ title: 'Assinar', icon: User })
+      } else {
+        tabs.push({ title: 'Entrar', icon: User })
+      }
+    } else {
+      tabs.push({ title: 'Conta', icon: User })
+    }
+    
+    return tabs
+  }
 
-  // Não renderizar se não houver tabs
-  const tabs = variant === 'homepage' ? homepageTabs : serviceTabs
+  const tabs = buildTabs()
   if (tabs.length === 0) return null
 
   return (
@@ -85,7 +108,7 @@ export function NavigationTabs({ variant, pricingEnabled = true, className }: Na
       <ExpandableTabs
         tabs={tabs}
         onChange={handleTabChange}
-        className="bg-white border-[#F7C948]/30 shadow-lg"
+        className="bg-gogh-beige border-gogh-yellow/30 shadow-lg"
       />
     </div>
   )

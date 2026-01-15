@@ -11,6 +11,7 @@ import { Toaster } from 'react-hot-toast'
 import { getSiteUrl } from '@/lib/utils/siteUrl'
 import { createServerClient } from '@/lib/supabase/server'
 import { NotFoundProvider } from '@/contexts/NotFoundContext'
+import { Providers } from '@/components/providers/Providers'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -243,27 +244,29 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={inter.className}>
         <ScrollEnabler />
-        <NotFoundProvider>
-          <MainBackground />
-          <Header />
-          <PageTransition>
-            <main className="min-h-screen relative">
-              {children}
-            </main>
-          </PageTransition>
-          <Footer />
-          <ConditionalWhatsAppFloat />
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 2000,
-              style: {
-                background: '#000',
-                color: '#fff',
-              },
-            }}
-          />
-        </NotFoundProvider>
+        <Providers>
+          <NotFoundProvider>
+            <MainBackground />
+            <Header />
+            <PageTransition>
+              <main className="min-h-screen relative">
+                {children}
+              </main>
+            </PageTransition>
+            <Footer />
+            <ConditionalWhatsAppFloat />
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 2000,
+                style: {
+                  background: '#000',
+                  color: '#fff',
+                },
+              }}
+            />
+          </NotFoundProvider>
+        </Providers>
       </body>
     </html>
   )
