@@ -5,13 +5,9 @@ import { HomepageSections } from '@/components/homepage/HomepageSections'
 import { FixedLogo } from '@/components/layout/FixedLogo'
 import { NavigationTabs } from '@/components/ui/NavigationTabs'
 
-// Forçar renderização dinâmica (usa cookies)
-export const dynamic = 'force-dynamic'
-
 async function getServices(): Promise<Service[]> {
   try {
     const supabase = createServerClient()
-    
     const { data, error } = await supabase
       .from('services')
       .select('*')
@@ -34,39 +30,23 @@ async function getServices(): Promise<Service[]> {
 async function getSiteSettings() {
   try {
     const supabase = createServerClient()
-    
     const { data, error } = await supabase
       .from('site_settings')
       .select('site_name, site_description, contact_email, contact_whatsapp, instagram_url, site_logo, homepage_content')
       .eq('key', 'general')
       .maybeSingle()
 
-    // Valores padrão caso dê erro ou não encontre dados
-    const defaultSettings = {
-      site_name: 'Gogh Lab',
-      site_description: 'Plataforma inteligente e autônoma baseada em agentes de IA',
-      contact_email: 'contato.goghlab@gmail.com',
-      contact_whatsapp: null,
-      instagram_url: null,
-      site_logo: null,
-      homepage_content: {}
-    }
-
     if (error) {
       console.error('Error fetching site settings:', error)
-      return defaultSettings
+      return null
     }
 
-    if (!data) {
-      return defaultSettings
-    }
-    
     // Garantir que homepage_content seja um objeto válido
     let homepageContent: any = {}
     if (data && data.homepage_content && typeof data.homepage_content === 'object') {
       homepageContent = data.homepage_content
     }
-    
+
     // Garantir que todos os arrays sejam sempre arrays válidos
     if (homepageContent) {
       if (!Array.isArray(homepageContent.services_cards)) {
@@ -82,43 +62,22 @@ async function getSiteSettings() {
         homepageContent.section_order = ['hero', 'services', 'comparison', 'notifications', 'testimonials', 'contact']
       }
     }
-    
+
     return {
       ...data,
       homepage_content: homepageContent
     }
   } catch (error) {
     console.error('Error fetching site settings:', error)
-    // Retornar valores padrão em caso de erro
-    return {
-      site_name: 'Gogh Lab',
-      site_description: 'Plataforma inteligente e autônoma baseada em agentes de IA',
-      contact_email: 'contato.goghlab@gmail.com',
-      contact_whatsapp: null,
-      instagram_url: null,
-      site_logo: null,
-      homepage_content: {}
-    }
+    return null
   }
 }
 
 export default async function Home() {
   const services = await getServices()
   const siteSettings = await getSiteSettings()
-  
-  // Garantir que siteSettings nunca seja null
-  const safeSiteSettings = siteSettings || {
-    site_name: 'Gogh Lab',
-    site_description: 'Plataforma inteligente e autônoma baseada em agentes de IA',
-    contact_email: 'contato.goghlab@gmail.com',
-    contact_whatsapp: null,
-    instagram_url: null,
-    site_logo: null,
-    homepage_content: {}
-  }
-  
-  const homepageContent = safeSiteSettings.homepage_content || {}
-  
+  const homepageContent = siteSettings?.homepage_content || {}
+
   // Garantir que arrays sejam sempre arrays válidos
   if (!Array.isArray(homepageContent.notifications_items)) {
     homepageContent.notifications_items = []
@@ -129,7 +88,7 @@ export default async function Home() {
   if (!Array.isArray(homepageContent.services_cards)) {
     homepageContent.services_cards = []
   }
-  
+
   // Ordem padrão das seções
   let sectionOrder = homepageContent.section_order || ['hero', 'video', 'services', 'comparison', 'notifications', 'testimonials', 'spline', 'pricing', 'contact']
   // Garantir que 'video', 'notifications', 'testimonials', 'spline' e 'pricing' estejam na ordem se não estiverem
@@ -180,7 +139,7 @@ export default async function Home() {
       }
     }
   }
-  
+
   let sectionVisibility = homepageContent.section_visibility || {
     hero: true,
     video: false,
@@ -214,11 +173,11 @@ export default async function Home() {
   const pricingEnabled = sectionVisibility.pricing === true && pricing.pricing_enabled === true
 
   // Extrair logo do siteSettings para passar como prop (carregamento imediato)
-  let siteLogo = safeSiteSettings.site_logo || null
+  let siteLogo = siteSettings?.site_logo || null
   if (!siteLogo && homepageContent?.hero_logo) {
     siteLogo = homepageContent.hero_logo
   }
-  const siteName = safeSiteSettings.site_name || 'Gogh Lab'
+  const siteName = siteSettings?.site_name || 'Gogh Lab'
 
   return (
     <HomepageTracker>
@@ -226,7 +185,7 @@ export default async function Home() {
       <div className="min-h-screen bg-black">
         <HomepageSections
           homepageContent={homepageContent}
-          siteSettings={safeSiteSettings}
+          siteSettings={siteSettings}
           services={services}
           sectionVisibility={sectionVisibility}
           sectionOrder={sectionOrder}

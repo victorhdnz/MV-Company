@@ -18,7 +18,6 @@ const inter = Inter({ subsets: ['latin'] })
 async function getSiteDescription(): Promise<string> {
   try {
     const supabase = createServerClient()
-    
     const { data, error } = await supabase
       .from('site_settings')
       .select('site_description, site_name')
@@ -26,8 +25,18 @@ async function getSiteDescription(): Promise<string> {
       .limit(1)
       .maybeSingle()
 
-    if (error && 'code' in error && error.code !== 'PGRST116') {
+    if (error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar descrição do site:', error)
+      // Tentar buscar qualquer registro como fallback
+      const { data: fallbackData } = await supabase
+        .from('site_settings')
+        .select('site_description, site_name')
+        .limit(1)
+        .maybeSingle()
+
+      if (fallbackData?.site_description) {
+        return fallbackData.site_description
+      }
     }
 
     if (data?.site_description) {
@@ -37,15 +46,14 @@ async function getSiteDescription(): Promise<string> {
     console.error('Erro ao buscar descrição do site:', error)
   }
 
-  // Descrição padrão caso não encontre no banco ou dê erro
-  return 'Plataforma inteligente e autônoma baseada em agentes de IA'
+  // Descrição padrão caso não encontre no banco
+  return 'Plataforma inteligente e autônoma baseada em agentes de IA.'
 }
 
 // Função para buscar nome do site do banco de dados
 async function getSiteName(): Promise<string> {
   try {
     const supabase = createServerClient()
-    
     const { data, error } = await supabase
       .from('site_settings')
       .select('site_name')
@@ -53,8 +61,18 @@ async function getSiteName(): Promise<string> {
       .limit(1)
       .maybeSingle()
 
-    if (error && 'code' in error && error.code !== 'PGRST116') {
+    if (error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar nome do site:', error)
+      // Tentar buscar qualquer registro como fallback
+      const { data: fallbackData } = await supabase
+        .from('site_settings')
+        .select('site_name')
+        .limit(1)
+        .maybeSingle()
+
+      if (fallbackData?.site_name) {
+        return fallbackData.site_name
+      }
     }
 
     if (data?.site_name) {
@@ -64,7 +82,7 @@ async function getSiteName(): Promise<string> {
     console.error('Erro ao buscar nome do site:', error)
   }
 
-  // Nome padrão caso não encontre no banco ou dê erro
+  // Nome padrão caso não encontre no banco
   return 'Gogh Lab'
 }
 
@@ -79,7 +97,7 @@ async function getSiteTitle(): Promise<string | null> {
       .limit(1)
       .maybeSingle()
 
-    if (error && 'code' in error && error.code !== 'PGRST116') {
+    if (error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar título do site:', error)
       // Tentar buscar qualquer registro como fallback
       const { data: fallbackData } = await supabase
@@ -93,7 +111,7 @@ async function getSiteTitle(): Promise<string | null> {
       }
       // Se não tiver site_title, usar site_name + sufixo
       if (fallbackData?.site_name) {
-        return `${fallbackData.site_name} - Toda sua gestão digital em um só lugar.`
+        return `${fallbackData.site_name} - Plataforma inteligente e autônoma baseada em agentes de IA.`
       }
     }
 
@@ -102,7 +120,7 @@ async function getSiteTitle(): Promise<string | null> {
     }
     // Se não tiver site_title, usar site_name + sufixo
     if (data?.site_name) {
-      return `${data.site_name} - Toda sua gestão digital em um só lugar.`
+      return `${data.site_name} - Plataforma inteligente e autônoma baseada em agentes de IA.`
     }
   } catch (error) {
     console.error('Erro ao buscar título do site:', error)
@@ -121,7 +139,7 @@ async function getSiteLogo(): Promise<string | null> {
       .eq('key', 'general')
       .maybeSingle()
 
-    if (error && 'code' in error && error.code !== 'PGRST116') {
+    if (error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar logo do site:', error)
       return null
     }
@@ -145,13 +163,13 @@ async function getSiteLogo(): Promise<string | null> {
 export async function generateMetadata(): Promise<Metadata> {
   const siteDescription = await getSiteDescription()
   const siteName = await getSiteName()
-  const siteTitle = await getSiteTitle() || `${siteName} - Toda sua gestão digital em um só lugar.`
+  const siteTitle = await getSiteTitle() || `${siteName} - Plataforma inteligente e autônoma baseada em agentes de IA.`
   const siteUrl = getSiteUrl()
   const siteLogo = await getSiteLogo()
 
   // Construir array de ícones - usar logo do banco se disponível
   const iconArray: Array<{ url: string; sizes?: string; type?: string }> = []
-  
+
   if (siteLogo) {
     // Usar logo do banco de dados como ícone principal
     iconArray.push({ url: siteLogo, sizes: 'any' })
@@ -165,7 +183,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   // Apple Touch Icon - sempre usar logo do banco se disponível (importante para Safari)
-  const appleIconArray = siteLogo 
+  const appleIconArray = siteLogo
     ? [{ url: siteLogo, sizes: '180x180', type: 'image/png' }]
     : [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }]
 
@@ -173,7 +191,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(siteUrl),
     title: siteTitle,
     description: siteDescription,
-    keywords: ['agentes de IA', 'criação de conteúdo', 'marketing digital', 'automação com IA', 'Gogh Lab', siteName],
+    keywords: ['serviços digitais', 'criação de sites', 'tráfego pago', 'marketing digital', 'gestão de redes sociais', 'Gogh Lab', 'agentes de IA', siteName],
     authors: [{ name: siteName }],
     creator: siteName,
     publisher: siteName,
@@ -184,7 +202,7 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: 'pt_BR',
       siteName: siteName,
       url: siteUrl,
-      images: siteLogo 
+      images: siteLogo
         ? [
             {
               url: siteLogo,
@@ -250,4 +268,3 @@ export default function RootLayout({
     </html>
   )
 }
-
