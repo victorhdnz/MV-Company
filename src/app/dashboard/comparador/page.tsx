@@ -48,8 +48,6 @@ export default function ComparadorDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
   const [footerExpanded, setFooterExpanded] = useState(false)
   const [savingFooter, setSavingFooter] = useState(false)
   const [editingCompany, setEditingCompany] = useState<number | null>(null)
@@ -125,10 +123,9 @@ export default function ComparadorDashboardPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    if (hasAccess) {
-      loadData()
-    }
-  }, [hasAccess])
+    // Carregar dados - autenticação é verificada pelo middleware
+    loadData()
+  }, [])
 
   const loadData = async () => {
     await Promise.all([loadGlobalTopics(), loadMVCompany(), loadCompanies(), loadFooterContent()])
