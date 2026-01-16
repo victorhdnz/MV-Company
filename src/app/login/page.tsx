@@ -238,17 +238,30 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Terms */}
-        <p className="text-center text-xs text-gogh-grayDark mt-6">
-          Ao continuar, você concorda com nossos{' '}
-          <Link href="/termos-uso" className="underline hover:text-gogh-black">
-            Termos de Uso
-          </Link>{' '}
-          e{' '}
-          <Link href="/politica-privacidade" className="underline hover:text-gogh-black">
-            Política de Privacidade
-          </Link>
-        </p>
+        {/* Terms - Login Google */}
+        <div className="mt-6 p-4 bg-gogh-grayLight/30 rounded-lg border border-gogh-grayLight">
+          <p className="text-center text-xs text-gogh-grayDark mb-2">
+            Ao continuar com Google, você concorda com nossos{' '}
+            <Link href="/termos-uso" className="underline hover:text-gogh-black font-medium">
+              Termos de Uso
+            </Link>{' '}
+            e{' '}
+            <Link href="/politica-privacidade" className="underline hover:text-gogh-black font-medium">
+              Política de Privacidade
+            </Link>
+            .
+          </p>
+          <p className="text-center text-xs text-gogh-grayDark">
+            Especificamente, ao autenticar-se via Google, você aceita os{' '}
+            <Link 
+              href="/termos-login-google" 
+              className="underline hover:text-gogh-black font-medium text-gogh-yellow"
+            >
+              Termos de Autenticação com Google
+            </Link>
+            , que incluem informações sobre dados coletados, uso dos serviços e responsabilidades.
+          </p>
+        </div>
       </motion.div>
     </div>
   )

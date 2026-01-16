@@ -169,6 +169,358 @@ Para solicitar troca ou devolução:
 
 Em caso de devolução, o reembolso será processado no mesmo método de pagamento utilizado na compra, em até 10 dias úteis após o recebimento do produto em nossa loja.`,
   },
+  {
+    key: 'termos-login-google',
+    title: 'Termos de Autenticação com Google',
+    icon: 'shield',
+    defaultContent: `# Termos de Autenticação com Google
+
+## 1. Aceitação dos Termos
+
+Ao utilizar a autenticação via Google para acessar a plataforma Gogh Lab, você concorda expressamente com os termos e condições estabelecidos neste documento. A utilização deste serviço implica na aceitação integral e irrestrita de todas as cláusulas aqui dispostas.
+
+## 2. Autenticação via Google
+
+### 2.1. Processo de Autenticação
+
+A autenticação é realizada através da plataforma Google OAuth, utilizando suas credenciais da conta Google. Ao clicar em "Continuar com Google", você será redirecionado para a página de autenticação do Google, onde deverá autorizar o acesso da Gogh Lab aos dados básicos da sua conta.
+
+### 2.2. Dados Coletados
+
+Ao autenticar-se via Google, coletamos apenas as seguintes informações básicas da sua conta Google:
+
+- **Nome completo**: Para identificação e personalização da experiência
+- **Endereço de e-mail**: Para comunicação e identificação da conta
+- **Foto de perfil**: Para exibição no perfil da plataforma (opcional)
+
+### 2.3. Uso dos Dados
+
+Os dados coletados são utilizados exclusivamente para:
+
+- Criação e gerenciamento da sua conta na plataforma Gogh Lab
+- Personalização da experiência do usuário
+- Comunicação sobre serviços, atualizações e informações relevantes
+- Cumprimento de obrigações legais e regulatórias
+
+## 3. Responsabilidades do Usuário
+
+### 3.1. Segurança da Conta
+
+Você é o único responsável por:
+
+- Manter a segurança e confidencialidade das credenciais da sua conta Google
+- Notificar imediatamente a Gogh Lab sobre qualquer uso não autorizado da sua conta
+- Garantir que possui autorização para utilizar a conta Google informada
+- Todas as atividades realizadas através da sua conta autenticada
+
+### 3.2. Uso Adequado
+
+Você concorda em:
+
+- Utilizar a plataforma apenas para fins legais e lícitos
+- Não compartilhar suas credenciais de acesso com terceiros
+- Não realizar atividades que possam comprometer a segurança da plataforma
+- Respeitar os direitos de propriedade intelectual da Gogh Lab e de terceiros
+
+## 4. Privacidade e Proteção de Dados
+
+### 4.1. Conformidade Legal
+
+A Gogh Lab está em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018) e demais legislações aplicáveis. O tratamento dos seus dados pessoais segue rigorosamente os princípios estabelecidos na legislação vigente.
+
+### 4.2. Compartilhamento de Dados
+
+A Gogh Lab **não compartilha, vende ou aluga** seus dados pessoais para terceiros, exceto:
+
+- Quando necessário para o cumprimento de obrigações legais
+- Com seu consentimento expresso
+- Para prestação de serviços essenciais (processamento de pagamentos, hospedagem, etc.), sempre com garantias de proteção adequadas
+
+### 4.3. Retenção de Dados
+
+Seus dados serão mantidos enquanto sua conta estiver ativa ou enquanto necessário para cumprimento de obrigações legais. Você pode solicitar a exclusão dos seus dados a qualquer momento, conforme previsto na LGPD.
+
+## 5. Limitações de Responsabilidade
+
+### 5.1. Serviços de Terceiros
+
+A Gogh Lab utiliza os serviços de autenticação do Google, que são fornecidos e gerenciados exclusivamente pela Google LLC. A Gogh Lab **não se responsabiliza** por:
+
+- Falhas, interrupções ou indisponibilidades dos serviços de autenticação do Google
+- Problemas de segurança que ocorram na infraestrutura do Google
+- Alterações nas políticas ou termos de serviço do Google que possam afetar a autenticação
+
+### 5.2. Disponibilidade do Serviço
+
+Embora nos esforcemos para manter a plataforma sempre disponível, não garantimos que o serviço estará livre de interrupções, erros ou falhas técnicas. A Gogh Lab não se responsabiliza por perdas ou danos decorrentes de indisponibilidade temporária do serviço.
+
+## 6. Modificações nos Termos
+
+A Gogh Lab reserva-se o direito de modificar estes termos a qualquer momento. As alterações entrarão em vigor imediatamente após sua publicação na plataforma. É sua responsabilidade revisar periodicamente estes termos. O uso continuado da plataforma após as modificações constitui aceitação dos novos termos.
+
+## 7. Rescisão
+
+A Gogh Lab reserva-se o direito de suspender ou encerrar sua conta, a qualquer momento e sem aviso prévio, em caso de:
+
+- Violação destes termos ou de qualquer política da plataforma
+- Uso fraudulento ou inadequado da conta
+- Solicitação de autoridades competentes
+- Qualquer outra situação que comprometa a segurança ou integridade da plataforma
+
+## 8. Lei Aplicável e Foro
+
+Estes termos são regidos pela legislação brasileira. Qualquer controvérsia decorrente destes termos será resolvida no foro da comarca de Uberlândia/MG, renunciando as partes a qualquer outro, por mais privilegiado que seja.
+
+## 9. Contato
+
+Para questões relacionadas a estes termos ou à proteção de dados, entre em contato através de:
+
+- **E-mail**: contato.goghlab@gmail.com
+- **WhatsApp**: [número configurado na plataforma]
+
+**Última atualização**: Janeiro de 2026`,
+  },
+  {
+    key: 'termos-assinatura-planos',
+    title: 'Termos de Assinatura e Planos',
+    icon: 'file-text',
+    defaultContent: `# Termos de Assinatura e Planos
+
+## 1. Aceitação dos Termos
+
+Ao assinar qualquer plano de assinatura da plataforma Gogh Lab, você concorda expressamente com os termos e condições estabelecidos neste documento. A contratação de qualquer plano implica na aceitação integral e irrestrita de todas as cláusulas aqui dispostas, bem como dos limites de uso e condições específicas de cada plano.
+
+## 2. Planos de Assinatura
+
+### 2.1. Planos Disponíveis
+
+A Gogh Lab oferece os seguintes planos de assinatura:
+
+#### 2.1.1. Plano Gratuito
+- **Custo**: Gratuito
+- **Recursos**: Acesso limitado a recursos básicos da plataforma
+- **Limites de Uso**: Conforme especificado na descrição do plano
+- **Renovação**: Não aplicável (plano permanente)
+
+#### 2.1.2. Plano Gogh Essencial
+- **Custo**: Conforme valores divulgados na plataforma
+- **Ciclo de Cobrança**: Mensal ou Anual (conforme selecionado)
+- **Recursos**: Acesso completo aos recursos do plano Essencial
+- **Limites de Uso**: Conforme especificado na descrição detalhada do plano
+- **Renovação**: Automática, conforme ciclo contratado
+
+#### 2.1.3. Plano Gogh Pro
+- **Custo**: Conforme valores divulgados na plataforma
+- **Ciclo de Cobrança**: Mensal ou Anual (conforme selecionado)
+- **Recursos**: Acesso completo a todos os recursos da plataforma, incluindo recursos exclusivos do plano Pro
+- **Limites de Uso**: Conforme especificado na descrição detalhada do plano
+- **Renovação**: Automática, conforme ciclo contratado
+
+### 2.2. Descrição Detalhada dos Recursos
+
+A descrição completa dos recursos, limites de uso mensais, e benefícios de cada plano está disponível na página de planos da plataforma. É sua responsabilidade revisar cuidadosamente as especificações de cada plano antes da contratação.
+
+### 2.3. Limites de Uso
+
+Cada plano possui limites específicos de uso mensal para determinados recursos, incluindo, mas não se limitando a:
+
+- **Mensagens de IA**: Número máximo de mensagens/interações com agentes de IA por mês
+- **Acesso a Cursos**: Quantidade e tipo de cursos disponíveis
+- **Acesso a Ferramentas Pro**: Disponibilidade e limites de uso de ferramentas profissionais (Canva Pro, CapCut Pro, etc.)
+- **Suporte**: Nível e prioridade de suporte disponível
+
+Os limites são resetados a cada início de período de cobrança (mensal ou anual, conforme o plano). O não uso dos limites em um período não gera créditos ou acúmulo para períodos futuros.
+
+## 3. Contratação e Pagamento
+
+### 3.1. Processo de Contratação
+
+A contratação do plano é realizada através da plataforma de pagamento Stripe. Ao selecionar um plano e prosseguir com o pagamento, você está formalizando a contratação do serviço.
+
+### 3.2. Preços e Formas de Pagamento
+
+- **Preços**: Os preços dos planos são divulgados na plataforma e podem ser alterados a qualquer momento, sem aviso prévio. Alterações de preço não afetam planos já contratados durante o período de vigência.
+- **Formas de Pagamento**: Aceitamos cartões de crédito e débito através da plataforma Stripe.
+- **Desconto Anual**: Planos anuais podem oferecer desconto em relação ao plano mensal, conforme divulgado na plataforma.
+
+### 3.3. Confirmação do Pagamento
+
+A ativação do plano ocorre imediatamente após a confirmação do pagamento pela instituição financeira. Em caso de falha no pagamento, o plano não será ativado e você será notificado.
+
+### 3.4. Renovação Automática
+
+Os planos pagos são renovados automaticamente no final de cada período (mensal ou anual), mediante cobrança no método de pagamento cadastrado. Você será notificado com antecedência sobre a próxima cobrança.
+
+## 4. Cancelamento e Reembolso
+
+### 4.1. Cancelamento pelo Usuário
+
+Você pode cancelar sua assinatura a qualquer momento através da área de membros da plataforma ou através do portal de gerenciamento do Stripe. O cancelamento será efetivado ao final do período já pago, e você continuará tendo acesso aos recursos até o término do período.
+
+### 4.2. Cancelamento pela Gogh Lab
+
+A Gogh Lab reserva-se o direito de cancelar sua assinatura, sem reembolso, em caso de:
+
+- Violação dos termos de uso ou políticas da plataforma
+- Uso fraudulento ou inadequado dos serviços
+- Não pagamento ou recusa de cobrança recorrente
+- Qualquer situação que comprometa a segurança ou integridade da plataforma
+
+### 4.3. Política de Reembolso
+
+#### 4.3.1. Reembolso Total
+- **Período de Arrependimento**: 7 (sete) dias corridos a partir da data de contratação, conforme previsto no Código de Defesa do Consumidor (CDC)
+- **Condições**: O reembolso total será processado apenas se solicitado dentro do período de arrependimento e se você não tiver utilizado recursos significativos do plano durante este período
+
+#### 4.3.2. Reembolso Proporcional
+- Após o período de arrependimento, **não há direito a reembolso**, exceto em casos específicos previstos em lei ou por decisão da Gogh Lab, a seu exclusivo critério
+
+#### 4.3.3. Processamento do Reembolso
+- O reembolso será processado no mesmo método de pagamento utilizado na contratação
+- O prazo para crédito na conta pode variar de 5 a 10 dias úteis, dependendo da instituição financeira
+
+## 5. Alterações nos Planos
+
+### 5.1. Alteração de Plano pelo Usuário
+
+Você pode fazer upgrade (mudança para plano superior) ou downgrade (mudança para plano inferior) a qualquer momento através da área de membros. As alterações terão efeito imediato, com ajuste proporcional na cobrança.
+
+### 5.2. Alterações pela Gogh Lab
+
+A Gogh Lab reserva-se o direito de:
+
+- Modificar recursos, limites de uso ou preços dos planos a qualquer momento
+- Adicionar ou remover recursos de qualquer plano
+- Descontinuar planos específicos (com aviso prévio de 30 dias)
+
+Alterações que reduzam significativamente os recursos do seu plano atual serão comunicadas com antecedência mínima de 30 dias, e você terá direito a cancelar sem penalidades.
+
+## 6. Disponibilidade e Uptime
+
+### 6.1. Disponibilidade do Serviço
+
+A Gogh Lab se esforça para manter a plataforma disponível 24 horas por dia, 7 dias por semana. No entanto, não garantimos disponibilidade ininterrupta e não nos responsabilizamos por:
+
+- Manutenções programadas ou de emergência
+- Falhas técnicas ou de infraestrutura
+- Problemas de conectividade de internet do usuário
+- Indisponibilidade de serviços de terceiros (Stripe, Google, etc.)
+
+### 6.2. Tempo de Inatividade
+
+Em caso de indisponibilidade prolongada (superior a 24 horas consecutivas), a Gogh Lab poderá, a seu exclusivo critério, estender o período de assinatura proporcionalmente ao tempo de inatividade.
+
+## 7. Limites de Uso e Fair Use
+
+### 7.1. Uso Razoável
+
+Os recursos da plataforma devem ser utilizados de forma razoável e dentro dos limites estabelecidos para cada plano. A Gogh Lab reserva-se o direito de:
+
+- Limitar ou suspender o acesso em caso de uso excessivo ou abusivo
+- Monitorar o uso dos recursos para garantir conformidade com os limites do plano
+- Solicitar explicações sobre padrões de uso incomuns
+
+### 7.2. Uso Proibido
+
+É expressamente proibido:
+
+- Compartilhar credenciais de acesso com terceiros
+- Utilizar a plataforma para atividades ilegais ou não autorizadas
+- Tentar burlar limites de uso através de métodos técnicos ou não autorizados
+- Realizar atividades que possam comprometer a segurança ou performance da plataforma
+
+## 8. Propriedade Intelectual
+
+### 8.1. Conteúdo da Plataforma
+
+Todo o conteúdo da plataforma, incluindo textos, imagens, vídeos, cursos, agentes de IA, e demais materiais, é de propriedade exclusiva da Gogh Lab ou de seus licenciadores, protegido por leis de propriedade intelectual.
+
+### 8.2. Conteúdo Gerado pelo Usuário
+
+Conteúdo gerado através dos recursos da plataforma (textos, imagens, etc.) é de propriedade do usuário, desde que não viole direitos de terceiros. A Gogh Lab não reivindica propriedade sobre conteúdo gerado pelo usuário.
+
+### 8.3. Uso de Conteúdo
+
+O uso dos recursos da plataforma é pessoal e não transferível. É proibido:
+
+- Reproduzir, distribuir ou comercializar conteúdo da plataforma sem autorização
+- Utilizar conteúdo da plataforma para treinar modelos de IA concorrentes
+- Realizar engenharia reversa ou descompilação de qualquer parte da plataforma
+
+## 9. Limitação de Responsabilidade
+
+### 9.1. Isenção de Garantias
+
+A plataforma é fornecida "como está", sem garantias expressas ou implícitas de qualquer natureza. A Gogh Lab não garante que:
+
+- A plataforma atenderá todas as suas necessidades
+- Os resultados obtidos serão exatos ou adequados aos seus objetivos
+- A plataforma estará livre de erros, vírus ou outros componentes prejudiciais
+
+### 9.2. Limitação de Danos
+
+A Gogh Lab não se responsabiliza por:
+
+- Perdas diretas, indiretas, incidentais ou consequenciais decorrentes do uso ou impossibilidade de uso da plataforma
+- Perda de dados, receitas, oportunidades de negócio ou lucros cessantes
+- Danos resultantes de falhas técnicas, interrupções ou indisponibilidade do serviço
+
+### 9.3. Limite Máximo de Responsabilidade
+
+Em nenhuma hipótese a responsabilidade total da Gogh Lab excederá o valor pago pelo usuário nos últimos 12 (doze) meses pela assinatura.
+
+## 10. Proteção de Dados
+
+### 10.1. Tratamento de Dados
+
+O tratamento dos seus dados pessoais segue rigorosamente a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018). Para mais informações, consulte nossa Política de Privacidade.
+
+### 10.2. Dados de Pagamento
+
+Dados de pagamento são processados exclusivamente pela Stripe, em conformidade com os mais altos padrões de segurança (PCI DSS). A Gogh Lab não armazena informações completas de cartão de crédito.
+
+## 11. Modificações nos Termos
+
+A Gogh Lab reserva-se o direito de modificar estes termos a qualquer momento. Alterações significativas serão comunicadas com antecedência mínima de 30 dias. O uso continuado da plataforma após as modificações constitui aceitação dos novos termos.
+
+## 12. Resolução de Conflitos
+
+### 12.1. Tentativa de Resolução Amigável
+
+Em caso de conflitos, as partes se comprometem a tentar resolver a questão de forma amigável através de comunicação direta.
+
+### 12.2. Mediação
+
+Caso não seja possível resolver amigavelmente, as partes podem optar por mediação antes de recorrer ao Poder Judiciário.
+
+## 13. Lei Aplicável e Foro
+
+Estes termos são regidos pela legislação brasileira. Qualquer controvérsia decorrente destes termos será resolvida no foro da comarca de Uberlândia/MG, renunciando as partes a qualquer outro, por mais privilegiado que seja.
+
+## 14. Disposições Gerais
+
+### 14.1. Integralidade
+
+Estes termos, juntamente com a Política de Privacidade e demais políticas da plataforma, constituem o acordo integral entre você e a Gogh Lab.
+
+### 14.2. Tolerância
+
+A tolerância de qualquer violação destes termos não constitui renúncia de direitos pela Gogh Lab.
+
+### 14.3. Divisibilidade
+
+Se qualquer disposição destes termos for considerada inválida ou inexequível, as demais disposições permanecerão em pleno vigor.
+
+## 15. Contato
+
+Para questões relacionadas a assinaturas, pagamentos ou estes termos, entre em contato através de:
+
+- **E-mail**: contato.goghlab@gmail.com
+- **WhatsApp**: [número configurado na plataforma]
+- **Portal de Gerenciamento**: Acesse sua área de membros para gerenciar sua assinatura
+
+**Última atualização**: Janeiro de 2026`,
+  },
 ]
 
 export default function DashboardTermsPage() {

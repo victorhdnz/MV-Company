@@ -133,7 +133,10 @@ export default function MembrosPage() {
       setSaving(true)
       
       const member = members.find(m => m.id === memberId)
-      if (!member) return
+      if (!member) {
+        toast.error('Membro não encontrado')
+        return
+      }
 
       if (editingPlan === '') {
         // Remover plano - deletar assinatura se existir
@@ -143,7 +146,10 @@ export default function MembrosPage() {
             .delete()
             .eq('id', member.subscription.id)
           
-          if (error) throw error
+          if (error) {
+            console.error('Erro ao deletar assinatura:', error)
+            throw new Error(error.message || 'Erro ao remover plano')
+          }
         }
       } else {
         // Atualizar ou criar assinatura
@@ -157,9 +163,16 @@ export default function MembrosPage() {
             })
             .eq('id', member.subscription.id)
           
-          if (error) throw error
+          if (error) {
+            console.error('Erro ao atualizar assinatura:', error)
+            throw new Error(error.message || 'Erro ao atualizar plano')
+          }
         } else {
           // Criar nova (assinatura manual sem Stripe)
+          const now = new Date()
+          const oneYearLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
+          const manualId = `manual_${memberId.slice(0, 8)}_${Date.now()}`
+          
           const { error } = await (supabase as any)
             .from('subscriptions')
             .insert({
@@ -167,15 +180,20 @@ export default function MembrosPage() {
               plan_id: editingPlan,
               status: 'active',
               billing_cycle: 'monthly',
-              stripe_customer_id: 'manual_' + memberId.slice(0, 8),
-              stripe_subscription_id: 'manual_' + Date.now(),
-              stripe_price_id: 'manual',
-              current_period_start: new Date().toISOString(),
-              current_period_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 ano
-              cancel_at_period_end: false
-            })
+              stripe_customer_id: manualId,
+              stripe_subscription_id: `sub_${manualId}`,
+              stripe_price_id: `price_${editingPlan}_manual`,
+              current_period_start: now.toISOString(),
+              current_period_end: oneYearLater.toISOString(),
+              cancel_at_period_end: false,
+              created_at: now.toISOString(),
+              updated_at: now.toISOString()
+            } as any)
           
-          if (error) throw error
+          if (error) {
+            console.error('Erro ao criar assinatura:', error)
+            throw new Error(error.message || 'Erro ao criar plano. Verifique se o usuário já possui uma assinatura ativa.')
+          }
         }
       }
 
@@ -183,9 +201,9 @@ export default function MembrosPage() {
       setEditingMember(null)
       setEditingPlan('')
       await loadMembers()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving plan:', error)
-      toast.error('Erro ao salvar plano')
+      toast.error(error?.message || 'Erro ao salvar plano')
     } finally {
       setSaving(false)
     }
