@@ -13,8 +13,13 @@ export async function POST(request: Request) {
     // Verificar se o usuário está autenticado
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    if (authError) {
+      console.error('Erro de autenticação:', authError)
+      return NextResponse.json({ error: 'Erro de autenticação' }, { status: 401 })
+    }
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 })
     }
 
     // Buscar a assinatura ativa do usuário

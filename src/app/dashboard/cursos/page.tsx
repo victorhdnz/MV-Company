@@ -104,22 +104,60 @@ export default function CursosPage() {
 
   const handleCreateCourse = async () => {
     try {
+      if (!courseForm.title.trim()) {
+        toast.error('O título do curso é obrigatório')
+        return
+      }
+
+      // Gerar slug único
+      const baseSlug = courseForm.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      let slug = baseSlug
+      let slugCounter = 1
+      
+      // Verificar se slug já existe
+      while (true) {
+        const { data: existing } = await (supabase as any)
+          .from('courses')
+          .select('id')
+          .eq('slug', slug)
+          .maybeSingle()
+        
+        if (!existing) break
+        slug = `${baseSlug}-${slugCounter}`
+        slugCounter++
+      }
+
       // Pegar o próximo order
       const maxOrder = courses
         .filter(c => c.course_type === courseForm.course_type)
         .reduce((max, c) => Math.max(max, c.order || c.order_position || 0), 0)
 
+      // Preparar dados do curso
+      const courseData: any = {
+        title: courseForm.title.trim(),
+        description: courseForm.description?.trim() || null,
+        slug: slug,
+        course_type: courseForm.course_type,
+        order_position: maxOrder + 1,
+        order: maxOrder + 1,
+        is_published: false, // Começar como não publicado
+        is_featured: false,
+        plan_required: 'all', // Padrão: todos podem acessar
+        lessons_count: 0,
+        duration_hours: 0,
+        instructor_name: 'Gogh Lab',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+
       const { error } = await (supabase as any)
         .from('courses')
-        .insert({
-          ...courseForm,
-          order_position: maxOrder + 1,
-          order: maxOrder + 1,
-          slug: courseForm.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-          is_published: true
-        })
+        .insert(courseData)
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro detalhado ao criar curso:', error)
+        throw error
+      }
 
       toast.success('Curso criado com sucesso!')
       setShowCourseForm(false)
@@ -127,7 +165,7 @@ export default function CursosPage() {
       await loadCourses()
     } catch (error: any) {
       console.error('Erro ao criar curso:', error)
-      toast.error('Erro ao criar curso')
+      toast.error(error.message || 'Erro ao criar curso. Verifique os campos obrigatórios.')
     }
   }
 

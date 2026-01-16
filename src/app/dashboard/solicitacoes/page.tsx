@@ -84,17 +84,33 @@ export default function SolicitacoesPage() {
   const loadTickets = async () => {
     setLoading(true)
     try {
-      const { data, error } = await (supabase as any)
+      // Buscar tickets primeiro
+      const { data: ticketsData, error: ticketsError } = await (supabase as any)
         .from('support_tickets')
-        .select(`
-          *,
-          user:profiles!support_tickets_user_id_fkey(email, full_name)
-        `)
+        .select('*')
         .eq('ticket_type', 'tools_access')
         .order('created_at', { ascending: false })
 
-      if (error) throw error
-      setTickets(data || [])
+      if (ticketsError) throw ticketsError
+
+      // Buscar perfis dos usuários separadamente
+      if (ticketsData && ticketsData.length > 0) {
+        const userIds = [...new Set(ticketsData.map((t: any) => t.user_id))]
+        const { data: profilesData } = await (supabase as any)
+          .from('profiles')
+          .select('id, email, full_name')
+          .in('id', userIds)
+
+        // Combinar dados
+        const ticketsWithUsers = ticketsData.map((ticket: any) => ({
+          ...ticket,
+          user: profilesData?.find((p: any) => p.id === ticket.user_id) || null
+        }))
+
+        setTickets(ticketsWithUsers)
+      } else {
+        setTickets([])
+      }
     } catch (error: any) {
       console.error('Erro ao carregar tickets:', error)
       toast.error('Erro ao carregar solicitações')

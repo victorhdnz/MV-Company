@@ -270,7 +270,7 @@ export default function ToolsPage() {
             <h3 className="font-semibold text-gogh-black mb-1">Como funciona?</h3>
             <p className="text-sm text-gogh-grayDark">
               Ao solicitar acesso, nossa equipe irá adicionar você às contas Pro compartilhadas.
-              Você receberá um e-mail com as instruções de acesso em até <strong>24 horas úteis</strong>.
+              Os links de ativação e o vídeo tutorial aparecerão aqui nesta página em até <strong>24 horas úteis</strong>.
               O acesso é válido enquanto sua assinatura estiver ativa.
             </p>
           </div>
