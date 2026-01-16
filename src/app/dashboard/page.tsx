@@ -14,6 +14,9 @@ import {
   Link as LinkIcon,
   Users,
   FileText,
+  MessageSquare,
+  Wrench,
+  BookOpen,
 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -113,6 +116,34 @@ function DashboardContent() {
           href: '/dashboard/termos',
           icon: FileText,
           color: 'bg-purple-500',
+        },
+      ],
+    },
+    {
+      title: 'Solicitações',
+      description: 'Gerencie solicitações de acesso às ferramentas',
+      icon: MessageSquare,
+      items: [
+        {
+          title: 'Solicitações de Ferramentas',
+          description: 'Visualize e responda solicitações de acesso ao Canva e CapCut',
+          href: '/dashboard/solicitacoes',
+          icon: Wrench,
+          color: 'bg-purple-500',
+        },
+      ],
+    },
+    {
+      title: 'Cursos',
+      description: 'Gerencie cursos e aulas para os membros',
+      icon: BookOpen,
+      items: [
+        {
+          title: 'Gerenciar Cursos',
+          description: 'Crie e edite cursos de Canva e CapCut com vídeos e sequência de aulas',
+          href: '/dashboard/cursos',
+          icon: BookOpen,
+          color: 'bg-teal-500',
         },
       ],
     },

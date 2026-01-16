@@ -13,7 +13,7 @@ import {
   Palette,
   Scissors,
   ExternalLink,
-  MessageSquare
+  Play
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -38,7 +38,8 @@ export default function ToolsPage() {
   const [toolAccess, setToolAccess] = useState<ToolAccess[]>([])
   const [pendingTickets, setPendingTickets] = useState<SupportTicket[]>([])
   const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [tutorialVideoUrl, setTutorialVideoUrl] = useState<string | null>(null)
   
   const supabase = createClient()
 
@@ -60,10 +61,21 @@ export default function ToolsPage() {
           .from('support_tickets')
           .select('*')
           .eq('user_id', user.id)
-          .in('ticket_type', ['canva_access', 'capcut_access'])
+          .eq('ticket_type', 'tools_access')
           .in('status', ['open', 'in_progress'])
 
         setPendingTickets(ticketsData || [])
+
+        // Buscar URL do vídeo tutorial
+        const { data: videoData } = await (supabase as any)
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'tools_tutorial_video')
+          .maybeSingle()
+
+        if (videoData?.value) {
+          setTutorialVideoUrl(videoData.value)
+        }
       } catch (error) {
         console.error('Error fetching tools data:', error)
       } finally {
@@ -77,13 +89,13 @@ export default function ToolsPage() {
   // Verificar se já tem acesso ou ticket pendente
   const hasCanvaAccess = toolAccess.some(t => t.tool_type === 'canva' && t.is_active)
   const hasCapcutAccess = toolAccess.some(t => t.tool_type === 'capcut' && t.is_active)
-  const hasPendingCanva = pendingTickets.some(t => t.ticket_type === 'canva_access')
-  const hasPendingCapcut = pendingTickets.some(t => t.ticket_type === 'capcut_access')
+  const hasBothAccess = hasCanvaAccess && hasCapcutAccess
+  const hasPendingRequest = pendingTickets.length > 0
 
   // Solicitar acesso para ambas as ferramentas
   const requestToolsAccess = async () => {
     if (!user) return
-    setSubmitting('both')
+    setSubmitting(true)
 
     try {
       // Criar ticket único para ambas as ferramentas
@@ -127,7 +139,7 @@ export default function ToolsPage() {
       console.error('Error requesting tools access:', error)
       toast.error('Erro ao enviar solicitação. Tente novamente.')
     } finally {
-      setSubmitting(null)
+      setSubmitting(false)
     }
   }
 
@@ -138,10 +150,7 @@ export default function ToolsPage() {
       description: 'Crie designs profissionais com templates premium, elementos exclusivos e recursos avançados de edição.',
       icon: Palette,
       color: 'from-purple-500 to-indigo-600',
-      bgColor: 'bg-purple-100',
-      iconColor: 'text-purple-600',
       hasAccess: hasCanvaAccess,
-      hasPending: hasPendingCanva,
       accessData: toolAccess.find(t => t.tool_type === 'canva'),
       features: [
         'Templates premium ilimitados',
@@ -157,10 +166,7 @@ export default function ToolsPage() {
       description: 'Editor de vídeo profissional com efeitos avançados, templates virais e sem marca d\'água.',
       icon: Scissors,
       color: 'from-emerald-500 to-teal-600',
-      bgColor: 'bg-emerald-100',
-      iconColor: 'text-emerald-600',
       hasAccess: hasCapcutAccess,
-      hasPending: hasPendingCapcut,
       accessData: toolAccess.find(t => t.tool_type === 'capcut'),
       features: [
         'Sem marca d\'água',
@@ -260,8 +266,8 @@ export default function ToolsPage() {
                 ))}
               </ul>
 
-              {/* Action Button */}
-              {tool.hasAccess ? (
+              {/* Access Status */}
+              {tool.hasAccess && (
                 <div className="space-y-3">
                   <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
                     <div className="flex items-center gap-2 text-emerald-700 mb-2">
@@ -285,47 +291,91 @@ export default function ToolsPage() {
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 </div>
-              ) : tool.hasPending ? (
-                <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
-                  <div className="flex items-center gap-2 text-amber-700 mb-2">
-                    <Clock className="w-5 h-5" />
-                    <span className="font-medium">Solicitação Pendente</span>
-                  </div>
-                  <p className="text-sm text-amber-600">
-                    Sua solicitação está sendo processada. Você receberá um e-mail com as instruções em breve.
-                  </p>
-                </div>
-              ) : (
-                <button
-                  onClick={() => requestAccess(tool.id as 'canva' | 'capcut')}
-                  disabled={submitting === tool.id}
-                  className={`
-                    w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all
-                    ${submitting === tool.id
-                      ? 'bg-gogh-grayLight text-gogh-grayDark cursor-not-allowed'
-                      : 'bg-gogh-yellow text-gogh-black hover:bg-gogh-yellow/80'
-                    }
-                  `}
-                >
-                  {submitting === tool.id ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-gogh-grayDark border-t-transparent rounded-full animate-spin" />
-                      Enviando...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      Solicitar Acesso
-                    </>
-                  )}
-                </button>
               )}
             </div>
           </motion.div>
         ))}
       </div>
 
+      {/* Request Button - Single button for both tools */}
+      {!hasBothAccess && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-xl border border-gogh-grayLight shadow-sm p-6"
+        >
+          {hasPendingRequest ? (
+            <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+              <div className="flex items-center gap-2 text-amber-700 mb-2">
+                <Clock className="w-5 h-5" />
+                <span className="font-medium">Solicitação Pendente</span>
+              </div>
+              <p className="text-sm text-amber-600">
+                Sua solicitação está sendo processada. Você receberá um e-mail com as instruções em breve.
+              </p>
+            </div>
+          ) : (
+            <div className="text-center">
+              <h3 className="text-lg font-bold text-gogh-black mb-2">
+                Solicitar Acesso às Ferramentas
+              </h3>
+              <p className="text-sm text-gogh-grayDark mb-6">
+                Clique no botão abaixo para solicitar acesso ao Canva Pro e CapCut Pro simultaneamente.
+              </p>
+              <button
+                onClick={requestToolsAccess}
+                disabled={submitting}
+                className={`
+                  inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
+                  ${submitting
+                    ? 'bg-gogh-grayLight text-gogh-grayDark cursor-not-allowed'
+                    : 'bg-gogh-yellow text-gogh-black hover:bg-gogh-yellow/80'
+                  }
+                `}
+              >
+                {submitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-gogh-grayDark border-t-transparent rounded-full animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Solicitar Acesso às Ferramentas
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Tutorial Video */}
+      {tutorialVideoUrl && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white rounded-xl border border-gogh-grayLight shadow-sm p-6"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <Play className="w-5 h-5 text-gogh-grayDark" />
+            <h3 className="text-lg font-bold text-gogh-black">
+              Como Ativar e Acessar as Ferramentas
+            </h3>
+          </div>
+          <div className="aspect-video rounded-lg overflow-hidden bg-gogh-grayLight">
+            <iframe
+              src={tutorialVideoUrl}
+              title="Tutorial de Ativação"
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </motion.div>
+      )}
     </div>
   )
 }
-
