@@ -124,7 +124,10 @@ export default function MembrosPage() {
           created_at: profile.created_at,
           subscription: subscription ? {
             id: subscription.id,
-            plan_id: subscription.plan_id || subscription.plan_type || null,
+            // Garantir que sempre temos plan_id, convertendo plan_type se necessário
+            plan_id: subscription.plan_id || 
+                    (subscription.plan_type === 'premium' ? 'gogh_pro' :
+                     subscription.plan_type === 'essential' ? 'gogh_essencial' : null),
             status: subscription.status,
             billing_cycle: subscription.billing_cycle || 'monthly',
             current_period_end: subscription.current_period_end
@@ -143,7 +146,20 @@ export default function MembrosPage() {
 
   const handleEditPlan = (member: Member) => {
     setEditingMember(member.id)
-    setEditingPlan(member.subscription?.plan_id || '')
+    // Garantir que pega o plan_id corretamente, mesmo se vier como plan_type
+    let currentPlanId = member.subscription?.plan_id || ''
+    
+    // Se não tem plan_id, tentar converter de plan_type
+    if (!currentPlanId && member.subscription) {
+      const planType = (member.subscription as any)?.plan_type
+      if (planType === 'premium') {
+        currentPlanId = 'gogh_pro'
+      } else if (planType === 'essential') {
+        currentPlanId = 'gogh_essencial'
+      }
+    }
+    
+    setEditingPlan(currentPlanId)
   }
 
   const handleCancelEdit = () => {
@@ -281,7 +297,16 @@ export default function MembrosPage() {
       toast.success('Plano atualizado com sucesso!')
       setEditingMember(null)
       setEditingPlan('')
+      
+      // Recarregar membros para atualizar a exibição
       await loadMembers()
+      
+      // Se o usuário editado for o usuário atual logado, atualizar o AuthContext
+      // Isso garante que a área de membros mostre o plano atualizado
+      if (memberId === (await supabase.auth.getUser()).data.user?.id) {
+        // Disparar evento customizado para atualizar o AuthContext
+        window.dispatchEvent(new CustomEvent('subscription-updated'))
+      }
     } catch (error: any) {
       console.error('Error saving plan:', error)
       toast.error(error?.message || 'Erro ao salvar plano')
@@ -313,7 +338,21 @@ export default function MembrosPage() {
       )
     }
 
-    const isPro = member.subscription.plan_id === 'gogh_pro'
+    // Converter plan_type para plan_id se necessário
+    const planId = member.subscription.plan_id || 
+                   ((member.subscription as any).plan_type === 'premium' ? 'gogh_pro' :
+                    (member.subscription as any).plan_type === 'essential' ? 'gogh_essencial' : null)
+    
+    const isPro = planId === 'gogh_pro'
+    const isEssencial = planId === 'gogh_essencial'
+    
+    if (!isPro && !isEssencial) {
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+          Gratuito
+        </span>
+      )
+    }
     
     return (
       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${

@@ -195,6 +195,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initializeAuth()
 
+    // Listener para atualização manual de assinatura (do dashboard)
+    const handleSubscriptionUpdate = async () => {
+      if (user) {
+        await updateUserData(user)
+      }
+    }
+    
+    window.addEventListener('subscription-updated', handleSubscriptionUpdate)
+
     // Listener para mudanças de auth
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
@@ -227,6 +236,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isMounted = false
       clearTimeout(timeoutId)
       authSubscription.unsubscribe()
+      window.removeEventListener('subscription-updated', handleSubscriptionUpdate)
     }
   }, [])
 

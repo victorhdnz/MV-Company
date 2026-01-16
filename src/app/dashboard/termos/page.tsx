@@ -547,7 +547,29 @@ export default function DashboardTermsPage() {
   useEffect(() => {
     // Carregar termos - autenticação é verificada pelo middleware
     loadTerms()
+    // Deletar termos antigos que não são mais necessários
+    deleteOldTerms()
   }, [])
+
+  const deleteOldTerms = async () => {
+    try {
+      // Termos antigos que devem ser removidos
+      const oldTermKeys = ['politica-entrega', 'trocas-devolucoes']
+      
+      for (const key of oldTermKeys) {
+        const { error } = await (supabase as any)
+          .from('site_terms')
+          .delete()
+          .eq('key', key)
+        
+        if (error && error.code !== 'PGRST116') {
+          console.warn(`Erro ao deletar termo ${key}:`, error)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao deletar termos antigos:', error)
+    }
+  }
 
   // Parsear conteúdo em seções quando termo é selecionado
   useEffect(() => {
