@@ -19,7 +19,8 @@ import {
   Palette,
   Scissors,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  Zap
 } from 'lucide-react'
 
 type TabType = 'profile' | 'plan'
