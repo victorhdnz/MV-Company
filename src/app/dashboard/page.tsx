@@ -320,9 +320,19 @@ function DashboardContent() {
 export default function DashboardPage() {
   const { isAuthenticated, isEditor, loading, profile, user } = useAuth()
   const [profileLoadingTimeout, setProfileLoadingTimeout] = useState(false)
+  const [sessionLostTimeout, setSessionLostTimeout] = useState(false)
+  const [wasAuthenticated, setWasAuthenticated] = useState(false)
 
   // Verificar se o email do usuário está na lista de admins
   const userEmailIsAdmin = isAdminEmail(user?.email)
+
+  // Rastrear se já foi autenticado para evitar redirecionamento durante refresh de token
+  useEffect(() => {
+    if (isAuthenticated) {
+      setWasAuthenticated(true)
+      setSessionLostTimeout(false)
+    }
+  }, [isAuthenticated])
 
   // Timeout de segurança: se após 1 segundo o profile ainda não carregou
   useEffect(() => {
@@ -336,6 +346,19 @@ export default function DashboardPage() {
     }
   }, [isAuthenticated, profile, loading])
 
+  // Se a sessão foi perdida mas já estava autenticado antes, aguardar um pouco
+  // (pode ser apenas um refresh de token)
+  useEffect(() => {
+    if (wasAuthenticated && !isAuthenticated && !loading) {
+      const timeout = setTimeout(() => {
+        setSessionLostTimeout(true)
+      }, 2000) // Aguardar 2 segundos antes de considerar sessão perdida
+      return () => clearTimeout(timeout)
+    } else if (isAuthenticated) {
+      setSessionLostTimeout(false)
+    }
+  }, [wasAuthenticated, isAuthenticated, loading])
+
   // Loading - aguardar até que o profile seja carregado completamente
   if (loading) {
     return (
@@ -345,9 +368,19 @@ export default function DashboardPage() {
     )
   }
 
-  // Não autenticado - mostrar login
-  if (!isAuthenticated) {
+  // Não autenticado - mostrar login apenas se realmente perdeu a sessão
+  // (não durante refresh de token)
+  if (!isAuthenticated && (sessionLostTimeout || !wasAuthenticated)) {
     return <LoginForm />
+  }
+
+  // Se estava autenticado mas perdeu temporariamente, aguardar um pouco
+  if (!isAuthenticated && wasAuthenticated && !sessionLostTimeout) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <LoadingSpinner size="md" />
+      </div>
+    )
   }
 
   // Se está autenticado mas ainda não temos profile carregado, aguardar
