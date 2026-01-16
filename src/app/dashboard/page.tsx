@@ -119,11 +119,14 @@ function DashboardContent() {
 
   const handleLogout = async () => {
     try {
-      await signOut()
-      toast.success('Logout realizado')
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      // Forçar redirecionamento completo para limpar estado
+      window.location.href = '/'
     } catch (error) {
       console.error('Erro ao fazer logout:', error)
-      toast.error('Erro ao fazer logout')
+      // Mesmo com erro, redirecionar
+      window.location.href = '/'
     }
   }
 

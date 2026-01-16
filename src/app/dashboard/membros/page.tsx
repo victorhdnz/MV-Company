@@ -229,18 +229,6 @@ export default function MembrosPage() {
     )
   }
 
-  // Verificar apenas permissão - autenticação é feita pelo middleware
-  // Se emailIsAdmin é true, sempre permitir acesso mesmo sem profile
-  if (!emailIsAdmin && !hasAccess) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Você não tem permissão.</p>
-          <a href="/dashboard" className="text-blue-600 hover:underline">Voltar</a>
-        </div>
-      </div>
-    )
-  }
 
   // Carregando dados
   if (loading) {
