@@ -25,20 +25,15 @@ export default function DashboardAvaliacoesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
-
   const supabase = createClient()
 
   useEffect(() => {
-    if (hasAccess) {
-      loadData()
-    }
-  }, [hasAccess])
+    // Carregar dados - autenticação é verificada pelo middleware
+    loadData()
+  }, [])
 
   // Recarregar quando a página receber foco
   useEffect(() => {
-    if (!hasAccess) return
     
     const handleFocus = () => {
       loadData()
@@ -46,7 +41,7 @@ export default function DashboardAvaliacoesPage() {
 
     window.addEventListener('focus', handleFocus)
     return () => window.removeEventListener('focus', handleFocus)
-  }, [hasAccess]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = async () => {
     try {

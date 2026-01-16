@@ -79,14 +79,10 @@ export default function AnalyticsPage() {
     count: number
   }>>([])
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
-  
   useEffect(() => {
-    if (hasAccess) {
-      loadPages()
-    }
-  }, [hasAccess])
+    // Carregar páginas - autenticação é verificada pelo middleware
+    loadPages()
+  }, [])
 
   useEffect(() => {
     if (pages.length > 0 || pageType === 'homepage' || pageType === 'all') {

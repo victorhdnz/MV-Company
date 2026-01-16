@@ -194,14 +194,10 @@ export default function DashboardTermsPage() {
     }
   ])
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
-
   useEffect(() => {
-    if (hasAccess) {
-      loadTerms()
-    }
-  }, [hasAccess])
+    // Carregar termos - autenticação é verificada pelo middleware
+    loadTerms()
+  }, [])
 
   // Parsear conteúdo em seções quando termo é selecionado
   useEffect(() => {

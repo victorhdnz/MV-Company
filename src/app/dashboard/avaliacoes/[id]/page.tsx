@@ -26,9 +26,6 @@ export default function EditAvaliacaoPage({ params }: EditAvaliacaoPageProps) {
   const [services, setServices] = useState<Service[]>([])
   const supabase = createClient()
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
-
   const [formData, setFormData] = useState({
     service_id: '',
     client_name: '',
@@ -41,11 +38,10 @@ export default function EditAvaliacaoPage({ params }: EditAvaliacaoPageProps) {
   })
 
   useEffect(() => {
-    if (hasAccess) {
-      loadTestimonial()
-      loadServices()
-    }
-  }, [hasAccess, params.id])
+    // Carregar dados - autenticação é verificada pelo middleware
+    loadTestimonial()
+    loadServices()
+  }, [params.id])
 
   const loadTestimonial = async () => {
     try {

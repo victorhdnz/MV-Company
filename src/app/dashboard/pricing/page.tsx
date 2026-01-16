@@ -95,14 +95,10 @@ export default function PricingEditorPage() {
     ],
   })
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
-
   useEffect(() => {
-    if (hasAccess) {
-      loadSettings()
-    }
-  }, [hasAccess])
+    // Carregar configurações - autenticação é verificada pelo middleware
+    loadSettings()
+  }, [])
 
   const loadSettings = async () => {
     setLoading(true)

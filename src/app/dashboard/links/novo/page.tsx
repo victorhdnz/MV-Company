@@ -23,9 +23,6 @@ export default function NewLinkAggregatorPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
-
   const [formData, setFormData] = useState({
     name: '',
     slug: '',

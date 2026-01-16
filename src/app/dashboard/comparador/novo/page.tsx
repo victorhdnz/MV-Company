@@ -17,8 +17,6 @@ export default function NovaComparacao() {
   const { isEditor, emailIsAdmin } = useAuth()
   const supabase = createClient()
   
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
 
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({

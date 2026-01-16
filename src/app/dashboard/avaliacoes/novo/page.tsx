@@ -18,9 +18,6 @@ export default function NovaAvaliacao() {
   const { isEditor, emailIsAdmin } = useAuth()
   const supabase = createClient()
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
-
   const [loading, setLoading] = useState(false)
   const [services, setServices] = useState<Service[]>([])
   const [formData, setFormData] = useState({
@@ -35,10 +32,9 @@ export default function NovaAvaliacao() {
   })
 
   useEffect(() => {
-    if (hasAccess) {
-      loadServices()
-    }
-  }, [hasAccess])
+    // Carregar serviços - autenticação é verificada pelo middleware
+    loadServices()
+  }, [])
 
   const loadServices = async () => {
     try {

@@ -389,15 +389,10 @@ export default function HomepageEditorPage() {
     award_standalone_description: 'A Gogh Lab é pioneira em oferecer uma solução completa com agentes de IA, cursos profissionais e acesso às melhores ferramentas de criação — tudo em uma única assinatura.',
   })
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
-  
   useEffect(() => {
-    // Só carregar settings se tiver acesso
-    if (hasAccess) {
-      loadSettings()
-    }
-  }, [hasAccess])
+    // Carregar settings - autenticação é verificada pelo middleware
+    loadSettings()
+  }, [])
 
   const loadSettings = async () => {
     setLoading(true)

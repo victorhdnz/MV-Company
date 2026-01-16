@@ -25,9 +25,6 @@ export default function EditLinkAggregatorPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
-
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -43,10 +40,11 @@ export default function EditLinkAggregatorPage() {
   });
 
   useEffect(() => {
-    if (hasAccess && id) {
+    // Carregar agregador - autenticação é verificada pelo middleware
+    if (id) {
       loadAggregator();
     }
-  }, [hasAccess, id]);
+  }, [id]);
 
   const loadAggregator = async () => {
     try {

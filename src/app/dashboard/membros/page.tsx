@@ -55,15 +55,10 @@ export default function MembrosPage() {
   const [editingPlan, setEditingPlan] = useState<string>('')
   const [saving, setSaving] = useState(false)
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
-  
   useEffect(() => {
-    // Só carregar dados se tiver acesso
-    if (hasAccess) {
-      loadMembers()
-    }
-  }, [hasAccess])
+    // Carregar membros - autenticação é verificada pelo middleware
+    loadMembers()
+  }, [])
 
   const loadMembers = async () => {
     try {

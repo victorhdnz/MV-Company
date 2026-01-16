@@ -17,14 +17,10 @@ export default function LinkAggregatorsDashboard() {
   const [aggregators, setAggregators] = useState<LinkAggregator[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor;
-
   useEffect(() => {
-    if (hasAccess) {
-      loadAggregators();
-    }
-  }, [hasAccess]);
+    // Carregar agregadores - autenticação é verificada pelo middleware
+    loadAggregators();
+  }, []);
 
   const loadAggregators = async () => {
     try {

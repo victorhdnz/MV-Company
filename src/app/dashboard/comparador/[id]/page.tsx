@@ -25,9 +25,6 @@ export default function EditComparacaoPage({ params }: EditComparacaoPageProps) 
   const [saving, setSaving] = useState(false)
   const supabase = createClient()
 
-  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
-  const hasAccess = emailIsAdmin || isEditor
-
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -38,10 +35,9 @@ export default function EditComparacaoPage({ params }: EditComparacaoPageProps) 
   const [topics, setTopics] = useState<ComparisonTopic[]>([])
 
   useEffect(() => {
-    if (hasAccess) {
-      loadComparison()
-    }
-  }, [hasAccess])
+    // Carregar comparação - autenticação é verificada pelo middleware
+    loadComparison()
+  }, [])
 
   const loadComparison = async () => {
     try {
