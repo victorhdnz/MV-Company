@@ -70,15 +70,38 @@ export default function MembrosPage() {
       if (profilesError) throw profilesError
 
       // Buscar todas as assinaturas ativas
+      // Tentar primeiro com a estrutura nova (plan_id, billing_cycle)
+      // Se falhar, tentar com estrutura antiga (plan_type)
       let subscriptions = []
       try {
+        // Primeiro, tentar buscar com select específico para ver quais colunas existem
         const { data: subsData, error: subsError } = await (supabase as any)
           .from('subscriptions')
           .select('*')
           .in('status', ['active', 'trialing'])
         
-        if (subsError && subsError.code !== 'PGRST116') {
-          console.error('Error fetching subscriptions:', subsError)
+        if (subsError) {
+          // Se der erro de coluna não encontrada, tentar buscar apenas colunas básicas
+          if (subsError.code === '42703' || subsError.message?.includes('does not exist')) {
+            console.warn('Estrutura antiga detectada, tentando buscar com campos alternativos')
+            // Tentar buscar com estrutura antiga (plan_type)
+            const { data: altData, error: altError } = await (supabase as any)
+              .from('subscriptions')
+              .select('id, user_id, plan_type, status, current_period_end, current_period_start')
+              .in('status', ['active', 'trialing'])
+            
+            if (!altError && altData) {
+              // Converter estrutura antiga para nova
+              subscriptions = altData.map((sub: any) => ({
+                ...sub,
+                plan_id: sub.plan_type === 'premium' ? 'gogh_pro' : 
+                        sub.plan_type === 'essential' ? 'gogh_essencial' : null,
+                billing_cycle: 'monthly' // Default para estrutura antiga
+              }))
+            }
+          } else if (subsError.code !== 'PGRST116') {
+            console.error('Error fetching subscriptions:', subsError)
+          }
         } else {
           subscriptions = subsData || []
         }
@@ -101,9 +124,9 @@ export default function MembrosPage() {
           created_at: profile.created_at,
           subscription: subscription ? {
             id: subscription.id,
-            plan_id: subscription.plan_id,
+            plan_id: subscription.plan_id || subscription.plan_type || null,
             status: subscription.status,
-            billing_cycle: subscription.billing_cycle,
+            billing_cycle: subscription.billing_cycle || 'monthly',
             current_period_end: subscription.current_period_end
           } : null
         }
@@ -155,17 +178,42 @@ export default function MembrosPage() {
         // Atualizar ou criar assinatura
         if (member.subscription) {
           // Atualizar existente
+          // Tentar primeiro com estrutura nova (plan_id)
+          let updateData: any = {
+            plan_id: editingPlan,
+            updated_at: new Date().toISOString()
+          }
+          
           const { error } = await (supabase as any)
             .from('subscriptions')
-            .update({
-              plan_id: editingPlan,
-              updated_at: new Date().toISOString()
-            })
+            .update(updateData)
             .eq('id', member.subscription.id)
           
           if (error) {
-            console.error('Erro ao atualizar assinatura:', error)
-            throw new Error(error.message || 'Erro ao atualizar plano')
+            // Se der erro de coluna não encontrada, tentar com estrutura antiga
+            if (error.code === '42703' || error.code === 'PGRST204' || error.message?.includes('does not exist')) {
+              console.warn('Tentando atualizar com estrutura antiga (plan_type)')
+              const planType = editingPlan === 'gogh_pro' ? 'premium' : 
+                              editingPlan === 'gogh_essencial' ? 'essential' : 'essential'
+              
+              updateData = {
+                plan_type: planType,
+                updated_at: new Date().toISOString()
+              }
+              
+              const { error: altError } = await (supabase as any)
+                .from('subscriptions')
+                .update(updateData)
+                .eq('id', member.subscription.id)
+              
+              if (altError) {
+                console.error('Erro ao atualizar assinatura (estrutura antiga):', altError)
+                throw new Error(altError.message || 'Erro ao atualizar plano. A tabela pode ter estrutura incompatível.')
+              }
+            } else {
+              console.error('Erro ao atualizar assinatura:', error)
+              throw new Error(error.message || 'Erro ao atualizar plano')
+            }
           }
         } else {
           // Criar nova (assinatura manual sem Stripe)
@@ -173,26 +221,59 @@ export default function MembrosPage() {
           const oneYearLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
           const manualId = `manual_${memberId.slice(0, 8)}_${Date.now()}`
           
+          // Tentar primeiro com estrutura nova (plan_id, billing_cycle)
+          let insertData: any = {
+            user_id: memberId,
+            plan_id: editingPlan,
+            status: 'active',
+            billing_cycle: 'monthly',
+            stripe_customer_id: manualId,
+            stripe_subscription_id: `sub_${manualId}`,
+            stripe_price_id: `price_${editingPlan}_manual`,
+            current_period_start: now.toISOString(),
+            current_period_end: oneYearLater.toISOString(),
+            cancel_at_period_end: false,
+            created_at: now.toISOString(),
+            updated_at: now.toISOString()
+          }
+          
           const { error } = await (supabase as any)
             .from('subscriptions')
-            .insert({
-              user_id: memberId,
-              plan_id: editingPlan,
-              status: 'active',
-              billing_cycle: 'monthly',
-              stripe_customer_id: manualId,
-              stripe_subscription_id: `sub_${manualId}`,
-              stripe_price_id: `price_${editingPlan}_manual`,
-              current_period_start: now.toISOString(),
-              current_period_end: oneYearLater.toISOString(),
-              cancel_at_period_end: false,
-              created_at: now.toISOString(),
-              updated_at: now.toISOString()
-            } as any)
+            .insert(insertData)
           
           if (error) {
-            console.error('Erro ao criar assinatura:', error)
-            throw new Error(error.message || 'Erro ao criar plano. Verifique se o usuário já possui uma assinatura ativa.')
+            // Se der erro de coluna não encontrada, tentar com estrutura antiga
+            if (error.code === '42703' || error.code === 'PGRST204' || error.message?.includes('does not exist')) {
+              console.warn('Tentando criar com estrutura antiga (plan_type)')
+              // Converter para estrutura antiga
+              const planType = editingPlan === 'gogh_pro' ? 'premium' : 
+                              editingPlan === 'gogh_essencial' ? 'essential' : 'essential'
+              
+              insertData = {
+                user_id: memberId,
+                plan_type: planType,
+                status: 'active',
+                stripe_customer_id: manualId,
+                stripe_subscription_id: `sub_${manualId}`,
+                current_period_start: now.toISOString(),
+                current_period_end: oneYearLater.toISOString(),
+                cancel_at_period_end: false,
+                created_at: now.toISOString(),
+                updated_at: now.toISOString()
+              }
+              
+              const { error: altError } = await (supabase as any)
+                .from('subscriptions')
+                .insert(insertData)
+              
+              if (altError) {
+                console.error('Erro ao criar assinatura (estrutura antiga):', altError)
+                throw new Error(altError.message || 'Erro ao criar plano. A tabela de assinaturas pode ter estrutura incompatível.')
+              }
+            } else {
+              console.error('Erro ao criar assinatura:', error)
+              throw new Error(error.message || 'Erro ao criar plano. Verifique se o usuário já possui uma assinatura ativa.')
+            }
           }
         }
       }
@@ -384,7 +465,7 @@ export default function MembrosPage() {
                       ) : (
                         <div>
                           {getPlanBadge(member)}
-                          {member.subscription && (
+                          {member.subscription && member.subscription.billing_cycle && (
                             <p className="text-xs text-gray-500 mt-1">
                               {member.subscription.billing_cycle === 'annual' ? 'Anual' : 'Mensal'}
                               {member.subscription.current_period_end && (

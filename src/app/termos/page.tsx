@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { FileText, Shield, Truck, RotateCcw, Loader2, ChevronRight } from 'lucide-react'
+import { FileText, Shield, Truck, RotateCcw, Loader2, ChevronRight, ArrowLeft, Home } from 'lucide-react'
 import { FadeInSection } from '@/components/ui/FadeInSection'
 import { TermsContent } from '@/components/ui/TermsContent'
 
@@ -32,9 +32,18 @@ const getIcon = (iconName: string) => {
 
 export default function TermosPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [terms, setTerms] = useState<Term[]>([])
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  
+  // Termos que devem ser mantidos (os novos e importantes)
+  const allowedTerms = [
+    'termos-login-google',
+    'termos-assinatura-planos',
+    'termos-uso',
+    'politica-privacidade'
+  ]
 
   const handleTermSelect = (termKey: string) => {
     setSelectedTerm(termKey)
@@ -58,7 +67,10 @@ export default function TermosPage() {
         const result = await response.json()
         
         if (result.success && result.terms) {
-          const termsData = result.terms as Term[]
+          // Filtrar apenas termos permitidos (remover termos antigos)
+          const termsData = (result.terms as Term[]).filter(term => 
+            allowedTerms.includes(term.key)
+          )
           setTerms(termsData)
           
           // Verificar se há um parâmetro de query para selecionar um termo específico
@@ -124,13 +136,47 @@ export default function TermosPage() {
   }
 
   return (
-    <FadeInSection>
-      <div className="min-h-screen bg-white py-20">
+    <div className="min-h-screen bg-gradient-to-br from-gogh-beige via-white to-gogh-beige">
+      {/* Header simples com botão de voltar */}
+      <div className="bg-white border-b border-gogh-grayLight sticky top-0 z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => {
+                  // Verificar se há uma página anterior no histórico
+                  if (window.history.length > 1) {
+                    router.back()
+                  } else {
+                    router.push('/')
+                  }
+                }}
+                className="flex items-center gap-2 text-gogh-grayDark hover:text-gogh-black transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span>Voltar</span>
+              </button>
+              <Link
+                href="/"
+                className="flex items-center gap-2 text-gogh-grayDark hover:text-gogh-black transition-colors"
+              >
+                <Home className="w-5 h-5" />
+                <span>Homepage</span>
+              </Link>
+            </div>
+            <Link href="/" className="text-xl font-bold text-gogh-black">
+              Gogh Lab
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Termos e Políticas</h1>
-            <div className="w-24 h-1 bg-black mx-auto mb-6" />
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gogh-black">Termos e Políticas</h1>
+            <div className="w-24 h-1 bg-gogh-yellow mx-auto mb-6" />
+            <p className="text-gogh-grayDark text-lg max-w-2xl mx-auto">
               Acesse nossos termos, políticas e informações importantes sobre nossos serviços
             </p>
           </div>
@@ -138,8 +184,8 @@ export default function TermosPage() {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar lateral com lista de termos */}
             <aside className="lg:w-64 flex-shrink-0">
-              <div className="bg-white border-2 border-gray-200 rounded-xl p-4 sticky top-4">
-                <h3 className="font-bold text-lg mb-4">Termos Disponíveis</h3>
+              <div className="bg-white border-2 border-gogh-grayLight rounded-xl p-4 sticky top-20 shadow-sm">
+                <h3 className="font-bold text-lg mb-4 text-gogh-black">Termos Disponíveis</h3>
                 <nav className="space-y-2">
                   {terms.map((term) => {
                     const Icon = getIcon(term.icon)
@@ -150,8 +196,8 @@ export default function TermosPage() {
                         onClick={() => handleTermSelect(term.key)}
                         className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center gap-3 ${
                           isActive
-                            ? 'bg-black text-white shadow-lg'
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:shadow-md'
+                            ? 'bg-gogh-yellow text-gogh-black shadow-md'
+                            : 'bg-gogh-grayLight hover:bg-gogh-yellow/20 text-gogh-grayDark hover:text-gogh-black'
                         }`}
                       >
                         <Icon className="w-5 h-5 flex-shrink-0" />
@@ -169,22 +215,24 @@ export default function TermosPage() {
               {selectedTerm ? (() => {
                 const selectedTermData = terms.find(t => t.key === selectedTerm)
                 return (
-                  <TermsContent
-                    termKey={selectedTerm}
-                    defaultTitle={selectedTermData?.title || 'Termo'}
-                    defaultContent={selectedTermData?.content || `# ${selectedTermData?.title || 'Termo'}\n\nConteúdo do termo aqui.`}
-                    cachedContent={selectedTermData?.content}
-                  />
+                  <div className="bg-white border-2 border-gogh-grayLight rounded-xl shadow-sm overflow-hidden">
+                    <TermsContent
+                      termKey={selectedTerm}
+                      defaultTitle={selectedTermData?.title || 'Termo'}
+                      defaultContent={selectedTermData?.content || `# ${selectedTermData?.title || 'Termo'}\n\nConteúdo do termo aqui.`}
+                      cachedContent={selectedTermData?.content}
+                    />
+                  </div>
                 )
               })() : (
-                <div className="bg-white border-2 border-gray-200 rounded-xl p-8 text-center">
-                  <p className="text-gray-600">Selecione um termo para visualizar</p>
+                <div className="bg-white border-2 border-gogh-grayLight rounded-xl p-8 text-center">
+                  <p className="text-gogh-grayDark">Selecione um termo para visualizar</p>
                 </div>
               )}
             </main>
           </div>
         </div>
       </div>
-    </FadeInSection>
+    </div>
   )
 }
