@@ -37,10 +37,11 @@ interface Lesson {
   id: string
   course_id: string
   title: string
-  description: string
-  video_url: string
-  order: number
-  created_at: string
+  description: string | null
+  video_url: string | null
+  order?: number
+  order_position?: number
+  created_at?: string
 }
 
 export default function CursosPage() {
