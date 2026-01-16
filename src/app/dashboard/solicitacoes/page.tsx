@@ -6,16 +6,17 @@ import { createClient } from '@/lib/supabase/client'
 import { motion } from 'framer-motion'
 import { 
   Wrench, 
-  MessageSquare, 
   Clock, 
   CheckCircle2, 
   XCircle,
-  Send,
   ArrowLeft,
   User,
   Mail,
   Calendar,
-  Search
+  Search,
+  Link as LinkIcon,
+  Save,
+  ExternalLink
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
@@ -35,16 +36,14 @@ interface SupportTicket {
   }
 }
 
-interface SupportMessage {
+interface ToolAccess {
   id: string
-  ticket_id: string
-  sender_id: string
-  content: string
-  created_at: string
-  sender?: {
-    email: string
-    full_name: string
-  }
+  user_id: string
+  tool_type: 'canva' | 'capcut'
+  email: string
+  access_link?: string
+  access_granted_at: string
+  is_active: boolean
 }
 
 export default function SolicitacoesPage() {
@@ -52,12 +51,15 @@ export default function SolicitacoesPage() {
   const supabase = createClient()
   const [tickets, setTickets] = useState<SupportTicket[]>([])
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null)
-  const [messages, setMessages] = useState<SupportMessage[]>([])
-  const [newMessage, setNewMessage] = useState('')
+  const [toolAccess, setToolAccess] = useState<ToolAccess[]>([])
   const [loading, setLoading] = useState(true)
-  const [sending, setSending] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  
+  // Form states para links
+  const [canvaLink, setCanvaLink] = useState('')
+  const [capcutLink, setCapcutLink] = useState('')
 
   useEffect(() => {
     loadTickets()
@@ -65,7 +67,7 @@ export default function SolicitacoesPage() {
 
   useEffect(() => {
     if (selectedTicket) {
-      loadMessages(selectedTicket.id)
+      loadToolAccess(selectedTicket.user_id)
     }
   }, [selectedTicket])
 
@@ -91,55 +93,115 @@ export default function SolicitacoesPage() {
     }
   }
 
-  const loadMessages = async (ticketId: string) => {
+  const loadToolAccess = async (userId: string) => {
     try {
       const { data, error } = await (supabase as any)
-        .from('support_messages')
-        .select(`
-          *,
-          sender:profiles!support_messages_sender_id_fkey(email, full_name)
-        `)
-        .eq('ticket_id', ticketId)
-        .order('created_at', { ascending: true })
+        .from('tool_access_credentials')
+        .select('*')
+        .eq('user_id', userId)
+        .in('tool_type', ['canva', 'capcut'])
 
       if (error) throw error
-      setMessages(data || [])
+      
+      setToolAccess(data || [])
+      
+      // Preencher campos com links existentes
+      const canvaAccess = data?.find((t: ToolAccess) => t.tool_type === 'canva')
+      const capcutAccess = data?.find((t: ToolAccess) => t.tool_type === 'capcut')
+      
+      setCanvaLink(canvaAccess?.access_link || '')
+      setCapcutLink(capcutAccess?.access_link || '')
     } catch (error: any) {
-      console.error('Erro ao carregar mensagens:', error)
-      toast.error('Erro ao carregar mensagens')
+      console.error('Erro ao carregar acessos:', error)
     }
   }
 
-  const sendMessage = async () => {
-    if (!selectedTicket || !newMessage.trim()) return
+  const saveLinks = async () => {
+    if (!selectedTicket) return
 
-    setSending(true)
+    setSaving(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Usuário não autenticado')
 
-      const { error } = await (supabase as any)
-        .from('support_messages')
-        .insert({
-          ticket_id: selectedTicket.id,
-          sender_id: user.id,
-          content: newMessage.trim()
-        })
+      // Salvar/atualizar link do Canva
+      if (canvaLink.trim()) {
+        const canvaAccess = toolAccess.find(t => t.tool_type === 'canva')
+        
+        if (canvaAccess) {
+          // Atualizar existente
+          const { error } = await (supabase as any)
+            .from('tool_access_credentials')
+            .update({
+              access_link: canvaLink.trim(),
+              email: selectedTicket.user?.email || 'noreply@example.com',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', canvaAccess.id)
 
-      if (error) throw error
+          if (error) throw error
+        } else {
+          // Criar novo
+          const { error } = await (supabase as any)
+            .from('tool_access_credentials')
+            .insert({
+              user_id: selectedTicket.user_id,
+              tool_type: 'canva',
+              email: selectedTicket.user?.email || 'noreply@example.com',
+              access_link: canvaLink.trim(),
+              is_active: true
+            })
 
-      setNewMessage('')
-      await loadMessages(selectedTicket.id)
-      
-      // Atualizar status do ticket para "in_progress" se estiver "open"
-      if (selectedTicket.status === 'open') {
+          if (error) throw error
+        }
+      }
+
+      // Salvar/atualizar link do CapCut
+      if (capcutLink.trim()) {
+        const capcutAccess = toolAccess.find(t => t.tool_type === 'capcut')
+        
+        if (capcutAccess) {
+          // Atualizar existente
+          const { error } = await (supabase as any)
+            .from('tool_access_credentials')
+            .update({
+              access_link: capcutLink.trim(),
+              email: selectedTicket.user?.email || 'noreply@example.com',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', capcutAccess.id)
+
+          if (error) throw error
+        } else {
+          // Criar novo
+          const { error } = await (supabase as any)
+            .from('tool_access_credentials')
+            .insert({
+              user_id: selectedTicket.user_id,
+              tool_type: 'capcut',
+              email: selectedTicket.user?.email || 'noreply@example.com',
+              access_link: capcutLink.trim(),
+              is_active: true
+            })
+
+          if (error) throw error
+        }
+      }
+
+      // Atualizar status do ticket para "resolved" se ambos os links foram enviados
+      if (canvaLink.trim() && capcutLink.trim()) {
+        await updateTicketStatus(selectedTicket.id, 'resolved')
+      } else {
         await updateTicketStatus(selectedTicket.id, 'in_progress')
       }
+
+      toast.success('Links salvos com sucesso! O cliente já pode ver os links na página de ferramentas.')
+      await loadToolAccess(selectedTicket.user_id)
     } catch (error: any) {
-      console.error('Erro ao enviar mensagem:', error)
-      toast.error('Erro ao enviar mensagem')
+      console.error('Erro ao salvar links:', error)
+      toast.error('Erro ao salvar links')
     } finally {
-      setSending(false)
+      setSaving(false)
     }
   }
 
@@ -246,7 +308,7 @@ export default function SolicitacoesPage() {
                 </div>
               ) : filteredTickets.length === 0 ? (
                 <div className="p-8 text-center">
-                  <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <Wrench className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500">Nenhuma solicitação encontrada</p>
                 </div>
               ) : (
@@ -279,11 +341,11 @@ export default function SolicitacoesPage() {
             </div>
           </div>
 
-          {/* Chat */}
+          {/* Links Form */}
           <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col">
             {selectedTicket ? (
               <>
-                {/* Chat Header */}
+                {/* Header */}
                 <div className="p-4 border-b border-gray-200">
                   <div className="flex items-center justify-between mb-2">
                     <div>
@@ -311,53 +373,98 @@ export default function SolicitacoesPage() {
                   <p className="text-sm text-gray-600">{selectedTicket.subject}</p>
                 </div>
 
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map((message) => {
-                    const isAdmin = message.sender_id !== selectedTicket.user_id
-                    return (
-                      <div
-                        key={message.id}
-                        className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div className={`max-w-[80%] ${isAdmin ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'} rounded-lg p-3`}>
-                          <p className="text-sm">{message.content}</p>
-                          <p className={`text-xs mt-1 ${isAdmin ? 'text-blue-100' : 'text-gray-500'}`}>
-                            {new Date(message.created_at).toLocaleString('pt-BR')}
-                          </p>
-                        </div>
+                {/* Links Form */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="flex items-center gap-2">
+                        <LinkIcon className="w-4 h-4" />
+                        Link de Ativação do Canva Pro
                       </div>
-                    )
-                  })}
+                    </label>
+                    <input
+                      type="url"
+                      value={canvaLink}
+                      onChange={(e) => setCanvaLink(e.target.value)}
+                      placeholder="https://..."
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Cole aqui o link de ativação do Canva Pro para este cliente
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="flex items-center gap-2">
+                        <LinkIcon className="w-4 h-4" />
+                        Link de Ativação do CapCut Pro
+                      </div>
+                    </label>
+                    <input
+                      type="url"
+                      value={capcutLink}
+                      onChange={(e) => setCapcutLink(e.target.value)}
+                      placeholder="https://..."
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Cole aqui o link de ativação do CapCut Pro para este cliente
+                    </p>
+                  </div>
+
+                  {/* Status dos Links */}
+                  {toolAccess.length > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Status dos Links Enviados:</p>
+                      {toolAccess.map((access) => (
+                        <div key={access.id} className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">
+                            {access.tool_type === 'canva' ? 'Canva Pro' : 'CapCut Pro'}:
+                          </span>
+                          {access.access_link ? (
+                            <span className="inline-flex items-center gap-1 text-emerald-600">
+                              <CheckCircle2 className="w-4 h-4" />
+                              Link enviado
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">Aguardando link</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {/* Message Input */}
+                {/* Save Button */}
                 <div className="p-4 border-t border-gray-200">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                      placeholder="Digite sua mensagem..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      onClick={sendMessage}
-                      disabled={!newMessage.trim() || sending}
-                      className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                      <Send className="w-4 h-4" />
-                      Enviar
-                    </button>
-                  </div>
+                  <button
+                    onClick={saveLinks}
+                    disabled={saving || (!canvaLink.trim() && !capcutLink.trim())}
+                    className="w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {saving ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Salvando...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        Salvar Links
+                      </>
+                    )}
+                  </button>
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    Os links serão enviados imediatamente para o cliente na página de ferramentas
+                  </p>
                 </div>
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center p-8">
                 <div className="text-center">
-                  <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">Selecione uma solicitação para ver as mensagens</p>
+                  <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">Selecione uma solicitação para enviar os links</p>
                 </div>
               </div>
             )}
@@ -367,4 +474,3 @@ export default function SolicitacoesPage() {
     </div>
   )
 }
-

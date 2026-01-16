@@ -95,16 +95,28 @@ CREATE TABLE IF NOT EXISTS support_messages (
 -- ==========================================
 -- TOOL_ACCESS_CREDENTIALS (Credenciais de Acesso às Ferramentas)
 -- ==========================================
-CREATE TABLE IF NOT EXISTS tool_access_credentials (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  tool_type TEXT NOT NULL CHECK (tool_type IN ('canva', 'capcut')),
-  email TEXT NOT NULL,
-  access_granted_at TIMESTAMPTZ DEFAULT NOW(),
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+-- A tabela já existe, apenas adicionar campo access_link se não existir
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'tool_access_credentials') THEN
+    -- Adicionar campo access_link se não existir
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'tool_access_credentials' AND column_name = 'access_link') THEN
+      ALTER TABLE tool_access_credentials ADD COLUMN access_link TEXT;
+    END IF;
+  ELSE
+    CREATE TABLE tool_access_credentials (
+      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+      user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+      tool_type TEXT NOT NULL CHECK (tool_type IN ('canva', 'capcut')),
+      email TEXT NOT NULL,
+      access_link TEXT,
+      access_granted_at TIMESTAMPTZ DEFAULT NOW(),
+      is_active BOOLEAN DEFAULT true,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  END IF;
+END $$;
 
 -- ==========================================
 -- ÍNDICES

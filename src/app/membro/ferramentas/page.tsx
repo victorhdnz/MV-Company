@@ -13,7 +13,8 @@ import {
   Palette,
   Scissors,
   ExternalLink,
-  Play
+  Play,
+  Link as LinkIcon
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -21,6 +22,7 @@ interface ToolAccess {
   id: string
   tool_type: 'canva' | 'capcut'
   email: string
+  access_link?: string
   access_granted_at: string
   is_active: boolean
 }
@@ -267,7 +269,7 @@ export default function ToolsPage() {
               </ul>
 
               {/* Access Status */}
-              {tool.hasAccess && (
+              {tool.hasAccess && tool.accessData && (
                 <div className="space-y-3">
                   <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
                     <div className="flex items-center gap-2 text-emerald-700 mb-2">
@@ -275,12 +277,27 @@ export default function ToolsPage() {
                       <span className="font-medium">Acesso Ativo</span>
                     </div>
                     <p className="text-sm text-emerald-600">
-                      Email: <span className="font-mono">{tool.accessData?.email}</span>
+                      Email: <span className="font-mono">{tool.accessData.email}</span>
                     </p>
                     <p className="text-xs text-emerald-500 mt-1">
-                      Liberado em {new Date(tool.accessData?.access_granted_at || '').toLocaleDateString('pt-BR')}
+                      Liberado em {new Date(tool.accessData.access_granted_at || '').toLocaleDateString('pt-BR')}
                     </p>
                   </div>
+                  
+                  {/* Link de Ativação */}
+                  {tool.accessData.access_link && (
+                    <a
+                      href={tool.accessData.access_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gogh-yellow text-gogh-black font-medium rounded-lg hover:bg-gogh-yellow/90 transition-colors"
+                    >
+                      <LinkIcon className="w-4 h-4" />
+                      Link de Ativação {tool.name}
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+                  
                   <a
                     href={tool.id === 'canva' ? 'https://canva.com' : 'https://capcut.com'}
                     target="_blank"
