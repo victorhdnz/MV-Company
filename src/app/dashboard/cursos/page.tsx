@@ -289,10 +289,14 @@ export default function CursosPage() {
   const openCourseForm = (course?: Course) => {
     if (course) {
       setEditingCourse(course)
+      // Garantir que course_type seja apenas 'canva' ou 'capcut'
+      const validCourseType = (course.course_type === 'canva' || course.course_type === 'capcut') 
+        ? course.course_type 
+        : 'canva'
       setCourseForm({
         title: course.title,
         description: course.description || '',
-        course_type: course.course_type || 'canva'
+        course_type: validCourseType
       })
     } else {
       setEditingCourse(null)
