@@ -44,7 +44,7 @@ const planOptions = [
 
 export default function MembrosPage() {
   const router = useRouter()
-  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin, user } = useAuth()
+  const { isEditor, emailIsAdmin } = useAuth()
   const supabase = createClient()
 
   const [members, setMembers] = useState<Member[]>([])
@@ -60,10 +60,10 @@ export default function MembrosPage() {
   
   useEffect(() => {
     // Só carregar dados se tiver acesso
-    if (!authLoading && hasAccess) {
+    if (hasAccess) {
       loadMembers()
     }
-  }, [hasAccess, authLoading])
+  }, [hasAccess])
 
   const loadMembers = async () => {
     try {
@@ -229,36 +229,9 @@ export default function MembrosPage() {
     )
   }
 
-  // Loading auth
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <DashboardNavigation title="Gerenciar Membros" />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex items-center justify-center py-20">
-            <LoadingSpinner size="md" />
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Se não está autenticado E auth já carregou, mostrar mensagem (não redirecionar automaticamente)
-  // O middleware ou a página principal do dashboard vai lidar com o redirecionamento
-  if (!authLoading && !isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Você precisa estar logado para acessar esta página.</p>
-          <a href="/dashboard" className="text-blue-600 hover:underline">Voltar ao Dashboard</a>
-        </div>
-      </div>
-    )
-  }
-
-  // Sem permissão - mostrar mensagem (só verificar após auth carregar e user estar disponível)
+  // Verificar apenas permissão - autenticação é feita pelo middleware
   // Se emailIsAdmin é true, sempre permitir acesso mesmo sem profile
-  if (!emailIsAdmin && !hasAccess && user) {
+  if (!emailIsAdmin && !hasAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

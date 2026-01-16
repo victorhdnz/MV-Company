@@ -268,7 +268,7 @@ const sectionLabels: Record<string, string> = {
 
 export default function HomepageEditorPage() {
   const router = useRouter()
-  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin, user } = useAuth()
+  const { isEditor, emailIsAdmin } = useAuth()
   const supabase = createClient()
 
   const [loading, setLoading] = useState(true)
@@ -393,11 +393,11 @@ export default function HomepageEditorPage() {
   const hasAccess = emailIsAdmin || isEditor
   
   useEffect(() => {
-    // Só carregar settings se tiver acesso e não estiver carregando auth
-    if (!authLoading && hasAccess) {
+    // Só carregar settings se tiver acesso
+    if (hasAccess) {
       loadSettings()
     }
-  }, [hasAccess, authLoading])
+  }, [hasAccess])
 
   const loadSettings = async () => {
     setLoading(true)
@@ -1545,31 +1545,9 @@ export default function HomepageEditorPage() {
     }
   }
 
-  // Loading - aguardar carregamento do auth
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
-      </div>
-    )
-  }
-
-  // Se não está autenticado E auth já carregou, mostrar mensagem (não redirecionar automaticamente)
-  // O middleware ou a página principal do dashboard vai lidar com o redirecionamento
-  if (!authLoading && !isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Você precisa estar logado para acessar esta página.</p>
-          <a href="/dashboard" className="text-blue-600 hover:underline">Voltar ao Dashboard</a>
-        </div>
-      </div>
-    )
-  }
-
-  // Sem permissão - mostrar mensagem (só verificar após auth carregar e user estar disponível)
+  // Verificar apenas permissão - autenticação é feita pelo middleware
   // Se emailIsAdmin é true, sempre permitir acesso mesmo sem profile
-  if (!emailIsAdmin && !hasAccess && user) {
+  if (!emailIsAdmin && !hasAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

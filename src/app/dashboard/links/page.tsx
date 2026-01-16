@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 
 export default function LinkAggregatorsDashboard() {
-  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin, user } = useAuth();
+  const { isEditor, emailIsAdmin } = useAuth();
   const router = useRouter();
   const supabase = createClient();
   const [aggregators, setAggregators] = useState<LinkAggregator[]>([]);
@@ -21,10 +21,10 @@ export default function LinkAggregatorsDashboard() {
   const hasAccess = emailIsAdmin || isEditor;
 
   useEffect(() => {
-    if (!authLoading && hasAccess) {
+    if (hasAccess) {
       loadAggregators();
     }
-  }, [hasAccess, authLoading]);
+  }, [hasAccess]);
 
   const loadAggregators = async () => {
     try {
@@ -88,31 +88,9 @@ export default function LinkAggregatorsDashboard() {
     return `${window.location.origin}/links/${slug}`;
   };
 
-  // Loading - aguardar carregamento do auth
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <LoadingSpinner size="md" />
-      </div>
-    );
-  }
-
-  // Se não está autenticado E auth já carregou, mostrar mensagem (não redirecionar automaticamente)
-  // O middleware ou a página principal do dashboard vai lidar com o redirecionamento
-  if (!authLoading && !isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Você precisa estar logado para acessar esta página.</p>
-          <a href="/dashboard" className="text-blue-600 hover:underline">Voltar ao Dashboard</a>
-        </div>
-      </div>
-    )
-  }
-
-  // Sem permissão - mostrar mensagem (só verificar após auth carregar e user estar disponível)
+  // Verificar apenas permissão - autenticação é feita pelo middleware
   // Se emailIsAdmin é true, sempre permitir acesso mesmo sem profile
-  if (!emailIsAdmin && !hasAccess && user) {
+  if (!emailIsAdmin && !hasAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
