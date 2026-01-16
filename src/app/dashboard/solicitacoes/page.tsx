@@ -44,6 +44,8 @@ interface ToolAccess {
   access_link?: string
   access_granted_at: string
   is_active: boolean
+  error_reported?: boolean
+  error_message?: string
 }
 
 export default function SolicitacoesPage() {

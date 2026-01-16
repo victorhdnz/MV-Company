@@ -95,13 +95,23 @@ CREATE TABLE IF NOT EXISTS support_messages (
 -- ==========================================
 -- TOOL_ACCESS_CREDENTIALS (Credenciais de Acesso às Ferramentas)
 -- ==========================================
--- A tabela já existe, apenas adicionar campo access_link se não existir
+-- A tabela já existe, apenas adicionar campos se não existirem
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'tool_access_credentials') THEN
     -- Adicionar campo access_link se não existir
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'tool_access_credentials' AND column_name = 'access_link') THEN
       ALTER TABLE tool_access_credentials ADD COLUMN access_link TEXT;
+    END IF;
+    
+    -- Adicionar campo error_reported se não existir
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'tool_access_credentials' AND column_name = 'error_reported') THEN
+      ALTER TABLE tool_access_credentials ADD COLUMN error_reported BOOLEAN DEFAULT false;
+    END IF;
+    
+    -- Adicionar campo error_message se não existir
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'tool_access_credentials' AND column_name = 'error_message') THEN
+      ALTER TABLE tool_access_credentials ADD COLUMN error_message TEXT;
     END IF;
   ELSE
     CREATE TABLE tool_access_credentials (
@@ -112,6 +122,8 @@ BEGIN
       access_link TEXT,
       access_granted_at TIMESTAMPTZ DEFAULT NOW(),
       is_active BOOLEAN DEFAULT true,
+      error_reported BOOLEAN DEFAULT false,
+      error_message TEXT,
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     );

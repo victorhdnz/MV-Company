@@ -14,7 +14,9 @@ import {
   Scissors,
   ExternalLink,
   Play,
-  Link as LinkIcon
+  Link as LinkIcon,
+  AlertTriangle,
+  X
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -392,6 +394,65 @@ export default function ToolsPage() {
             />
           </div>
         </motion.div>
+      )}
+
+      {/* Modal de Reporte de Erro */}
+      {showErrorModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gogh-black">
+                Reportar Erro no Link
+              </h3>
+              <button
+                onClick={() => {
+                  setShowErrorModal(false)
+                  setErrorMessage('')
+                  setReportingError(null)
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <p className="text-sm text-gogh-grayDark mb-4">
+              Descreva o problema que você encontrou ao tentar usar o link de ativação:
+            </p>
+            
+            <textarea
+              value={errorMessage}
+              onChange={(e) => setErrorMessage(e.target.value)}
+              placeholder="Ex: O link não abre, aparece erro 404, o link expirou, etc..."
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gogh-yellow resize-none"
+              rows={4}
+            />
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowErrorModal(false)
+                  setErrorMessage('')
+                  setReportingError(null)
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={submitErrorReport}
+                disabled={!errorMessage.trim()}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Enviar Reporte
+              </button>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   )
