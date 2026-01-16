@@ -202,7 +202,18 @@ export const useAuth = () => {
         
         // Não alterar loading aqui para evitar conflitos
         // Apenas atualizar user e profile
-        setUser(session?.user ?? null)
+        // Durante TOKEN_REFRESHED, manter o user anterior se a sessão temporariamente não tiver user
+        if (event === 'TOKEN_REFRESHED' && session?.user) {
+          setUser(session.user)
+        } else if (session?.user) {
+          setUser(session.user)
+        } else if (event === 'SIGNED_OUT') {
+          // Só limpar user se realmente foi sign out
+          setUser(null)
+          setProfile(null)
+        }
+        // Para outros eventos, manter o user atual se não houver sessão
+        // (pode ser um refresh temporário)
 
         if (session?.user) {
           // Buscar profile de forma assíncrona sem bloquear
