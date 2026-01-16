@@ -46,7 +46,7 @@ export default function DashboardAvaliacoesPage() {
 
     window.addEventListener('focus', handleFocus)
     return () => window.removeEventListener('focus', handleFocus)
-  }, [isAuthenticated, isEditor]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [hasAccess]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = async () => {
     try {
