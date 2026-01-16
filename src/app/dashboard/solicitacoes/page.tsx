@@ -533,6 +533,76 @@ export default function SolicitacoesPage() {
                     </p>
                   </div>
 
+                  {/* Upload de Vídeo Tutorial */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="flex items-center gap-2">
+                        <Video className="w-4 h-4" />
+                        Vídeo Tutorial de Ativação
+                      </div>
+                    </label>
+                    <div className="space-y-3">
+                      {tutorialVideoUrl && (
+                        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Video className="w-4 h-4 text-emerald-600" />
+                              <span className="text-sm text-emerald-700">Vídeo já enviado</span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setTutorialVideoUrl(null)
+                                setTutorialVideo(null)
+                              }}
+                              className="text-emerald-600 hover:text-emerald-800"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <video
+                            src={tutorialVideoUrl}
+                            controls
+                            className="w-full mt-2 rounded-lg max-h-48"
+                          />
+                        </div>
+                      )}
+                      
+                      {!tutorialVideoUrl && (
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                          <input
+                            type="file"
+                            accept="video/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                setTutorialVideo(file)
+                              }
+                            }}
+                            className="hidden"
+                            id="video-upload"
+                          />
+                          <label
+                            htmlFor="video-upload"
+                            className="cursor-pointer flex flex-col items-center gap-2"
+                          >
+                            <Upload className="w-8 h-8 text-gray-400" />
+                            <span className="text-sm text-gray-600">
+                              {tutorialVideo ? tutorialVideo.name : 'Clique para fazer upload do vídeo tutorial'}
+                            </span>
+                            {tutorialVideo && (
+                              <span className="text-xs text-gray-500">
+                                {(tutorialVideo.size / 1024 / 1024).toFixed(2)} MB
+                              </span>
+                            )}
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      O vídeo aparecerá na página de ferramentas do cliente quando os links estiverem disponíveis
+                    </p>
+                  </div>
+
                   {/* Status dos Links */}
                   {toolAccess.length > 0 && (
                     <div className="bg-gray-50 rounded-lg p-4 space-y-2">
