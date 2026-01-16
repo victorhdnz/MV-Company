@@ -139,7 +139,6 @@ export default function CursosPage() {
         slug: slug,
         course_type: courseForm.course_type,
         order_position: maxOrder + 1,
-        order: maxOrder + 1,
         is_published: false, // Começar como não publicado
         is_featured: false,
         plan_required: 'all', // Padrão: todos podem acessar

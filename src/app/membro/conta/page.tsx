@@ -58,19 +58,20 @@ export default function AccountPage() {
 
       setLoadingUsage(true)
       try {
-        const periodStart = new Date()
-        periodStart.setDate(1)
-        periodStart.setHours(0, 0, 0, 0)
+        // Buscar uso diário (hoje)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
 
         const { data: usageData } = await (supabase as any)
           .from('user_usage')
           .select('usage_count')
           .eq('user_id', user.id)
-          .eq('feature_key', 'ai_messages')
-          .gte('period_start', periodStart.toISOString().split('T')[0])
+          .eq('feature_key', 'ai_interactions')
+          .gte('period_start', today.toISOString().split('T')[0])
           .maybeSingle()
 
-        const limit = isPro ? 2000 : 500
+        // Limites diários: Essencial = 8, Pro = 20
+        const limit = isPro ? 20 : 8
 
         setUsageStats({
           ai_messages: {
@@ -206,13 +207,13 @@ export default function AccountPage() {
 
   const planFeatures = hasActiveSubscription ? (
     isPro ? [
-      { text: '2000 mensagens de IA/mês', icon: MessageSquare },
+      { text: '20 interações por dia', icon: MessageSquare },
       { text: 'Todos os agentes', icon: Sparkles },
       { text: 'Todos os cursos', icon: BookOpen },
       { text: 'Canva Pro', icon: Palette },
       { text: 'CapCut Pro', icon: Scissors },
     ] : [
-      { text: '500 mensagens de IA/mês', icon: MessageSquare },
+      { text: '8 interações por dia', icon: MessageSquare },
       { text: 'Agentes básicos', icon: Sparkles },
       { text: 'Cursos de Canva e CapCut', icon: BookOpen },
       { text: 'Canva Pro', icon: Palette },
@@ -394,9 +395,9 @@ export default function AccountPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <Zap className="w-5 h-5 text-gogh-grayDark" />
-                      <h3 className="text-lg font-bold text-gogh-black">Uso de Mensagens de IA</h3>
+                      <h3 className="text-lg font-bold text-gogh-black">Interações de IA</h3>
                     </div>
-                    <span className="text-sm text-gogh-grayDark">Este mês</span>
+                    <span className="text-sm text-gogh-grayDark">Hoje</span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-baseline gap-2">
@@ -404,7 +405,7 @@ export default function AccountPage() {
                         {usageStats.ai_messages.current}
                       </span>
                       <span className="text-sm text-gogh-grayDark">
-                        / {usageStats.ai_messages.limit} mensagens
+                        / {usageStats.ai_messages.limit} interações
                       </span>
                     </div>
                     <div className="h-2 bg-gogh-grayLight rounded-full overflow-hidden">

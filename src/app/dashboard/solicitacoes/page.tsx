@@ -310,21 +310,36 @@ export default function SolicitacoesPage() {
     try {
       const { error } = await (supabase as any)
         .from('support_tickets')
-        .update({ status, updated_at: new Date().toISOString() })
+        .update({ 
+          status: status,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', ticketId)
 
-      if (error) throw error
-
-      await loadTickets()
-      if (selectedTicket?.id === ticketId) {
-        setSelectedTicket({ ...selectedTicket, status })
+      if (error) {
+        console.error('Erro ao atualizar status:', error)
+        toast.error('Erro ao atualizar status do ticket')
+        return
       }
-      toast.success('Status atualizado')
+
+      // Atualizar o ticket na lista local
+      setTickets(prev => prev.map(t => 
+        t.id === ticketId ? { ...t, status: status as any } : t
+      ))
+
+      // Se houver um ticket selecionado, atualizar também
+      if (selectedTicket && selectedTicket.id === ticketId) {
+        setSelectedTicket({ ...selectedTicket, status: status as any })
+      }
+
+      toast.success('Status atualizado com sucesso!')
+      await loadTickets() // Recarregar para garantir sincronização
     } catch (error: any) {
       console.error('Erro ao atualizar status:', error)
-      toast.error('Erro ao atualizar status')
+      toast.error('Erro ao atualizar status do ticket')
     }
   }
+
 
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch = !searchTerm || 

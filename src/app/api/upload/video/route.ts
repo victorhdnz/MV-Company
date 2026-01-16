@@ -31,7 +31,14 @@ export async function POST(request: NextRequest) {
     // Verificar autenticação
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     
-    if (sessionError || !session) {
+    if (sessionError) {
+      console.error('Erro de sessão:', sessionError)
+      return NextResponse.json({ 
+        error: 'Erro de autenticação. Faça login novamente.' 
+      }, { status: 401 })
+    }
+    
+    if (!session || !session.user) {
       return NextResponse.json({ 
         error: 'Não autenticado. Faça login para fazer upload de vídeos.' 
       }, { status: 401 })

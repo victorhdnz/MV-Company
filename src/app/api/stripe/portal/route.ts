@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createServerClient } from '@/lib/supabase/server'
 import Stripe from 'stripe'
-import { Database } from '@/types/database.types'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '')
 
 export async function POST(request: Request) {
   try {
-    const supabase = createRouteHandlerClient<Database>({ cookies })
+    const supabase = createServerClient()
 
     // Verificar se o usuário está autenticado
     const { data: { user }, error: authError } = await supabase.auth.getUser()
