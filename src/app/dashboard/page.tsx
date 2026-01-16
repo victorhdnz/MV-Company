@@ -60,8 +60,15 @@ function AccessDenied() {
   const supabase = createClient()
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    toast.success('Logout realizado')
+    try {
+      await supabase.auth.signOut()
+      // Forçar redirecionamento completo para limpar estado
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error)
+      // Mesmo com erro, redirecionar
+      window.location.href = '/'
+    }
   }
 
   return (
@@ -85,7 +92,7 @@ function AccessDenied() {
 
 // Dashboard Principal
 function DashboardContent() {
-  const { profile, signOut } = useAuth()
+  const { profile } = useAuth()
   const [stats, setStats] = useState<DashboardStats>({
     totalServices: 0,
   })
