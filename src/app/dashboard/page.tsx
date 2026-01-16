@@ -13,6 +13,7 @@ import {
   Sparkles,
   Link as LinkIcon,
   Users,
+  FileText,
 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -98,6 +99,20 @@ function DashboardContent() {
           href: '/dashboard/links',
           icon: LinkIcon,
           color: 'bg-pink-500',
+        },
+      ],
+    },
+    {
+      title: 'Termos e Políticas',
+      description: 'Gerencie termos de uso e políticas do site',
+      icon: FileText,
+      items: [
+        {
+          title: 'Gerenciar Termos',
+          description: 'Editar termos de uso, política de privacidade e outros',
+          href: '/dashboard/termos',
+          icon: FileText,
+          color: 'bg-purple-500',
         },
       ],
     },
