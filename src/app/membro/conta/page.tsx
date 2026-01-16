@@ -50,14 +50,15 @@ export default function AccountPage() {
     
     window.addEventListener('subscription-updated', handleSubscriptionUpdate)
     
-    // Também verificar periodicamente se a assinatura mudou (fallback)
-    const interval = setInterval(() => {
+    // Verificar quando a página ganha foco (usuário volta para a aba)
+    const handleFocus = () => {
       refreshSubscription()
-    }, 30000) // A cada 30 segundos
+    }
+    window.addEventListener('focus', handleFocus)
     
     return () => {
       window.removeEventListener('subscription-updated', handleSubscriptionUpdate)
-      clearInterval(interval)
+      window.removeEventListener('focus', handleFocus)
     }
   }, [refreshSubscription])
 
