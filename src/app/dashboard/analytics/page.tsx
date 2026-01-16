@@ -54,7 +54,7 @@ interface SessionData {
 
 export default function AnalyticsPage() {
   const router = useRouter()
-  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin } = useAuth()
+  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin, user } = useAuth()
   const supabase = createClient()
 
   // Estados
@@ -79,8 +79,8 @@ export default function AnalyticsPage() {
     count: number
   }>>([])
 
-  // Verificar se tem acesso
-  const hasAccess = isEditor || emailIsAdmin
+  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
+  const hasAccess = emailIsAdmin || isEditor
   
   useEffect(() => {
     if (!authLoading && hasAccess) {
@@ -764,7 +764,7 @@ export default function AnalyticsPage() {
     setClickDetails(details)
   }
 
-  // Loading
+  // Loading - aguardar carregamento do auth
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -773,8 +773,14 @@ export default function AnalyticsPage() {
     )
   }
 
-  // Sem permissão
-  if (!hasAccess) {
+  // Se não está autenticado, redirecionar para login
+  if (!isAuthenticated) {
+    router.push('/dashboard')
+    return null
+  }
+
+  // Sem permissão - mostrar mensagem (só verificar após auth carregar e user estar disponível)
+  if (!hasAccess && user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

@@ -11,14 +11,14 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 
 export default function LinkAggregatorsDashboard() {
-  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin } = useAuth();
+  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin, user } = useAuth();
   const router = useRouter();
   const supabase = createClient();
   const [aggregators, setAggregators] = useState<LinkAggregator[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Verificar se tem acesso
-  const hasAccess = isEditor || emailIsAdmin;
+  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
+  const hasAccess = emailIsAdmin || isEditor;
 
   useEffect(() => {
     if (!authLoading && hasAccess) {
@@ -88,7 +88,7 @@ export default function LinkAggregatorsDashboard() {
     return `${window.location.origin}/links/${slug}`;
   };
 
-  // Loading
+  // Loading - aguardar carregamento do auth
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -97,8 +97,14 @@ export default function LinkAggregatorsDashboard() {
     );
   }
 
-  // Sem permissão
-  if (!hasAccess) {
+  // Se não está autenticado, redirecionar para login
+  if (!isAuthenticated) {
+    router.push('/dashboard')
+    return null
+  }
+
+  // Sem permissão - mostrar mensagem (só verificar após auth carregar e user estar disponível)
+  if (!hasAccess && user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

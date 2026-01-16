@@ -85,7 +85,7 @@ function AccessDenied() {
 
 // Dashboard Principal
 function DashboardContent() {
-  const { profile } = useAuth()
+  const { profile, signOut } = useAuth()
   const [stats, setStats] = useState<DashboardStats>({
     totalServices: 0,
   })
@@ -118,8 +118,13 @@ function DashboardContent() {
   }
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    toast.success('Logout realizado')
+    try {
+      await signOut()
+      toast.success('Logout realizado')
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error)
+      toast.error('Erro ao fazer logout')
+    }
   }
 
   const statsCards = [

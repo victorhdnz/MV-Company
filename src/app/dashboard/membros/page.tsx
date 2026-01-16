@@ -44,7 +44,7 @@ const planOptions = [
 
 export default function MembrosPage() {
   const router = useRouter()
-  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin } = useAuth()
+  const { isAuthenticated, isEditor, loading: authLoading, emailIsAdmin, user } = useAuth()
   const supabase = createClient()
 
   const [members, setMembers] = useState<Member[]>([])
@@ -55,8 +55,8 @@ export default function MembrosPage() {
   const [editingPlan, setEditingPlan] = useState<string>('')
   const [saving, setSaving] = useState(false)
 
-  // Verificar se tem acesso
-  const hasAccess = isEditor || emailIsAdmin
+  // Verificar se tem acesso - emailIsAdmin funciona mesmo sem profile carregado
+  const hasAccess = emailIsAdmin || isEditor
   
   useEffect(() => {
     // Só carregar dados se tiver acesso
@@ -243,8 +243,14 @@ export default function MembrosPage() {
     )
   }
 
-  // Sem permissão
-  if (!hasAccess) {
+  // Se não está autenticado, redirecionar para login
+  if (!isAuthenticated) {
+    router.push('/dashboard')
+    return null
+  }
+
+  // Sem permissão - mostrar mensagem (só verificar após auth carregar e user estar disponível)
+  if (!hasAccess && user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
