@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/Input'
 import { ImageUploader } from '@/components/ui/ImageUploader'
@@ -15,7 +14,6 @@ import { BackButton } from '@/components/ui/BackButton'
 
 export default function NovaAvaliacao() {
   const router = useRouter()
-  const { isEditor, emailIsAdmin } = useAuth()
   const supabase = createClient()
 
   const [loading, setLoading] = useState(false)

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase/client'
 import { DashboardNavigation } from '@/components/dashboard/DashboardNavigation'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -44,7 +43,6 @@ const planOptions = [
 
 export default function MembrosPage() {
   const router = useRouter()
-  const { isEditor, emailIsAdmin } = useAuth()
   const supabase = createClient()
 
   const [members, setMembers] = useState<Member[]>([])

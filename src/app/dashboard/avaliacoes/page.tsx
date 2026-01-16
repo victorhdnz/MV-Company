@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { ServiceTestimonial, Service } from '@/types'
@@ -14,7 +13,6 @@ import Link from 'next/link'
 
 export default function DashboardAvaliacoesPage() {
   const router = useRouter()
-  const { isEditor, emailIsAdmin } = useAuth()
   const [testimonials, setTestimonials] = useState<ServiceTestimonial[]>([])
   const [services, setServices] = useState<Service[]>([])
   const [filteredTestimonials, setFilteredTestimonials] = useState<ServiceTestimonial[]>([])

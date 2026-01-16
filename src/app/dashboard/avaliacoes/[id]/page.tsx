@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/Input'
 import { ImageUploader } from '@/components/ui/ImageUploader'
@@ -19,7 +18,6 @@ interface EditAvaliacaoPageProps {
 
 export default function EditAvaliacaoPage({ params }: EditAvaliacaoPageProps) {
   const router = useRouter()
-  const { isEditor, emailIsAdmin } = useAuth()
   const [testimonial, setTestimonial] = useState<ServiceTestimonial | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)

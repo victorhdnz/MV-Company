@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/Input'
 import { ImageUploader } from '@/components/ui/ImageUploader'
@@ -268,7 +267,6 @@ const sectionLabels: Record<string, string> = {
 
 export default function HomepageEditorPage() {
   const router = useRouter()
-  const { isEditor, emailIsAdmin } = useAuth()
   const supabase = createClient()
 
   const [loading, setLoading] = useState(true)

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
 import { Input } from '@/components/ui/Input';
 import { ImageUploader } from '@/components/ui/ImageUploader';
@@ -17,7 +16,6 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 
 export default function NewLinkAggregatorPage() {
-  const { isEditor, emailIsAdmin } = useAuth();
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/Input'
 import { Switch } from '@/components/ui/Switch'
@@ -44,7 +43,6 @@ interface MVCompany {
 
 export default function ComparadorDashboardPage() {
   const router = useRouter()
-  const { isEditor, emailIsAdmin } = useAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   

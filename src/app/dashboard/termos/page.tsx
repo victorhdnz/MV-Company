@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/Input'
 import { DashboardNavigation } from '@/components/dashboard/DashboardNavigation'
@@ -174,7 +173,6 @@ Em caso de devolução, o reembolso será processado no mesmo método de pagamen
 
 export default function DashboardTermsPage() {
   const router = useRouter()
-  const { isEditor, emailIsAdmin } = useAuth()
   const supabase = createClient()
   
   const [terms, setTerms] = useState<Term[]>([])

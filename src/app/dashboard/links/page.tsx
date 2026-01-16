@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
 import { LinkAggregator } from '@/types/link-aggregator';
 import { Plus, ExternalLink, Edit, Trash2, Link as LinkIcon } from 'lucide-react';
@@ -11,7 +10,6 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 
 export default function LinkAggregatorsDashboard() {
-  const { isEditor, emailIsAdmin } = useAuth();
   const router = useRouter();
   const supabase = createClient();
   const [aggregators, setAggregators] = useState<LinkAggregator[]>([]);

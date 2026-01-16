@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase/client'
 import { 
   BarChart3, Eye, Users, MousePointer, 
@@ -54,7 +53,6 @@ interface SessionData {
 
 export default function AnalyticsPage() {
   const router = useRouter()
-  const { isEditor, emailIsAdmin } = useAuth()
   const supabase = createClient()
 
   // Estados
