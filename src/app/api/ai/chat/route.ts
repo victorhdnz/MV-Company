@@ -334,7 +334,7 @@ export async function POST(request: Request) {
       // Erro de quota insuficiente (pode vir como 429 ou 402, mas sempre com code 'insufficient_quota')
       if (openaiError.code === 'insufficient_quota' || openaiError.error?.code === 'insufficient_quota') {
         return NextResponse.json({ 
-          error: 'A cota da API OpenAI foi esgotada. Por favor, entre em contato com o suporte para resolver este problema.',
+          error: 'O agente está temporariamente indisponível devido a um problema técnico. Nossa equipe já foi notificada e está trabalhando para resolver. Tente novamente em alguns instantes.',
           code: 'OPENAI_INSUFFICIENT_QUOTA'
         }, { status: 402 })
       }

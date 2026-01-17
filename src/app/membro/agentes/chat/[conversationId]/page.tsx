@@ -317,7 +317,7 @@ export default function ChatPage() {
   const sendMessage = async () => {
     if (!inputValue.trim() || isSending || !user || !conversation) return
 
-    // Verificar limite de uso
+    // Verificar limite de uso ANTES de enviar
     if (usageInfo && usageInfo.current >= usageInfo.limit) {
       setError('Você atingiu o limite de interações de hoje. Volte amanhã ou faça upgrade para aumentar o limite.')
       return
@@ -404,14 +404,19 @@ export default function ChatPage() {
           // Se for erro de autenticação, resetar flag para permitir nova tentativa
           nicheContextSentRef.current = false
         } else if (response.status === 402 && data.code === 'OPENAI_INSUFFICIENT_QUOTA') {
-          // Erro específico de quota da OpenAI esgotada
-          setError(data.error || 'A cota da API OpenAI foi esgotada. Por favor, entre em contato com o suporte.')
+          // Erro específico de quota da OpenAI esgotada - mensagem genérica como problema do agente
+          setError(data.error || 'O agente está temporariamente indisponível devido a um problema técnico. Nossa equipe já foi notificada e está trabalhando para resolver. Tente novamente em alguns instantes.')
         } else if (response.status === 429) {
           // Pode ser limite do usuário ou rate limit da OpenAI
           if (data.code === 'OPENAI_RATE_LIMIT') {
             setError(data.error || 'Limite de requisições excedido. Tente novamente em alguns instantes.')
           } else {
-            setError(data.error || 'Você atingiu o limite de interações de hoje.')
+            // Limite de uso do usuário atingido
+            setError(data.error || 'Você atingiu o limite de interações de hoje. Volte amanhã ou faça upgrade para aumentar o limite.')
+            // Atualizar usageInfo para refletir o limite atingido
+            if (usageInfo) {
+              setUsageInfo(prev => prev ? { ...prev, current: prev.limit } : null)
+            }
           }
         } else {
           setError(data.error || 'Erro ao enviar mensagem')
@@ -428,9 +433,15 @@ export default function ChatPage() {
         data.assistantMessage
       ])
 
-      // Atualizar uso
+      // Atualizar uso após envio bem-sucedido
       if (usageInfo) {
-        setUsageInfo(prev => prev ? { ...prev, current: prev.current + 1 } : null)
+        const newUsage = usageInfo.current + 1
+        setUsageInfo(prev => prev ? { ...prev, current: newUsage } : null)
+        
+        // Se atingiu o limite, mostrar mensagem
+        if (newUsage >= usageInfo.limit) {
+          setError('Você atingiu o limite de interações de hoje. Volte amanhã ou faça upgrade para aumentar o limite.')
+        }
       }
     } catch (error: any) {
       console.error('Error sending message:', error)
@@ -538,10 +549,23 @@ export default function ChatPage() {
 
         {/* Usage Info */}
         {usageInfo && (
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gogh-grayLight/50 rounded-lg">
-            <Sparkles className="w-4 h-4 text-gogh-yellow" />
-            <span className="text-sm text-gogh-grayDark">
+          <div className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+            usageInfo.current >= usageInfo.limit
+              ? 'bg-amber-100 border border-amber-300'
+              : 'bg-gogh-grayLight/50'
+          }`}>
+            <Sparkles className={`w-4 h-4 ${
+              usageInfo.current >= usageInfo.limit
+                ? 'text-amber-600'
+                : 'text-gogh-yellow'
+            }`} />
+            <span className={`text-sm ${
+              usageInfo.current >= usageInfo.limit
+                ? 'text-amber-800 font-medium'
+                : 'text-gogh-grayDark'
+            }`}>
               {usageInfo.current}/{usageInfo.limit} interações hoje
+              {usageInfo.current >= usageInfo.limit && ' (Limite atingido)'}
             </span>
           </div>
         )}
@@ -684,26 +708,55 @@ export default function ChatPage() {
         </motion.div>
       )}
 
+      {/* Mensagem de limite atingido */}
+      {usageInfo && usageInfo.current >= usageInfo.limit && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mx-4 mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl"
+        >
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="font-semibold text-amber-900 mb-1">
+                Limite de interações atingido
+              </h4>
+              <p className="text-sm text-amber-800">
+                Você utilizou todas as {usageInfo.limit} interações disponíveis hoje. O limite será renovado amanhã. Para aumentar seu limite diário, considere fazer upgrade para o plano Pro.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Input Area */}
       <div className="pt-4 border-t border-gogh-grayLight">
-        <div className="relative bg-white border border-gogh-grayLight rounded-xl shadow-sm focus-within:border-gogh-yellow focus-within:shadow-md transition-all">
+        <div className={`relative bg-white border rounded-xl shadow-sm transition-all ${
+          usageInfo && usageInfo.current >= usageInfo.limit
+            ? 'border-amber-300 bg-amber-50/30'
+            : 'border-gogh-grayLight focus-within:border-gogh-yellow focus-within:shadow-md'
+        }`}>
           <textarea
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`Mensagem para ${agent.name}...`}
+            placeholder={
+              usageInfo && usageInfo.current >= usageInfo.limit
+                ? 'Limite de interações atingido para hoje'
+                : `Mensagem para ${agent.name}...`
+            }
             rows={1}
-            className="w-full px-4 py-3 pr-12 bg-transparent resize-none focus:outline-none max-h-32"
+            className="w-full px-4 py-3 pr-12 bg-transparent resize-none focus:outline-none max-h-32 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ minHeight: '48px' }}
-            disabled={isSending}
+            disabled={isSending || (usageInfo !== null && usageInfo.current >= usageInfo.limit)}
           />
           <button
             onClick={sendMessage}
-            disabled={!inputValue.trim() || isSending}
+            disabled={!inputValue.trim() || isSending || (usageInfo !== null && usageInfo.current >= usageInfo.limit)}
             className={`
               absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all
-              ${inputValue.trim() && !isSending
+              ${inputValue.trim() && !isSending && (!usageInfo || usageInfo.current < usageInfo.limit)
                 ? 'bg-gogh-yellow text-gogh-black hover:bg-gogh-yellow/80'
                 : 'bg-gogh-grayLight text-gogh-grayDark cursor-not-allowed'
               }
@@ -719,9 +772,16 @@ export default function ChatPage() {
         
         {/* Mobile Usage Info */}
         {usageInfo && (
-          <div className="md:hidden flex items-center justify-center gap-2 mt-2 text-sm text-gogh-grayDark">
-            <Sparkles className="w-3 h-3 text-gogh-yellow" />
-            <span>{usageInfo.current}/{usageInfo.limit} interações hoje</span>
+          <div className={`md:hidden flex items-center justify-center gap-2 mt-2 text-sm ${
+            usageInfo.current >= usageInfo.limit
+              ? 'text-amber-700 font-medium'
+              : 'text-gogh-grayDark'
+          }`}>
+            <Sparkles className={`w-3 h-3 ${usageInfo.current >= usageInfo.limit ? 'text-amber-600' : 'text-gogh-yellow'}`} />
+            <span>
+              {usageInfo.current}/{usageInfo.limit} interações hoje
+              {usageInfo.current >= usageInfo.limit && ' (Limite atingido)'}
+            </span>
           </div>
         )}
       </div>
