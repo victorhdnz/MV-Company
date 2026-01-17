@@ -20,22 +20,42 @@ async function getLinkAggregator(slug: string): Promise<LinkAggregator | null> {
     return null;
   }
 
+  type LinkAggregatorData = {
+    id: string
+    user_id: string
+    name: string
+    slug: string
+    main_title: string | null
+    main_title_letter: string | null
+    profile_image: string | null
+    profile_name: string | null
+    homepage_button_enabled: boolean | null
+    homepage_button_title: string | null
+    homepage_button_url: string | null
+    links: any
+    social_links: any
+    created_at: string
+    updated_at: string
+  }
+
+  const dataTyped = data as LinkAggregatorData
+
   return {
-    id: data.id,
-    user_id: data.user_id,
-    name: data.name,
-    slug: data.slug,
-    main_title: data.main_title || 'Portfolio',
-    main_title_letter: data.main_title_letter || 'o',
-    profile_image: data.profile_image || undefined,
-    profile_name: data.profile_name || data.name,
-    homepage_button_enabled: data.homepage_button_enabled ?? true,
-    homepage_button_title: data.homepage_button_title || 'Visite nosso site',
-    homepage_button_url: data.homepage_button_url || undefined,
-    links: (data.links as any) || [],
-    social_links: (data.social_links as any) || [],
-    created_at: data.created_at,
-    updated_at: data.updated_at,
+    id: dataTyped.id,
+    user_id: dataTyped.user_id,
+    name: dataTyped.name,
+    slug: dataTyped.slug,
+    main_title: dataTyped.main_title || 'Portfolio',
+    main_title_letter: dataTyped.main_title_letter || 'o',
+    profile_image: dataTyped.profile_image || undefined,
+    profile_name: dataTyped.profile_name || dataTyped.name,
+    homepage_button_enabled: dataTyped.homepage_button_enabled ?? true,
+    homepage_button_title: dataTyped.homepage_button_title || 'Visite nosso site',
+    homepage_button_url: dataTyped.homepage_button_url || undefined,
+    links: (dataTyped.links as any) || [],
+    social_links: (dataTyped.social_links as any) || [],
+    created_at: dataTyped.created_at,
+    updated_at: dataTyped.updated_at,
   };
 }
 
