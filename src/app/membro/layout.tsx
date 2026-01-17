@@ -217,7 +217,7 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
         <div className="flex flex-col h-full">
           {/* Logo / Header */}
           <div className="p-6 border-b border-gogh-grayLight">
-            <div className="flex items-center justify-center">
+            <Link href="/" className="flex items-center justify-center">
               {siteLogo ? (
                 <Image
                   src={siteLogo}
@@ -231,7 +231,7 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
                   <Sparkles className="w-7 h-7 text-gogh-black" />
                 </div>
               )}
-            </div>
+            </Link>
           </div>
 
           {/* User Info */}
@@ -270,6 +270,19 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+            {/* Botão para voltar à HomePage */}
+            <Link
+              href="/"
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-gogh-grayDark hover:bg-gogh-grayLight hover:text-gogh-black mb-2"
+            >
+              <Home className="w-5 h-5" />
+              <div className="flex-1">
+                <p className="font-medium">Voltar à HomePage</p>
+                <p className="text-xs text-gogh-grayDark">Retornar ao site principal</p>
+              </div>
+            </Link>
+
             {/* Itens que requerem assinatura */}
             {hasActiveSubscription && subscriberMenuItems.map((item) => {
               const isActive = pathname === item.href || 
@@ -378,7 +391,9 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
                   className="rounded-lg"
                 />
               ) : (
-                <Sparkles className="w-5 h-5 text-gogh-yellow" />
+                <div className="w-8 h-8 bg-gogh-yellow rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-gogh-black" />
+                </div>
               )}
             </Link>
             <div className="w-10" /> {/* Spacer */}

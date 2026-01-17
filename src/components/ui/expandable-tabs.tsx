@@ -110,7 +110,7 @@ export function ExpandableTabs({
                   animate="animate"
                   exit="exit"
                   transition={transition}
-                  className="overflow-hidden text-[#0A0A0A]"
+                  className="overflow-hidden text-[#0A0A0A] whitespace-nowrap"
                 >
                   {tab.title}
                 </motion.span>
