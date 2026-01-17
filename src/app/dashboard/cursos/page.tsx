@@ -70,7 +70,68 @@ export default function CursosPage() {
 
   useEffect(() => {
     loadCourses()
+    ensureDefaultCourses()
   }, [])
+
+  // Garantir que existam sempre os cursos pré-definidos
+  const ensureDefaultCourses = async () => {
+    try {
+      // Verificar se existe curso de Canva
+      const { data: canvaCourse } = await (supabase as any)
+        .from('courses')
+        .select('id')
+        .eq('course_type', 'canva')
+        .maybeSingle()
+
+      if (!canvaCourse) {
+        // Criar curso de Canva
+        await (supabase as any)
+          .from('courses')
+          .insert({
+            title: 'Curso de Canva',
+            description: 'Aprenda a criar designs profissionais no Canva',
+            course_type: 'canva',
+            slug: 'curso-de-canva',
+            order_position: 1,
+            is_published: false,
+            plan_required: 'all',
+            lessons_count: 0,
+            duration_hours: 0,
+            instructor_name: 'Gogh Lab'
+          })
+      }
+
+      // Verificar se existe curso de CapCut
+      const { data: capcutCourse } = await (supabase as any)
+        .from('courses')
+        .select('id')
+        .eq('course_type', 'capcut')
+        .maybeSingle()
+
+      if (!capcutCourse) {
+        // Criar curso de CapCut
+        await (supabase as any)
+          .from('courses')
+          .insert({
+            title: 'Curso de CapCut',
+            description: 'Domine a edição de vídeos para redes sociais usando o CapCut Pro',
+            course_type: 'capcut',
+            slug: 'curso-de-capcut',
+            order_position: 1,
+            is_published: false,
+            plan_required: 'all',
+            lessons_count: 0,
+            duration_hours: 0,
+            instructor_name: 'Gogh Lab'
+          })
+      }
+
+      // Recarregar cursos após criar os padrões
+      await loadCourses()
+    } catch (error) {
+      console.error('Erro ao garantir cursos padrão:', error)
+    }
+  }
 
   const loadCourses = async () => {
     setLoading(true)
@@ -377,16 +438,9 @@ export default function CursosPage() {
                 Gerenciar Cursos
               </h1>
               <p className="text-gray-600">
-                Crie e gerencie cursos de Canva e CapCut com vídeos e sequência de aulas
+                Gerencie cursos de Canva e CapCut. Clique em um curso para adicionar e gerenciar aulas.
               </p>
             </div>
-            <button
-              onClick={() => openCourseForm()}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Novo Curso
-            </button>
           </div>
         </div>
 
@@ -407,7 +461,7 @@ export default function CursosPage() {
                 {canvaCourses.length === 0 ? (
                   <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
                     <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Nenhum curso de Canva criado</p>
+                    <p className="text-gray-500">Carregando curso de Canva...</p>
                   </div>
                 ) : (
                   canvaCourses.map((course) => (
@@ -415,7 +469,7 @@ export default function CursosPage() {
                       key={course.id}
                       course={course}
                       onEdit={() => openCourseForm(course)}
-                      onDelete={() => handleDeleteCourse(course.id)}
+                      onDelete={() => {}}
                       onSelect={() => setSelectedCourse(course)}
                       isSelected={selectedCourse?.id === course.id}
                     />
@@ -434,7 +488,7 @@ export default function CursosPage() {
                 {capcutCourses.length === 0 ? (
                   <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
                     <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Nenhum curso de CapCut criado</p>
+                    <p className="text-gray-500">Carregando curso de CapCut...</p>
                   </div>
                 ) : (
                   capcutCourses.map((course) => (
@@ -442,7 +496,7 @@ export default function CursosPage() {
                       key={course.id}
                       course={course}
                       onEdit={() => openCourseForm(course)}
-                      onDelete={() => handleDeleteCourse(course.id)}
+                      onDelete={() => {}}
                       onSelect={() => setSelectedCourse(course)}
                       isSelected={selectedCourse?.id === course.id}
                     />

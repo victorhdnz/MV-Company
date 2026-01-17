@@ -47,7 +47,10 @@ export default function ToolsPage() {
   const [pendingTickets, setPendingTickets] = useState<SupportTicket[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [tutorialVideoUrl, setTutorialVideoUrl] = useState<string | null>(null)
+  const [canvaVideoUrl, setCanvaVideoUrl] = useState<string | null>(null)
+  const [capcutVideoUrl, setCapcutVideoUrl] = useState<string | null>(null)
+  const [showCanvaVideoModal, setShowCanvaVideoModal] = useState(false)
+  const [showCapcutVideoModal, setShowCapcutVideoModal] = useState(false)
   const [reportingError, setReportingError] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [showErrorModal, setShowErrorModal] = useState(false)
@@ -78,14 +81,15 @@ export default function ToolsPage() {
 
         setPendingTickets(ticketsData || [])
 
-        // Buscar URL do vídeo tutorial dos acessos
+        // Buscar URLs dos vídeos tutorial separados por plataforma
         const canvaAccess = accessData?.find((t: ToolAccess) => t.tool_type === 'canva')
         const capcutAccess = accessData?.find((t: ToolAccess) => t.tool_type === 'capcut')
         
-        // Priorizar vídeo do Canva, se não tiver, usar do CapCut
-        const videoUrl = canvaAccess?.tutorial_video_url || capcutAccess?.tutorial_video_url || null
-        if (videoUrl) {
-          setTutorialVideoUrl(videoUrl)
+        if (canvaAccess?.tutorial_video_url) {
+          setCanvaVideoUrl(canvaAccess.tutorial_video_url)
+        }
+        if (capcutAccess?.tutorial_video_url) {
+          setCapcutVideoUrl(capcutAccess.tutorial_video_url)
         }
       } catch (error) {
         console.error('Error fetching tools data:', error)
@@ -366,6 +370,17 @@ export default function ToolsPage() {
                             <ExternalLink className="w-4 h-4" />
                           </a>
                           
+                          {/* Botão para assistir vídeo tutorial do Canva */}
+                          {canvaVideoUrl && (
+                            <button
+                              onClick={() => setShowCanvaVideoModal(true)}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors"
+                            >
+                              <Play className="w-4 h-4" />
+                              Assistir Tutorial de Ativação
+                            </button>
+                          )}
+                          
                           <button
                             onClick={() => reportLinkError(tool.id as 'canva' | 'capcut')}
                             className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
@@ -386,6 +401,17 @@ export default function ToolsPage() {
                             <LinkIcon className="w-4 h-4" />
                             Ver Credenciais de Acesso {tool.name}
                           </button>
+                          
+                          {/* Botão para assistir vídeo tutorial do CapCut */}
+                          {capcutVideoUrl && (
+                            <button
+                              onClick={() => setShowCapcutVideoModal(true)}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors"
+                            >
+                              <Play className="w-4 h-4" />
+                              Assistir Tutorial de Ativação
+                            </button>
+                          )}
                           
                           <button
                             onClick={() => reportLinkError(tool.id as 'canva' | 'capcut')}
@@ -459,31 +485,77 @@ export default function ToolsPage() {
         </motion.div>
       )}
 
-      {/* Tutorial Video - Mostrar apenas quando tiver links de acesso */}
-      {hasBothAccess && tutorialVideoUrl && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white rounded-xl border border-gogh-grayLight shadow-sm p-6"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <Play className="w-5 h-5 text-gogh-grayDark" />
-            <h3 className="text-lg font-bold text-gogh-black">
-              Como Ativar e Acessar as Ferramentas
-            </h3>
-          </div>
-          <div className="aspect-video rounded-lg overflow-hidden bg-gogh-grayLight">
-            <video
-              src={tutorialVideoUrl}
-              controls
-              className="w-full h-full"
-              title="Tutorial de Ativação"
-            >
-              Seu navegador não suporta a reprodução de vídeo.
-            </video>
-          </div>
-        </motion.div>
+
+      {/* Modal de Vídeo Tutorial Canva */}
+      {showCanvaVideoModal && canvaVideoUrl && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl shadow-xl max-w-4xl w-full p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gogh-black">
+                Tutorial de Ativação - Canva Pro
+              </h3>
+              <button
+                onClick={() => setShowCanvaVideoModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="aspect-video rounded-lg overflow-hidden bg-black">
+              <video
+                src={canvaVideoUrl}
+                controls
+                className="w-full h-full"
+                title="Tutorial de Ativação Canva Pro"
+              >
+                Seu navegador não suporta a reprodução de vídeo.
+              </video>
+            </div>
+            <p className="text-sm text-gray-600 mt-4">
+              Assista este tutorial para aprender como ativar e fazer login no Canva Pro.
+            </p>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Modal de Vídeo Tutorial CapCut */}
+      {showCapcutVideoModal && capcutVideoUrl && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl shadow-xl max-w-4xl w-full p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gogh-black">
+                Tutorial de Ativação - CapCut Pro
+              </h3>
+              <button
+                onClick={() => setShowCapcutVideoModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="aspect-video rounded-lg overflow-hidden bg-black">
+              <video
+                src={capcutVideoUrl}
+                controls
+                className="w-full h-full"
+                title="Tutorial de Ativação CapCut Pro"
+              >
+                Seu navegador não suporta a reprodução de vídeo.
+              </video>
+            </div>
+            <p className="text-sm text-gray-600 mt-4">
+              Assista este tutorial para aprender como fazer login no CapCut Pro usando as credenciais fornecidas.
+            </p>
+          </motion.div>
+        </div>
       )}
 
       {/* Modal de Credenciais CapCut */}
