@@ -166,6 +166,10 @@ export async function POST(request: Request) {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
+    type UsageData = {
+      usage_count: number
+    }
+
     const { data: usageData } = await supabase
       .from('user_usage')
       .select('usage_count')
@@ -174,7 +178,8 @@ export async function POST(request: Request) {
       .gte('period_start', today.toISOString().split('T')[0])
       .maybeSingle()
 
-    const currentUsage = usageData?.usage_count || 0
+    const usageDataTyped = usageData as UsageData | null
+    const currentUsage = usageDataTyped?.usage_count || 0
     // Limites diários: Pro = 20, Essencial ou sem assinatura = 8
     // Aceita planos manuais e Stripe
     const limit = (hasValidSubscription && subscriptionData?.plan_id === 'gogh_pro') ? 20 : 8
