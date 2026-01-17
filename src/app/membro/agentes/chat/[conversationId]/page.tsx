@@ -139,7 +139,7 @@ export default function ChatPage() {
     try {
       // Aguardar mais tempo para garantir que os cookies estejam prontos
       // E que o usuário esteja completamente autenticado
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 2000)) // Aumentado para 2 segundos
 
       console.log('[Niche Context] Enviando requisição para API...')
       
@@ -254,14 +254,24 @@ export default function ChatPage() {
           setShowNicheModal(true)
         } else if (nicheData && (!messagesData || messagesData.length === 0) && !nicheContextSentRef.current) {
           // Se tem perfil mas não há mensagens, enviar automaticamente o contexto
-          // Aguardar um pouco para garantir que autenticação esteja completa
+          // Aguardar que o AuthContext termine de carregar e o usuário esteja autenticado
           console.log('[Chat] Preparando para enviar contexto do nicho automaticamente...')
-          setTimeout(() => {
-            if (user && convData && nicheData && !nicheContextSentRef.current) {
-              console.log('[Chat] Enviando contexto do nicho agora...')
-              sendInitialNicheContext(convData, nicheData)
+          const waitForAuth = async () => {
+            let attempts = 0
+            const maxAttempts = 10
+            while (attempts < maxAttempts) {
+              const { data: { user: currentUser } } = await supabase.auth.getUser()
+              if (currentUser && !authLoading) { // `authLoading` from AuthContext
+                console.log('[Chat] Usuário autenticado e AuthContext carregado. Enviando contexto do nicho agora...')
+                sendInitialNicheContext(convData, nicheData)
+                return
+              }
+              await new Promise(resolve => setTimeout(resolve, 500)) // Wait 500ms
+              attempts++
             }
-          }, 1500) // Aguardar 1.5 segundos para garantir que tudo está pronto
+            console.warn('[Chat] Timeout: Não foi possível enviar contexto do nicho automaticamente. Usuário não autenticado ou AuthContext não carregou.')
+          }
+          waitForAuth()
         }
 
         // Buscar uso diário (hoje)
