@@ -255,13 +255,39 @@ export default function ChatPage() {
         } else if (nicheData && (!messagesData || messagesData.length === 0) && !nicheContextSentRef.current) {
           // Se tem perfil mas não há mensagens, enviar automaticamente o contexto
           // Aguardar mais tempo para garantir que autenticação esteja completa
+          // E que o AuthContext tenha terminado de carregar
           console.log('[Chat] Preparando para enviar contexto do nicho automaticamente...')
-          setTimeout(() => {
+          
+          // Aguardar que o AuthContext termine de carregar
+          const waitForAuth = async () => {
+            let attempts = 0
+            const maxAttempts = 10
+            
+            while (attempts < maxAttempts) {
+              // Verificar se o usuário está realmente autenticado
+              const { data: { user: currentUser } } = await supabase.auth.getUser()
+              
+              if (currentUser && user && convData && nicheData && !nicheContextSentRef.current) {
+                console.log('[Chat] Autenticação confirmada, enviando contexto do nicho agora...')
+                sendInitialNicheContext(convData, nicheData)
+                return
+              }
+              
+              attempts++
+              await new Promise(resolve => setTimeout(resolve, 500))
+            }
+            
+            // Se não conseguiu após várias tentativas, tentar mesmo assim
             if (user && convData && nicheData && !nicheContextSentRef.current) {
-              console.log('[Chat] Enviando contexto do nicho agora...')
+              console.log('[Chat] Timeout de autenticação, tentando enviar contexto mesmo assim...')
               sendInitialNicheContext(convData, nicheData)
             }
-          }, 2000) // Aumentar delay para 2 segundos
+          }
+          
+          // Aguardar um pouco antes de começar a verificar
+          setTimeout(() => {
+            waitForAuth()
+          }, 1000)
         }
 
         // Buscar uso diário (hoje)
