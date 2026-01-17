@@ -388,9 +388,9 @@ export async function POST(request: Request) {
     }
 
     // Atualizar título da conversa se for a primeira mensagem
-    if (!historyMessages || historyMessages.length === 0) {
+    if (!historyMessagesTyped || historyMessagesTyped.length === 0) {
       const title = message.length > 50 ? message.substring(0, 50) + '...' : message
-      await supabase
+      await (supabase as any)
         .from('ai_conversations')
         .update({ title })
         .eq('id', conversationId)
