@@ -528,7 +528,31 @@ export default function ToolsPage() {
                     onClick={() => {
                       const text = toolAccess.find(t => t.tool_type === 'capcut')?.access_link || ''
                       navigator.clipboard.writeText(text)
-                      toast.success('Credenciais copiadas!')
+                      toast.success('Email/Usuário copiado!')
+                    }}
+                    className="px-4 py-2 bg-gogh-yellow text-gogh-black rounded-lg hover:bg-gogh-yellow/90 transition-colors text-sm font-medium"
+                  >
+                    Copiar
+                  </button>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gogh-grayDark mb-2">
+                  Senha:
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="password"
+                    value={toolAccess.find(t => t.tool_type === 'capcut')?.password || ''}
+                    readOnly
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
+                  />
+                  <button
+                    onClick={() => {
+                      const text = toolAccess.find(t => t.tool_type === 'capcut')?.password || ''
+                      navigator.clipboard.writeText(text)
+                      toast.success('Senha copiada!')
                     }}
                     className="px-4 py-2 bg-gogh-yellow text-gogh-black rounded-lg hover:bg-gogh-yellow/90 transition-colors text-sm font-medium"
                   >
@@ -539,7 +563,7 @@ export default function ToolsPage() {
               
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
                 <p className="text-xs text-amber-700">
-                  <strong>Importante:</strong> Use essas credenciais para fazer login no CapCut. Se encontrar algum problema, clique em "Reportar Erro na Conta".
+                  <strong>Importante:</strong> Use essas credenciais para fazer login no CapCut. Você pode copiar cada campo separadamente. Se encontrar algum problema, clique em "Reportar Erro na Conta".
                 </p>
               </div>
             </div>
