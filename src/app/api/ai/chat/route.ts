@@ -232,15 +232,20 @@ export async function POST(request: Request) {
         .eq('id', conversationId)
     }
 
-    // Atualizar ou criar registro de uso
+    // Atualizar ou criar registro de uso diário
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
     const { error: usageError } = await supabase
       .from('user_usage')
       .upsert({
         user_id: user.id,
-        feature_key: 'ai_messages',
+        feature_key: 'ai_interactions',
         usage_count: currentUsage + 1,
-        period_start: periodStart.toISOString().split('T')[0],
-        period_end: periodEnd.toISOString().split('T')[0]
+        period_start: today.toISOString().split('T')[0],
+        period_end: tomorrow.toISOString().split('T')[0]
       }, {
         onConflict: 'user_id,feature_key,period_start'
       })
