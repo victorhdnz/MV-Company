@@ -47,6 +47,12 @@ export async function POST(request: Request) {
     console.log('[Portal Stripe] Usuário autenticado com sucesso:', user.id)
     
     // Buscar a assinatura ativa do usuário
+    type SubscriptionData = {
+      stripe_customer_id: string | null
+      plan_id: string
+      status: string
+    }
+
     const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .select('stripe_customer_id, plan_id, status')
@@ -56,11 +62,13 @@ export async function POST(request: Request) {
       .limit(1)
       .maybeSingle()
 
+    const subscriptionData = subscription as SubscriptionData | null
+
     console.log('[Portal Stripe] Busca de assinatura:', {
-      found: !!subscription,
-      hasStripeId: !!subscription?.stripe_customer_id,
-      stripeId: subscription?.stripe_customer_id,
-      planId: subscription?.plan_id,
+      found: !!subscriptionData,
+      hasStripeId: !!subscriptionData?.stripe_customer_id,
+      stripeId: subscriptionData?.stripe_customer_id,
+      planId: subscriptionData?.plan_id,
       error: subError ? subError.message : null
     })
 
@@ -72,7 +80,7 @@ export async function POST(request: Request) {
       }, { status: 500 })
     }
 
-    if (!subscription) {
+    if (!subscriptionData) {
       console.log('[Portal Stripe] Assinatura não encontrada para usuário:', user.id)
       return NextResponse.json({ 
         error: 'Nenhuma assinatura ativa encontrada. Se você tem uma assinatura manual, entre em contato com o suporte.',
@@ -82,11 +90,11 @@ export async function POST(request: Request) {
 
     // Se não tem stripe_customer_id, é uma assinatura manual
     // Não pode usar o portal do Stripe
-    if (!subscription.stripe_customer_id || subscription.stripe_customer_id.startsWith('manual_') || subscription.stripe_customer_id === null) {
+    if (!subscriptionData.stripe_customer_id || subscriptionData.stripe_customer_id.startsWith('manual_') || subscriptionData.stripe_customer_id === null) {
       console.log('Tentativa de acessar portal com assinatura manual:', {
         user_id: user.id,
-        subscription_id: subscription.plan_id,
-        stripe_customer_id: subscription.stripe_customer_id
+        subscription_id: subscriptionData.plan_id,
+        stripe_customer_id: subscriptionData.stripe_customer_id
       })
       return NextResponse.json({ 
         error: 'Esta assinatura foi criada manualmente e não pode ser gerenciada através do portal do Stripe. Entre em contato com o suporte através do WhatsApp para gerenciar sua assinatura.',
@@ -97,7 +105,7 @@ export async function POST(request: Request) {
     // Criar sessão do portal de gerenciamento do Stripe
     // Usar a configuração do portal criada no Dashboard
     const portalSession = await stripe.billingPortal.sessions.create({
-      customer: subscription.stripe_customer_id,
+      customer: subscriptionData.stripe_customer_id,
       return_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://goghlab.com.br'}/membro/conta`,
       // Usar a configuração do portal se especificada
       ...(process.env.STRIPE_PORTAL_CONFIGURATION_ID && {
