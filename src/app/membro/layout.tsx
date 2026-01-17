@@ -50,7 +50,7 @@ const subscriberMenuItems = [
   },
   { 
     href: '/membro/perfil', 
-    label: 'Perfil de Nicho', 
+    label: 'Nicho do Perfil', 
     icon: User,
     description: 'Configure seu perfil para IA'
   },

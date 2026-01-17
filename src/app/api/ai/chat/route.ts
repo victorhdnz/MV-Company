@@ -59,28 +59,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Assinatura não encontrada ou expirada' }, { status: 403 })
     }
 
-    // Verificar limite de uso
-    const periodStart = new Date()
-    periodStart.setDate(1)
-    periodStart.setHours(0, 0, 0, 0)
-    const periodEnd = new Date(periodStart)
-    periodEnd.setMonth(periodEnd.getMonth() + 1)
-    periodEnd.setDate(0) // Último dia do mês
+    // Verificar limite de uso diário
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
 
     const { data: usageData } = await supabase
       .from('user_usage')
       .select('usage_count')
       .eq('user_id', user.id)
-      .eq('feature_key', 'ai_messages')
-      .gte('period_start', periodStart.toISOString().split('T')[0])
-      .single()
+      .eq('feature_key', 'ai_interactions')
+      .gte('period_start', today.toISOString().split('T')[0])
+      .maybeSingle()
 
     const currentUsage = usageData?.usage_count || 0
-    const limit = subscription.plan_id === 'gogh_pro' ? 2000 : 500
+    // Limites diários: Essencial = 8, Pro = 20
+    const limit = subscription.plan_id === 'gogh_pro' ? 20 : 8
 
     if (currentUsage >= limit) {
       return NextResponse.json({ 
-        error: 'Limite de mensagens atingido. Faça upgrade para continuar.' 
+        error: 'Você atingiu o limite de interações de hoje. Volte amanhã ou faça upgrade para aumentar o limite.' 
       }, { status: 429 })
     }
 

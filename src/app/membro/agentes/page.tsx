@@ -9,10 +9,8 @@ import {
   MessageSquare, 
   Crown, 
   Lock, 
-  ChevronRight,
   Sparkles,
-  Plus,
-  Clock
+  Plus
 } from 'lucide-react'
 
 interface AIAgent {
@@ -36,7 +34,6 @@ interface Conversation {
 export default function AgentsPage() {
   const { user, isPro } = useAuth()
   const [agents, setAgents] = useState<AIAgent[]>([])
-  const [conversations, setConversations] = useState<Conversation[]>([])
   const [loading, setLoading] = useState(true)
   
   const supabase = createClient()
@@ -55,35 +52,6 @@ export default function AgentsPage() {
 
         if (agentsError) throw agentsError
         setAgents(agentsData || [])
-
-        // Buscar conversas recentes do usuário
-        const { data: conversationsData, error: conversationsError } = await (supabase as any)
-          .from('ai_conversations')
-          .select(`
-            id,
-            agent_id,
-            title,
-            updated_at,
-            ai_agents (
-              id,
-              slug,
-              name,
-              avatar_url
-            )
-          `)
-          .eq('user_id', user.id)
-          .eq('is_archived', false)
-          .order('updated_at', { ascending: false })
-          .limit(10)
-
-        if (conversationsError) throw conversationsError
-        
-        const formattedConversations = conversationsData?.map((conv: any) => ({
-          ...conv,
-          agent: conv.ai_agents as unknown as AIAgent
-        })) || []
-        
-        setConversations(formattedConversations)
       } catch (error) {
         console.error('Error fetching agents:', error)
       } finally {
@@ -151,51 +119,6 @@ export default function AgentsPage() {
         </p>
       </div>
 
-      {/* Conversas Recentes */}
-      {conversations.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl p-6 border border-gogh-grayLight shadow-sm"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gogh-black flex items-center gap-2">
-              <Clock className="w-5 h-5 text-gogh-grayDark" />
-              Conversas Recentes
-            </h2>
-            <Link
-              href="/membro/agentes/historico"
-              className="text-sm text-gogh-yellow hover:underline"
-            >
-              Ver todas
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {conversations.slice(0, 6).map((conv) => (
-              <Link
-                key={conv.id}
-                href={`/membro/agentes/chat/${conv.id}`}
-                className="flex items-center gap-3 p-3 bg-gogh-grayLight/30 hover:bg-gogh-grayLight rounded-lg transition-colors group"
-              >
-                <div className="w-10 h-10 bg-gradient-to-br from-gogh-yellow to-amber-500 rounded-lg flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5 text-gogh-black" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gogh-black truncate text-sm">
-                    {conv.title}
-                  </p>
-                  <p className="text-xs text-gogh-grayDark truncate">
-                    {conv.agent?.name || 'Agente'}
-                  </p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-gogh-grayDark group-hover:text-gogh-yellow transition-colors" />
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
       {/* Agentes Básicos */}
       <div>
         <h2 className="text-lg font-semibold text-gogh-black mb-4 flex items-center gap-2">
@@ -218,11 +141,11 @@ export default function AgentsPage() {
                   <div className="w-14 h-14 bg-gradient-to-br from-gogh-yellow to-amber-500 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <MessageSquare className="w-7 h-7 text-gogh-black" />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-h-[3.5rem]">
                     <h3 className="font-semibold text-gogh-black group-hover:text-gogh-yellow transition-colors">
                       {agent.name}
                     </h3>
-                    <p className="text-sm text-gogh-grayDark mt-1 line-clamp-2">
+                    <p className="text-sm text-gogh-grayDark mt-1 line-clamp-2 min-h-[2.5rem]">
                       {agent.description}
                     </p>
                   </div>
@@ -269,7 +192,7 @@ export default function AgentsPage() {
                       <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                         <Crown className="w-7 h-7 text-white" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-h-[3.5rem]">
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold text-gogh-black group-hover:text-amber-600 transition-colors">
                             {agent.name}
@@ -278,7 +201,7 @@ export default function AgentsPage() {
                             Pro
                           </span>
                         </div>
-                        <p className="text-sm text-gogh-grayDark mt-1 line-clamp-2">
+                        <p className="text-sm text-gogh-grayDark mt-1 line-clamp-2 min-h-[2.5rem]">
                           {agent.description}
                         </p>
                       </div>

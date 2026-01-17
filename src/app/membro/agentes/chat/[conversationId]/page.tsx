@@ -57,6 +57,10 @@ export default function ChatPage() {
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [usageInfo, setUsageInfo] = useState<{ current: number; limit: number } | null>(null)
+  const [nicheProfile, setNicheProfile] = useState<any>(null)
+  const [showNicheModal, setShowNicheModal] = useState(false)
+  const [nicheProfileLoaded, setNicheProfileLoaded] = useState(false)
+  const [shouldSendNicheContext, setShouldSendNicheContext] = useState(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -103,20 +107,38 @@ export default function ChatPage() {
         if (messagesError) throw messagesError
         setMessages(messagesData || [])
 
-        // Buscar uso atual
-        const periodStart = new Date()
-        periodStart.setDate(1)
-        periodStart.setHours(0, 0, 0, 0)
+        // Buscar perfil de nicho
+        const { data: nicheData } = await (supabase as any)
+          .from('user_niche_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle()
+
+        setNicheProfile(nicheData)
+        setNicheProfileLoaded(true)
+
+        // Se não tem perfil configurado e não há mensagens, mostrar modal
+        if (!nicheData && (!messagesData || messagesData.length === 0)) {
+          setShowNicheModal(true)
+        } else if (nicheData && (!messagesData || messagesData.length === 0)) {
+          // Se tem perfil mas não há mensagens, marcar para enviar contexto na primeira mensagem
+          setShouldSendNicheContext(true)
+        }
+
+        // Buscar uso diário (hoje)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
 
         const { data: usageData } = await (supabase as any)
           .from('user_usage')
           .select('usage_count')
           .eq('user_id', user.id)
-          .eq('feature_key', 'ai_messages')
-          .gte('period_start', periodStart.toISOString().split('T')[0])
-          .single()
+          .eq('feature_key', 'ai_interactions')
+          .gte('period_start', today.toISOString().split('T')[0])
+          .maybeSingle()
 
-        const limit = subscription?.plan_id === 'gogh_pro' ? 2000 : 500
+        // Limites diários: Essencial = 8, Pro = 20
+        const limit = isPro ? 20 : 8
         setUsageInfo({
           current: usageData?.usage_count || 0,
           limit: limit
@@ -143,11 +165,19 @@ export default function ChatPage() {
 
     // Verificar limite de uso
     if (usageInfo && usageInfo.current >= usageInfo.limit) {
-      setError('Você atingiu o limite de mensagens deste mês. Faça upgrade para continuar.')
+      setError('Você atingiu o limite de interações de hoje. Volte amanhã ou faça upgrade para aumentar o limite.')
       return
     }
 
-    const userMessage = inputValue.trim()
+    let userMessage = inputValue.trim()
+    
+    // Se for a primeira mensagem e tiver perfil de nicho, adicionar contexto
+    if (shouldSendNicheContext && nicheProfile && messages.length === 0) {
+      const nicheContext = buildNicheContext(nicheProfile)
+      userMessage = `${nicheContext}\n\nAgora, sobre minha solicitação: ${userMessage}`
+      setShouldSendNicheContext(false)
+    }
+    
     setInputValue('')
     setIsSending(true)
     setError(null)
@@ -201,6 +231,39 @@ export default function ChatPage() {
     }
   }
 
+  // Função para construir contexto do nicho
+  const buildNicheContext = (profile: any): string => {
+    let context = 'INFORMAÇÕES DO MEU PERFIL:\n\n'
+    
+    if (profile.business_name) {
+      context += `Nome do negócio: ${profile.business_name}\n`
+    }
+    if (profile.niche) {
+      context += `Nicho: ${profile.niche}\n`
+    }
+    if (profile.target_audience) {
+      context += `Público-alvo: ${profile.target_audience}\n`
+    }
+    if (profile.brand_voice) {
+      context += `Tom de voz: ${profile.brand_voice}\n`
+    }
+    if (profile.content_pillars && Array.isArray(profile.content_pillars) && profile.content_pillars.length > 0) {
+      context += `Pilares de conteúdo: ${profile.content_pillars.join(', ')}\n`
+    }
+    if (profile.platforms && Array.isArray(profile.platforms) && profile.platforms.length > 0) {
+      context += `Plataformas que uso: ${profile.platforms.join(', ')}\n`
+    }
+    if (profile.goals) {
+      context += `Objetivos: ${profile.goals}\n`
+    }
+    if (profile.additional_context) {
+      context += `Contexto adicional: ${profile.additional_context}\n`
+    }
+    
+    context += '\nUse essas informações para personalizar suas respostas e sugestões.'
+    return context
+  }
+
   // Handler para Enter
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -238,7 +301,45 @@ export default function ChatPage() {
   const agent = conversation.ai_agents
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)] max-w-4xl mx-auto">
+    <>
+      {/* Modal para configurar perfil de nicho */}
+      {showNicheModal && nicheProfileLoaded && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+          >
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gogh-yellow rounded-full flex items-center justify-center mx-auto mb-4">
+                <User className="w-8 h-8 text-gogh-black" />
+              </div>
+              <h3 className="text-xl font-bold text-gogh-black mb-2">
+                Configure seu Perfil
+              </h3>
+              <p className="text-gogh-grayDark">
+                Para que os agentes de IA possam te ajudar da melhor forma, configure seu perfil de nicho primeiro.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowNicheModal(false)}
+                className="flex-1 px-4 py-2 border border-gogh-grayLight rounded-lg text-gogh-grayDark hover:bg-gogh-grayLight transition-colors"
+              >
+                Depois
+              </button>
+              <Link
+                href="/membro/perfil"
+                className="flex-1 px-4 py-2 bg-gogh-yellow text-gogh-black rounded-lg hover:bg-gogh-yellow/80 transition-colors text-center font-medium"
+              >
+                Configurar Agora
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      <div className="flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)] max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4 pb-4 border-b border-gogh-grayLight mb-4">
         <Link
@@ -262,7 +363,7 @@ export default function ChatPage() {
           <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gogh-grayLight/50 rounded-lg">
             <Sparkles className="w-4 h-4 text-gogh-yellow" />
             <span className="text-sm text-gogh-grayDark">
-              {usageInfo.current}/{usageInfo.limit} msgs
+              {usageInfo.current}/{usageInfo.limit} interações hoje
             </span>
           </div>
         )}
@@ -428,11 +529,12 @@ export default function ChatPage() {
         {usageInfo && (
           <div className="md:hidden flex items-center justify-center gap-2 mt-2 text-sm text-gogh-grayDark">
             <Sparkles className="w-3 h-3 text-gogh-yellow" />
-            <span>{usageInfo.current}/{usageInfo.limit} mensagens este mês</span>
+            <span>{usageInfo.current}/{usageInfo.limit} interações hoje</span>
           </div>
         )}
       </div>
     </div>
+    </>
   )
 }
 
