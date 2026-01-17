@@ -5,6 +5,10 @@ import { Database } from '@/types/database.types'
 
 export async function POST(request: NextRequest) {
   try {
+    // Verificar cookies recebidos
+    const cookieHeader = request.headers.get('cookie')
+    console.log('Cookies recebidos:', cookieHeader ? 'Sim' : 'Não')
+    
     const formData = await request.formData()
     const file = formData.get('file') as File
 
@@ -30,12 +34,26 @@ export async function POST(request: NextRequest) {
     // Obter cliente Supabase autenticado usando createRouteHandlerClient para API routes
     const supabase = createRouteHandlerClient<Database>({ cookies })
 
+    // Tentar primeiro com getSession() para ver se há sessão
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError) {
+      console.error('Erro ao obter sessão:', sessionError)
+    }
+    
+    if (session) {
+      console.log('Sessão encontrada via getSession:', session.user.id)
+    } else {
+      console.log('Nenhuma sessão encontrada via getSession, tentando getUser()...')
+    }
+
     // Verificar autenticação usando getUser() que é mais confiável em API routes
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError) {
       console.error('Erro de autenticação no upload:', authError)
-      console.error('Detalhes:', JSON.stringify(authError, null, 2))
+      console.error('Código do erro:', authError.status)
+      console.error('Mensagem:', authError.message)
       return NextResponse.json({ 
         error: 'Erro de autenticação. Faça login novamente.',
         details: process.env.NODE_ENV === 'development' ? authError.message : undefined
@@ -44,6 +62,7 @@ export async function POST(request: NextRequest) {
     
     if (!user) {
       console.error('Usuário não autenticado no upload de vídeo')
+      console.error('Sessão disponível:', session ? 'Sim' : 'Não')
       return NextResponse.json({ 
         error: 'Não autenticado. Faça login para fazer upload de vídeos.' 
       }, { status: 401 })
