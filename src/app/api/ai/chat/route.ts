@@ -233,9 +233,9 @@ export async function POST(request: Request) {
     }
 
     // Atualizar ou criar registro de uso diário
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const tomorrow = new Date(today)
+    const todayForUsage = new Date()
+    todayForUsage.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(todayForUsage)
     tomorrow.setDate(tomorrow.getDate() + 1)
 
     const { error: usageError } = await supabase
@@ -244,7 +244,7 @@ export async function POST(request: Request) {
         user_id: user.id,
         feature_key: 'ai_interactions',
         usage_count: currentUsage + 1,
-        period_start: today.toISOString().split('T')[0],
+        period_start: todayForUsage.toISOString().split('T')[0],
         period_end: tomorrow.toISOString().split('T')[0]
       }, {
         onConflict: 'user_id,feature_key,period_start'
