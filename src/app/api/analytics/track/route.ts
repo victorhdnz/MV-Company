@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('page_analytics')
       .insert({
         page_type: body.page_type,
