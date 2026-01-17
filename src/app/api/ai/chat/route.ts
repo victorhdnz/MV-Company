@@ -9,18 +9,38 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
+    // Verificar cookies recebidos (para debug)
+    const cookieStore = cookies()
+    const hasAccessToken = cookieStore.has('sb-access-token')
+    const hasRefreshToken = cookieStore.has('sb-refresh-token')
+    console.log('[AI Chat] Cookies presentes:', { hasAccessToken, hasRefreshToken })
+    
     // IMPORTANTE: Autenticar PRIMEIRO (como na API de upload que funciona)
     // Isso garante que os cookies sejam lidos corretamente
     const supabase = createRouteHandlerClient<Database>({ cookies })
 
+    // Tentar getSession primeiro (mais tolerante)
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    console.log('[AI Chat] Sessão obtida:', session ? `Sim (user: ${session.user.id})` : 'Não', sessionError ? `Erro: ${sessionError.message}` : '')
+    
     // Verificar autenticação usando getUser() que é mais confiável em API routes
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    console.log('[AI Chat] Tentativa de autenticação:', {
+      hasSession: !!session,
+      hasUser: !!user,
+      userId: user?.id,
+      userEmail: user?.email,
+      sessionError: sessionError?.message,
+      authError: authError?.message
+    })
     
     if (authError) {
       console.error('[AI Chat] Erro de autenticação no chat:', {
         message: authError.message,
         status: authError.status,
-        name: authError.name
+        name: authError.name,
+        hasSession: !!session
       })
       return NextResponse.json({ 
         error: 'Erro de autenticação. Faça login novamente.',
