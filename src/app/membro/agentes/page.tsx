@@ -135,17 +135,17 @@ export default function AgentsPage() {
             >
               <button
                 onClick={() => startNewConversation(agent)}
-                className="w-full text-left bg-white rounded-xl p-5 border border-gogh-grayLight shadow-sm hover:shadow-md hover:border-gogh-yellow transition-all duration-300 group"
+                className="w-full text-left bg-white rounded-xl p-5 border border-gogh-grayLight shadow-sm hover:shadow-md hover:border-gogh-yellow transition-all duration-300 group h-full flex flex-col"
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4 flex-1">
                   <div className="w-14 h-14 bg-gradient-to-br from-gogh-yellow to-amber-500 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <MessageSquare className="w-7 h-7 text-gogh-black" />
                   </div>
-                  <div className="flex-1 min-h-[3.5rem]">
+                  <div className="flex-1 min-h-[4rem] flex flex-col">
                     <h3 className="font-semibold text-gogh-black group-hover:text-gogh-yellow transition-colors">
                       {agent.name}
                     </h3>
-                    <p className="text-sm text-gogh-grayDark mt-1 line-clamp-2 min-h-[2.5rem]">
+                    <p className="text-sm text-gogh-grayDark mt-1 line-clamp-3 flex-1">
                       {agent.description}
                     </p>
                   </div>
@@ -186,13 +186,13 @@ export default function AgentsPage() {
                 {isPro ? (
                   <button
                     onClick={() => startNewConversation(agent)}
-                    className="w-full text-left bg-gradient-to-br from-amber-50 to-white rounded-xl p-5 border border-amber-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all duration-300 group"
+                    className="w-full text-left bg-gradient-to-br from-amber-50 to-white rounded-xl p-5 border border-amber-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all duration-300 group h-full flex flex-col"
                   >
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-4 flex-1">
                       <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                         <Crown className="w-7 h-7 text-white" />
                       </div>
-                      <div className="flex-1 min-h-[3.5rem]">
+                      <div className="flex-1 min-h-[4rem] flex flex-col">
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold text-gogh-black group-hover:text-amber-600 transition-colors">
                             {agent.name}
@@ -201,7 +201,7 @@ export default function AgentsPage() {
                             Pro
                           </span>
                         </div>
-                        <p className="text-sm text-gogh-grayDark mt-1 line-clamp-2 min-h-[2.5rem]">
+                        <p className="text-sm text-gogh-grayDark mt-1 line-clamp-3 flex-1">
                           {agent.description}
                         </p>
                       </div>

@@ -196,6 +196,7 @@ export default function ChatPage() {
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Garantir que cookies sejam enviados
         body: JSON.stringify({
           conversationId: conversation.id,
           message: userMessage,
