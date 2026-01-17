@@ -30,17 +30,17 @@ export async function POST(request: NextRequest) {
     // Obter cliente Supabase autenticado usando createRouteHandlerClient para API routes
     const supabase = createRouteHandlerClient<Database>({ cookies })
 
-    // Verificar autenticação
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // Verificar autenticação usando getUser() que é mais confiável em API routes
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
     
-    if (sessionError) {
-      console.error('Erro de sessão:', sessionError)
+    if (authError) {
+      console.error('Erro de autenticação:', authError)
       return NextResponse.json({ 
         error: 'Erro de autenticação. Faça login novamente.' 
       }, { status: 401 })
     }
     
-    if (!session || !session.user) {
+    if (!user) {
       return NextResponse.json({ 
         error: 'Não autenticado. Faça login para fazer upload de vídeos.' 
       }, { status: 401 })
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single()
 
     if (profileError || !profile) {

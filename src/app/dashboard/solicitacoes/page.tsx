@@ -152,26 +152,25 @@ export default function SolicitacoesPage() {
       const formData = new FormData()
       formData.append('file', file)
 
-      // Obter o token de sessão para enviar com a requisição
-      const { data: { session } } = await supabase.auth.getSession()
+      // Verificar autenticação antes de fazer upload
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
       
-      if (!session) {
+      if (authError || !user) {
         throw new Error('Não autenticado. Faça login para fazer upload de vídeos.')
       }
 
+      // Fazer upload - os cookies serão enviados automaticamente
       const response = await fetch('/api/upload/video', {
         method: 'POST',
-        headers: {
-          // Não definir Content-Type, deixar o browser definir automaticamente com boundary para FormData
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        credentials: 'include', // Incluir cookies na requisição
+        credentials: 'include', // Incluir cookies na requisição (importante!)
         body: formData
+        // Não definir Content-Type - o browser define automaticamente com boundary para FormData
+        // Não definir Authorization header - os cookies já contêm a sessão
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Erro ao fazer upload do vídeo')
+        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+        throw new Error(errorData.error || 'Erro ao fazer upload do vídeo')
       }
 
       const data = await response.json()
@@ -315,8 +314,17 @@ export default function SolicitacoesPage() {
       toast.success('Links salvos com sucesso! O cliente já pode ver os links na página de ferramentas.')
       await loadToolAccess(selectedTicket.user_id)
       
-      // Recarregar tickets para garantir que tudo está sincronizado
+      // Recarregar tickets para garantir que tudo está sincronizado, mas preservar o ticket selecionado
+      const currentSelectedId = selectedTicket.id
       await loadTickets()
+      
+      // Restaurar o ticket selecionado após recarregar
+      setTimeout(() => {
+        const reloadedTicket = tickets.find(t => t.id === currentSelectedId)
+        if (reloadedTicket) {
+          setSelectedTicket(reloadedTicket)
+        }
+      }, 100)
     } catch (error: any) {
       console.error('Erro ao salvar links:', error)
       toast.error('Erro ao salvar links')
@@ -327,14 +335,15 @@ export default function SolicitacoesPage() {
 
   const updateTicketStatus = async (ticketId: string, status: string) => {
     try {
-      // Atualizar sem usar .single() para evitar erro PGRST116
-      const { error } = await (supabase as any)
+      // Atualizar e verificar se foi bem-sucedido
+      const { data, error } = await (supabase as any)
         .from('support_tickets')
         .update({ 
           status: status,
           updated_at: new Date().toISOString()
         })
         .eq('id', ticketId)
+        .select()
 
       if (error) {
         console.error('Erro ao atualizar status:', error)
@@ -342,45 +351,36 @@ export default function SolicitacoesPage() {
         return false
       }
 
+      // Verificar se realmente atualizou
+      if (!data || data.length === 0) {
+        console.error('Nenhum ticket foi atualizado')
+        toast.error('Erro ao atualizar status: ticket não encontrado ou sem permissão')
+        return false
+      }
+
+      const updatedTicket = data[0]
+
       // Atualizar o ticket na lista local imediatamente
       setTickets(prev => prev.map(t => 
-        t.id === ticketId ? { ...t, status: status as any, updated_at: new Date().toISOString() } : t
+        t.id === ticketId ? { ...t, status: updatedTicket.status, updated_at: updatedTicket.updated_at } : t
       ))
 
       // Se houver um ticket selecionado, atualizar também
       if (selectedTicket && selectedTicket.id === ticketId) {
-        setSelectedTicket({ ...selectedTicket, status: status as any, updated_at: new Date().toISOString() })
+        // Buscar perfil do usuário para manter os dados completos
+        const { data: profile } = await (supabase as any)
+          .from('profiles')
+          .select('id, email, full_name')
+          .eq('id', updatedTicket.user_id)
+          .single()
+        
+        setSelectedTicket({
+          ...updatedTicket,
+          user: profile || selectedTicket.user
+        })
       }
 
       toast.success('Status atualizado com sucesso!')
-      
-      // Recarregar após um delay para garantir que o banco foi atualizado
-      setTimeout(async () => {
-        await loadTickets()
-        // Após recarregar, garantir que o ticket selecionado ainda está selecionado
-        const currentSelectedId = selectedTicket?.id
-        if (currentSelectedId) {
-          const updatedTickets = await (supabase as any)
-            .from('support_tickets')
-            .select('*')
-            .eq('id', currentSelectedId)
-            .single()
-          
-          if (updatedTickets.data) {
-            // Buscar perfil do usuário
-            const { data: profile } = await (supabase as any)
-              .from('profiles')
-              .select('id, email, full_name')
-              .eq('id', updatedTickets.data.user_id)
-              .single()
-            
-            setSelectedTicket({
-              ...updatedTickets.data,
-              user: profile || null
-            })
-          }
-        }
-      }, 1000)
       
       return true
     } catch (error: any) {
