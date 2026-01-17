@@ -305,6 +305,16 @@ export default function ChatPage() {
       const data = await response.json()
 
       if (!response.ok) {
+        // Tratar diferentes tipos de erro
+        if (response.status === 403) {
+          setError('Assinatura não encontrada. Configure sua assinatura para usar os agentes de IA.')
+        } else if (response.status === 401) {
+          setError('Erro de autenticação. Faça login novamente.')
+        } else if (response.status === 429) {
+          setError(data.error || 'Você atingiu o limite de interações de hoje.')
+        } else {
+          setError(data.error || 'Erro ao enviar mensagem')
+        }
         throw new Error(data.error || 'Erro ao enviar mensagem')
       }
 
