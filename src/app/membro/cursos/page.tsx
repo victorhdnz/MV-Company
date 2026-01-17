@@ -58,7 +58,12 @@ export default function CoursesPage() {
           .order('order_position', { ascending: true, nullsLast: true })
           .order('order', { ascending: true, nullsLast: true })
 
-        if (error) throw error
+        if (error) {
+          console.error('Erro ao buscar cursos:', error)
+          throw error
+        }
+        
+        console.log('Cursos encontrados:', data?.length || 0, data)
         
         // Ordenar lessons dentro de cada curso
         const coursesWithOrderedLessons = (data || []).map((course: Course) => ({

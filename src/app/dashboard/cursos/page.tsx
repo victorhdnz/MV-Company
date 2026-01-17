@@ -124,7 +124,8 @@ export default function CursosPage() {
             title: 'Canva do Zero ao Avançado',
             description: 'Aprenda a criar designs profissionais no Canva, desde o básico até técnicas avançadas.',
             slug: 'canva-do-zero-ao-avancado',
-            is_published: true // Garantir que está publicado
+            is_published: true, // Garantir que está publicado
+            is_active: true // Garantir que está ativo também
           })
           .eq('id', canvaCourse.id)
       }
@@ -140,6 +141,7 @@ export default function CursosPage() {
             slug: 'capcut-do-zero-ao-avancado',
             order_position: 1,
             is_published: true, // Publicar automaticamente
+            is_active: true, // Garantir que está ativo também
             plan_required: 'all',
             lessons_count: 0,
             duration_hours: 0,
@@ -153,7 +155,8 @@ export default function CursosPage() {
             title: 'CapCut do Zero ao Avançado',
             description: 'Domine a edição de vídeos para redes sociais usando o CapCut Pro, desde o básico até técnicas avançadas.',
             slug: 'capcut-do-zero-ao-avancado',
-            is_published: true // Garantir que está publicado
+            is_published: true, // Garantir que está publicado
+            is_active: true // Garantir que está ativo também
           })
           .eq('id', capcutCourse.id)
       }
