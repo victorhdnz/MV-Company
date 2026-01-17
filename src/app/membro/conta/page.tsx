@@ -191,14 +191,28 @@ export default function AccountPage() {
       
       // Verificar status da resposta
       if (!response.ok) {
-        // Se for assinatura manual, mostrar mensagem mais amigável
+        // Se for assinatura manual, mostrar mensagem informativa (não é erro)
         if (data.isManual) {
-          toast.error(data.error || 'Esta assinatura foi criada manualmente. Entre em contato com o suporte através do WhatsApp.', {
-            duration: 6000
+          toast('Esta assinatura foi criada manualmente. Para gerenciar sua assinatura, entre em contato com o suporte através do WhatsApp.', {
+            duration: 6000,
+            icon: 'ℹ️',
+            style: {
+              background: '#fef3c7',
+              color: '#92400e',
+            }
           })
         } else if (response.status === 401) {
           toast.error('Erro de autenticação. Faça login novamente.', {
             duration: 5000
+          })
+        } else if (response.status === 404) {
+          toast('Nenhuma assinatura ativa encontrada. Se você tem uma assinatura manual, entre em contato com o suporte.', {
+            duration: 6000,
+            icon: 'ℹ️',
+            style: {
+              background: '#fef3c7',
+              color: '#92400e',
+            }
           })
         } else {
           toast.error(data.error || 'Erro ao abrir portal de assinatura', {

@@ -61,6 +61,7 @@ export default function ChatPage() {
   const [showNicheModal, setShowNicheModal] = useState(false)
   const [nicheProfileLoaded, setNicheProfileLoaded] = useState(false)
   const [shouldSendNicheContext, setShouldSendNicheContext] = useState(false)
+  const [isSendingNicheContext, setIsSendingNicheContext] = useState(false)
   const nicheContextSentRef = useRef(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -133,6 +134,7 @@ export default function ChatPage() {
     console.log('[Niche Context] Iniciando envio do contexto do nicho')
 
     const nicheContext = buildNicheContext(profile)
+    setIsSendingNicheContext(true) // Indicador visual de que está enviando contexto
     setIsSending(true)
     setError(null)
 
@@ -199,6 +201,7 @@ export default function ChatPage() {
         nicheContextSentRef.current = false
       }
     } finally {
+      setIsSendingNicheContext(false) // Remover indicador visual
       setIsSending(false)
     }
   }, [user, buildNicheContext, isPro, isSending])
@@ -479,7 +482,7 @@ export default function ChatPage() {
 
   return (
     <>
-      {/* Modal para configurar perfil de nicho */}
+      {/* Modal para configurar perfil de nicho - OBRIGATÓRIO */}
       {showNicheModal && nicheProfileLoaded && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <motion.div
@@ -494,20 +497,18 @@ export default function ChatPage() {
               <h3 className="text-xl font-bold text-gogh-black mb-2">
                 Configure seu Perfil
               </h3>
-              <p className="text-gogh-grayDark">
-                Para que os agentes de IA possam te ajudar da melhor forma, configure seu perfil de nicho primeiro.
+              <p className="text-gogh-grayDark mb-2">
+                Para que os agentes de IA possam te ajudar da melhor forma, é <strong>obrigatório</strong> configurar seu perfil de nicho primeiro.
+              </p>
+              <p className="text-sm text-gogh-grayDark">
+                Após configurar, o agente será treinado automaticamente com suas informações.
               </p>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowNicheModal(false)}
-                className="flex-1 px-4 py-2 border border-gogh-grayLight rounded-lg text-gogh-grayDark hover:bg-gogh-grayLight transition-colors"
-              >
-                Depois
-              </button>
               <Link
                 href="/membro/perfil"
                 className="flex-1 px-4 py-2 bg-gogh-yellow text-gogh-black rounded-lg hover:bg-gogh-yellow/80 transition-colors text-center font-medium"
+                onClick={() => setShowNicheModal(false)}
               >
                 Configurar Agora
               </Link>
@@ -548,8 +549,22 @@ export default function ChatPage() {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+        {/* Indicador de envio automático do contexto do nicho */}
+        {isSendingNicheContext && messages.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center gap-3 py-4"
+          >
+            <Loader2 className="w-5 h-5 text-gogh-yellow animate-spin" />
+            <span className="text-sm text-gogh-grayDark">
+              Configurando o agente com suas informações do perfil...
+            </span>
+          </motion.div>
+        )}
+
         {/* Welcome Message */}
-        {messages.length === 0 && (
+        {messages.length === 0 && !isSendingNicheContext && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
