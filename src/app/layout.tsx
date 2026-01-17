@@ -16,12 +16,19 @@ const inter = Inter({ subsets: ['latin'] })
 async function getSiteDescription(): Promise<string> {
   try {
     const supabase = createServerClient()
+    type SiteSettingsData = {
+      site_description: string | null
+      site_name: string | null
+    }
+
     const { data, error } = await supabase
       .from('site_settings')
       .select('site_description, site_name')
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle()
+
+    const dataTyped = data as SiteSettingsData | null
 
     if (error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar descrição do site:', error)
@@ -32,13 +39,15 @@ async function getSiteDescription(): Promise<string> {
         .limit(1)
         .maybeSingle()
 
-      if (fallbackData?.site_description) {
-        return fallbackData.site_description
+      const fallbackDataTyped = fallbackData as SiteSettingsData | null
+
+      if (fallbackDataTyped?.site_description) {
+        return fallbackDataTyped.site_description
       }
     }
 
-    if (data?.site_description) {
-      return data.site_description
+    if (dataTyped?.site_description) {
+      return dataTyped.site_description
     }
   } catch (error) {
     console.error('Erro ao buscar descrição do site:', error)
@@ -52,12 +61,18 @@ async function getSiteDescription(): Promise<string> {
 async function getSiteName(): Promise<string> {
   try {
     const supabase = createServerClient()
+    type SiteSettingsData = {
+      site_name: string | null
+    }
+
     const { data, error } = await supabase
       .from('site_settings')
       .select('site_name')
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle()
+
+    const dataTyped = data as SiteSettingsData | null
 
     if (error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar nome do site:', error)
@@ -68,13 +83,15 @@ async function getSiteName(): Promise<string> {
         .limit(1)
         .maybeSingle()
 
-      if (fallbackData?.site_name) {
-        return fallbackData.site_name
+      const fallbackDataTyped = fallbackData as SiteSettingsData | null
+
+      if (fallbackDataTyped?.site_name) {
+        return fallbackDataTyped.site_name
       }
     }
 
-    if (data?.site_name) {
-      return data.site_name
+    if (dataTyped?.site_name) {
+      return dataTyped.site_name
     }
   } catch (error) {
     console.error('Erro ao buscar nome do site:', error)
@@ -88,12 +105,19 @@ async function getSiteName(): Promise<string> {
 async function getSiteTitle(): Promise<string | null> {
   try {
     const supabase = createServerClient()
+    type SiteSettingsData = {
+      site_title: string | null
+      site_name: string | null
+    }
+
     const { data, error } = await supabase
       .from('site_settings')
       .select('site_title, site_name')
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle()
+
+    const dataTyped = data as SiteSettingsData | null
 
     if (error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar título do site:', error)
@@ -104,21 +128,23 @@ async function getSiteTitle(): Promise<string | null> {
         .limit(1)
         .maybeSingle()
 
-      if (fallbackData?.site_title) {
-        return fallbackData.site_title
+      const fallbackDataTyped = fallbackData as SiteSettingsData | null
+
+      if (fallbackDataTyped?.site_title) {
+        return fallbackDataTyped.site_title
       }
       // Se não tiver site_title, usar site_name + sufixo
-      if (fallbackData?.site_name) {
-        return `${fallbackData.site_name} - Criatividade guiada por tecnologia`
+      if (fallbackDataTyped?.site_name) {
+        return `${fallbackDataTyped.site_name} - Criatividade guiada por tecnologia`
       }
     }
 
-    if (data?.site_title) {
-      return data.site_title
+    if (dataTyped?.site_title) {
+      return dataTyped.site_title
     }
     // Se não tiver site_title, usar site_name + sufixo padrão
-    if (data?.site_name) {
-      return `${data.site_name} - Criatividade guiada por tecnologia`
+    if (dataTyped?.site_name) {
+      return `${dataTyped.site_name} - Criatividade guiada por tecnologia`
     }
   } catch (error) {
     console.error('Erro ao buscar título do site:', error)
@@ -131,22 +157,29 @@ async function getSiteTitle(): Promise<string | null> {
 async function getSiteLogo(): Promise<string | null> {
   try {
     const supabase = createServerClient()
+    type SiteSettingsData = {
+      site_logo: string | null
+      homepage_content: any
+    }
+
     const { data, error } = await supabase
       .from('site_settings')
       .select('site_logo, homepage_content')
       .eq('key', 'general')
       .maybeSingle()
 
+    const dataTyped = data as SiteSettingsData | null
+
     if (error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar logo do site:', error)
       return null
     }
 
-    if (data) {
+    if (dataTyped) {
       // Priorizar site_logo, mas usar hero_logo como fallback
-      let logo = data.site_logo
-      if (!logo && data.homepage_content && typeof data.homepage_content === 'object') {
-        logo = (data.homepage_content as any)?.hero_logo || null
+      let logo = dataTyped.site_logo
+      if (!logo && dataTyped.homepage_content && typeof dataTyped.homepage_content === 'object') {
+        logo = (dataTyped.homepage_content as any)?.hero_logo || null
       }
       return logo
     }
