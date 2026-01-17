@@ -68,7 +68,22 @@ export async function POST(request: Request) {
       .eq('user_id', user.id)
       .single()
 
-    if (convError || !conversation) {
+    if (convError) {
+      console.error('[AI Chat] Erro ao buscar conversa:', convError)
+      // Se for erro de RLS/permissão, dar mensagem mais específica
+      if (convError.code === 'PGRST301' || convError.message?.includes('permission') || convError.message?.includes('policy')) {
+        return NextResponse.json({ 
+          error: 'Erro de permissão. Verifique se a conversa pertence a você.',
+          details: process.env.NODE_ENV === 'development' ? convError.message : undefined
+        }, { status: 403 })
+      }
+      return NextResponse.json({ 
+        error: 'Conversa não encontrada',
+        details: process.env.NODE_ENV === 'development' ? convError.message : undefined
+      }, { status: 404 })
+    }
+    
+    if (!conversation) {
       return NextResponse.json({ error: 'Conversa não encontrada' }, { status: 404 })
     }
 
