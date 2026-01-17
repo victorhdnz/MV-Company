@@ -152,8 +152,20 @@ export default function SolicitacoesPage() {
       const formData = new FormData()
       formData.append('file', file)
 
+      // Obter o token de sessão para enviar com a requisição
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        throw new Error('Não autenticado. Faça login para fazer upload de vídeos.')
+      }
+
       const response = await fetch('/api/upload/video', {
         method: 'POST',
+        headers: {
+          // Não definir Content-Type, deixar o browser definir automaticamente com boundary para FormData
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        credentials: 'include', // Incluir cookies na requisição
         body: formData
       })
 
@@ -342,10 +354,33 @@ export default function SolicitacoesPage() {
 
       toast.success('Status atualizado com sucesso!')
       
-      // Recarregar após um pequeno delay para garantir que o banco foi atualizado
+      // Recarregar após um delay para garantir que o banco foi atualizado
       setTimeout(async () => {
         await loadTickets()
-      }, 500)
+        // Após recarregar, garantir que o ticket selecionado ainda está selecionado
+        const currentSelectedId = selectedTicket?.id
+        if (currentSelectedId) {
+          const updatedTickets = await (supabase as any)
+            .from('support_tickets')
+            .select('*')
+            .eq('id', currentSelectedId)
+            .single()
+          
+          if (updatedTickets.data) {
+            // Buscar perfil do usuário
+            const { data: profile } = await (supabase as any)
+              .from('profiles')
+              .select('id, email, full_name')
+              .eq('id', updatedTickets.data.user_id)
+              .single()
+            
+            setSelectedTicket({
+              ...updatedTickets.data,
+              user: profile || null
+            })
+          }
+        }
+      }, 1000)
       
       return true
     } catch (error: any) {
