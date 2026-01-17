@@ -514,13 +514,22 @@ export default function MembrosPage() {
                       ) : (
                         <div>
                           {getPlanBadge(member)}
-                          {member.subscription && member.subscription.billing_cycle && (
-                            <p className="text-xs text-gray-500 mt-1">
-                              {member.subscription.billing_cycle === 'annual' ? 'Anual' : 'Mensal'}
-                              {member.subscription.current_period_end && (
-                                <> • Até {new Date(member.subscription.current_period_end).toLocaleDateString('pt-BR')}</>
+                          {member.subscription && (
+                            <div className="mt-1 space-y-0.5">
+                              {member.subscription.billing_cycle && (
+                                <p className="text-xs text-gray-500">
+                                  {member.subscription.billing_cycle === 'annual' ? 'Anual' : 'Mensal'}
+                                  {member.subscription.current_period_end && (
+                                    <> • Até {new Date(member.subscription.current_period_end).toLocaleDateString('pt-BR')}</>
+                                  )}
+                                </p>
                               )}
-                            </p>
+                              {member.subscription.is_manual && (
+                                <p className="text-xs text-amber-600 font-medium">
+                                  Plano Manual
+                                </p>
+                              )}
+                            </div>
                           )}
                         </div>
                       )}
