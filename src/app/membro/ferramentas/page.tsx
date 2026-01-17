@@ -543,7 +543,7 @@ export default function ToolsPage() {
                 </label>
                 <div className="flex items-center gap-2">
                   <input
-                    type="password"
+                    type="text"
                     value={toolAccess.find(t => t.tool_type === 'capcut')?.password || ''}
                     readOnly
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
