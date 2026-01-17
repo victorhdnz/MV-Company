@@ -1,36 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { createClient } from '@/lib/supabase/client'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { 
-  MessageSquare, 
-  BookOpen, 
-  Wrench, 
-  TrendingUp,
-  Crown,
-  Calendar,
-  Zap,
-  ArrowRight,
-  CheckCircle2,
-  Clock,
-  Sparkles
-} from 'lucide-react'
-
-interface UsageStats {
-  ai_messages: { current: number; limit: number | null }
-}
-
-interface CourseProgress {
-  course_id: string
-  course_title: string
-  progress: number
-  last_watched: string
-}
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function MemberDashboard() {
+  const router = useRouter()
+
+  useEffect(() => {
+    // Redirecionar para a página de agentes
+    router.replace('/membro/agentes')
+  }, [router])
+
+  return null
   const { user, profile, subscription, isPro } = useAuth()
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null)
   const [recentCourses, setRecentCourses] = useState<CourseProgress[]>([])

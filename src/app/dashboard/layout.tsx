@@ -1,11 +1,13 @@
-import { ReactNode } from 'react'
+'use client'
 
-// Forçar renderização dinâmica sem cache
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-export const fetchCache = 'force-no-store'
+import { ReactNode } from 'react'
+import { DashboardPasswordProtection } from '@/components/dashboard/DashboardPasswordProtection'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>
+  return (
+    <DashboardPasswordProtection>
+      {children}
+    </DashboardPasswordProtection>
+  )
 }
 
