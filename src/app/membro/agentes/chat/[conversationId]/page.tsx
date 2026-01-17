@@ -108,34 +108,48 @@ export default function ChatPage() {
   // Função para enviar contexto do nicho automaticamente na primeira mensagem
   const sendInitialNicheContext = useCallback(async (conv: any, profile: any) => {
     // Evitar múltiplas chamadas
-    if (nicheContextSentRef.current || !user || !conv) return
+    if (nicheContextSentRef.current || !user || !conv) {
+      console.log('[Niche Context] Cancelado:', { 
+        alreadySent: nicheContextSentRef.current, 
+        hasUser: !!user, 
+        hasConv: !!conv 
+      })
+      return
+    }
     
     // Verificar se já está enviando
     if (isSending) {
+      console.log('[Niche Context] Já está enviando, aguardando...')
       // Aguardar um pouco e tentar novamente
       setTimeout(() => {
         if (!nicheContextSentRef.current && user && conv) {
           sendInitialNicheContext(conv, profile)
         }
-      }, 500)
+      }, 1000)
       return
     }
     
     nicheContextSentRef.current = true
+    console.log('[Niche Context] Iniciando envio do contexto do nicho')
 
     const nicheContext = buildNicheContext(profile)
     setIsSending(true)
     setError(null)
 
     try {
-      // Aguardar um pouco para garantir que os cookies estejam prontos
-      await new Promise(resolve => setTimeout(resolve, 200))
+      // Aguardar mais tempo para garantir que os cookies estejam prontos
+      // E que o usuário esteja completamente autenticado
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
+      console.log('[Niche Context] Enviando requisição para API...')
+      
       // Chamar API de chat
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // IMPORTANTE: Garantir que cookies sejam enviados
         body: JSON.stringify({
           conversationId: conv.id,
           message: nicheContext,
@@ -144,6 +158,12 @@ export default function ChatPage() {
       })
 
       const data = await response.json()
+      
+      console.log('[Niche Context] Resposta da API:', { 
+        status: response.status, 
+        ok: response.ok,
+        error: data.error 
+      })
 
       if (!response.ok) {
         // Se for erro de assinatura, não mostrar como erro de autenticação
@@ -151,22 +171,33 @@ export default function ChatPage() {
           setError('Assinatura não encontrada. Configure sua assinatura para usar os agentes de IA.')
         } else if (response.status === 401) {
           setError('Erro de autenticação. Faça login novamente.')
+          // Não resetar flag em caso de erro de autenticação - deixar para o usuário resolver
+          console.error('[Niche Context] Erro de autenticação - usuário precisa fazer login novamente')
         } else {
           setError(data.error || 'Erro ao enviar contexto do perfil')
+          // Resetar flag em caso de outros erros para permitir nova tentativa
+          nicheContextSentRef.current = false
         }
         throw new Error(data.error || 'Erro ao enviar contexto do perfil')
       }
 
+      console.log('[Niche Context] Contexto enviado com sucesso!')
+      
       // Atualizar mensagens
       setMessages([data.userMessage, data.assistantMessage])
 
       // Atualizar uso
       setUsageInfo(prev => prev ? { ...prev, current: (prev.current || 0) + 1 } : { current: 1, limit: isPro ? 20 : 8 })
     } catch (error: any) {
-      console.error('Error sending niche context:', error)
+      console.error('[Niche Context] Erro ao enviar contexto:', error)
       setError(error.message || 'Erro ao enviar contexto do perfil')
-      // Resetar flag em caso de erro para permitir nova tentativa
-      nicheContextSentRef.current = false
+      // Resetar flag em caso de erro para permitir nova tentativa (exceto erro de auth)
+      if (error.message?.includes('autenticação') || error.message?.includes('login')) {
+        // Não resetar em caso de erro de autenticação
+        console.log('[Niche Context] Erro de autenticação detectado, não resetando flag')
+      } else {
+        nicheContextSentRef.current = false
+      }
     } finally {
       setIsSending(false)
     }
@@ -223,10 +254,14 @@ export default function ChatPage() {
           setShowNicheModal(true)
         } else if (nicheData && (!messagesData || messagesData.length === 0) && !nicheContextSentRef.current) {
           // Se tem perfil mas não há mensagens, enviar automaticamente o contexto
-          // Usar setTimeout para evitar chamada durante o render
+          // Aguardar mais tempo para garantir que autenticação esteja completa
+          console.log('[Chat] Preparando para enviar contexto do nicho automaticamente...')
           setTimeout(() => {
-            sendInitialNicheContext(convData, nicheData)
-          }, 100)
+            if (user && convData && nicheData && !nicheContextSentRef.current) {
+              console.log('[Chat] Enviando contexto do nicho agora...')
+              sendInitialNicheContext(convData, nicheData)
+            }
+          }, 2000) // Aumentar delay para 2 segundos
         }
 
         // Buscar uso diário (hoje)

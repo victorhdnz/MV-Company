@@ -7,13 +7,32 @@ import { Database } from '@/types/database.types'
 export async function POST(request: Request) {
   try {
     // IMPORTANTE: Criar cliente Supabase PRIMEIRO para ler cookies corretamente
-    const supabase = createRouteHandlerClient<Database>({ cookies })
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore })
+    
+    // Verificar cookies recebidos
+    const hasAuthCookies = cookieStore.has('sb-access-token') || cookieStore.has('sb-refresh-token')
+    console.log('[AI Chat] Cookies de autenticação presentes:', hasAuthCookies)
+    
+    // Tentar obter sessão primeiro
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    console.log('[AI Chat] Sessão obtida:', session ? 'Sim' : 'Não', sessionError ? `Erro: ${sessionError.message}` : '')
     
     // Verificar autenticação ANTES de qualquer outra coisa
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
+    console.log('[AI Chat] Tentativa de autenticação:', {
+      hasUser: !!user,
+      userId: user?.id,
+      userEmail: user?.email,
+      authError: authError ? {
+        message: authError.message,
+        status: authError.status
+      } : null
+    })
+    
     if (authError) {
-      console.error('[AI Chat] Erro de autenticação:', authError)
+      console.error('[AI Chat] Erro de autenticação completo:', JSON.stringify(authError, null, 2))
       return NextResponse.json({ 
         error: 'Erro de autenticação. Faça login novamente.',
         details: process.env.NODE_ENV === 'development' ? authError.message : undefined
@@ -26,6 +45,8 @@ export async function POST(request: Request) {
         error: 'Usuário não autenticado. Faça login novamente.' 
       }, { status: 401 })
     }
+    
+    console.log('[AI Chat] Usuário autenticado com sucesso:', user.id)
 
     // Verificar se a chave da OpenAI está configurada
     if (!process.env.OPENAI_API_KEY) {
