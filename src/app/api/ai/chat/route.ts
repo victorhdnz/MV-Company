@@ -61,12 +61,22 @@ export async function POST(request: Request) {
       }, { status: 500 })
     }
 
+    // Ler o body da request ANTES de fazer outras operações
+    // Isso garante que o stream não seja consumido incorretamente
+    let body
+    try {
+      body = await request.json()
+    } catch (error) {
+      console.error('[AI Chat] Erro ao ler body da request:', error)
+      return NextResponse.json({ error: 'Erro ao processar requisição' }, { status: 400 })
+    }
+    
+    const { conversationId, message, agentId } = body
+
     // Inicializar OpenAI dentro da função para evitar erro no build
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     })
-
-    const { conversationId, message, agentId } = await request.json()
 
     if (!conversationId || !message) {
       return NextResponse.json({ error: 'Parâmetros inválidos' }, { status: 400 })
