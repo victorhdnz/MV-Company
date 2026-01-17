@@ -10,14 +10,14 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: Request) {
   try {
     // IMPORTANTE: Autenticar PRIMEIRO antes de ler o body
-    // Isso garante que os cookies sejam lidos corretamente
+    // Usar EXATAMENTE a mesma abordagem da API de upload que funciona
     const supabase = createRouteHandlerClient<Database>({ cookies })
 
-    // Verificar autenticação usando getUser() - mesma abordagem das APIs que funcionam
+    // Verificar autenticação usando getUser() que é mais confiável em API routes
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError) {
-      console.error('[AI Chat] Erro de autenticação:', authError.message)
+      console.error('[AI Chat] Erro de autenticação no chat:', authError)
       return NextResponse.json({ 
         error: 'Erro de autenticação. Faça login novamente.',
         details: process.env.NODE_ENV === 'development' ? authError.message : undefined
@@ -25,13 +25,11 @@ export async function POST(request: Request) {
     }
     
     if (!user) {
-      console.error('[AI Chat] Usuário não autenticado')
+      console.error('[AI Chat] Usuário não autenticado no chat')
       return NextResponse.json({ 
-        error: 'Usuário não autenticado. Faça login novamente.' 
+        error: 'Não autenticado. Faça login para usar o chat.' 
       }, { status: 401 })
     }
-    
-    console.log('[AI Chat] Usuário autenticado:', user.id)
 
     // Verificar se a chave da OpenAI está configurada
     if (!process.env.OPENAI_API_KEY) {
