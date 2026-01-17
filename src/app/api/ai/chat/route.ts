@@ -79,6 +79,29 @@ export async function POST(request: Request) {
     })
 
     // Verificar se a conversa pertence ao usuário
+    type ConversationData = {
+      id: string
+      user_id: string
+      agent_id: string
+      title: string | null
+      created_at: string
+      updated_at: string
+      ai_agents: {
+        id: string
+        slug: string
+        name: string
+        description: string | null
+        avatar_url: string | null
+        system_prompt: string
+        model: string
+        is_active: boolean
+        is_premium: boolean
+        order_position: number
+        created_at: string
+        updated_at: string
+      }
+    }
+
     const { data: conversation, error: convError } = await supabase
       .from('ai_conversations')
       .select('*, ai_agents(*)')
@@ -101,7 +124,9 @@ export async function POST(request: Request) {
       }, { status: 404 })
     }
     
-    if (!conversation) {
+    const conversationData = conversation as ConversationData | null
+    
+    if (!conversationData) {
       return NextResponse.json({ error: 'Conversa não encontrada' }, { status: 404 })
     }
 
@@ -213,7 +238,7 @@ export async function POST(request: Request) {
       .limit(20)
 
     // Construir system prompt personalizado
-    const agent = conversation.ai_agents as any
+    const agent = conversationData.ai_agents
     let systemPrompt = agent.system_prompt
 
     // Adicionar contexto do perfil de nicho se existir
