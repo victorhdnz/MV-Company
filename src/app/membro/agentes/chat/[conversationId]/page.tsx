@@ -306,25 +306,50 @@ export default function ChatPage() {
     let userMessage = inputValue.trim()
     
     // Se for a primeira mensagem e tiver perfil de nicho, adicionar contexto automaticamente
-    if (nicheProfile && messages.length === 0) {
+    // Usar a flag para verificar se já foi enviado contexto (não confiar em messages.length)
+    const isFirstMessage = !nicheContextSentRef.current && messages.length === 0
+    if (nicheProfile && isFirstMessage) {
       const nicheContext = buildNicheContext(nicheProfile)
       userMessage = `${nicheContext}\n\nAgora, sobre minha solicitação: ${userMessage}`
+      nicheContextSentRef.current = true // Marcar como enviado
+      console.log('[Chat] Contexto do nicho incluído na primeira mensagem')
     }
     
     setInputValue('')
     setIsSending(true)
     setError(null)
 
-    // Adicionar mensagem do usuário otimisticamente
+    // Adicionar mensagem do usuário otimisticamente (mostrar apenas o texto do usuário, não o contexto completo)
+    const displayMessage = nicheProfile && isFirstMessage 
+      ? inputValue.trim() // Mostrar apenas o que o usuário digitou
+      : userMessage // Mostrar a mensagem completa
+    
     const tempUserMessage: Message = {
       id: `temp-${Date.now()}`,
       role: 'user',
-      content: userMessage,
+      content: displayMessage,
       created_at: new Date().toISOString()
     }
     setMessages(prev => [...prev, tempUserMessage])
 
     try {
+      // Verificar autenticação antes de enviar
+      const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser()
+      
+      if (userError || !currentUser) {
+        console.error('[Chat] Erro ao verificar usuário antes de enviar:', userError)
+        setError('Erro de autenticação. Faça login novamente.')
+        setMessages(prev => prev.filter(m => !m.id.startsWith('temp-')))
+        return
+      }
+      
+      console.log('[Chat] Usuário verificado antes de enviar:', currentUser.id)
+      console.log('[Chat] Enviando mensagem para API...', { 
+        conversationId: conversation.id,
+        messageLength: userMessage.length,
+        hasNicheContext: nicheProfile && isFirstMessage
+      })
+      
       // Chamar API de chat
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
@@ -336,15 +361,28 @@ export default function ChatPage() {
           agentId: conversation.agent_id
         })
       })
+      
+      console.log('[Chat] Resposta da API recebida:', { 
+        status: response.status, 
+        ok: response.ok 
+      })
 
       const data = await response.json()
 
       if (!response.ok) {
+        console.error('[Chat] Erro na resposta da API:', {
+          status: response.status,
+          error: data.error,
+          details: data.details
+        })
+        
         // Tratar diferentes tipos de erro
         if (response.status === 403) {
           setError('Assinatura não encontrada. Configure sua assinatura para usar os agentes de IA.')
         } else if (response.status === 401) {
           setError('Erro de autenticação. Faça login novamente.')
+          // Se for erro de autenticação, resetar flag para permitir nova tentativa
+          nicheContextSentRef.current = false
         } else if (response.status === 429) {
           setError(data.error || 'Você atingiu o limite de interações de hoje.')
         } else {
@@ -352,6 +390,8 @@ export default function ChatPage() {
         }
         throw new Error(data.error || 'Erro ao enviar mensagem')
       }
+      
+      console.log('[Chat] Mensagem enviada com sucesso!')
 
       // Atualizar mensagens com as reais do banco
       setMessages(prev => [
