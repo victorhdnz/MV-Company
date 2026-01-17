@@ -183,23 +183,41 @@ export default function AccountPage() {
       setOpeningPortal(true)
       const response = await fetch('/api/stripe/portal', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include' // Garantir que cookies sejam enviados
       })
+      
       const data = await response.json()
+      
+      // Verificar status da resposta
+      if (!response.ok) {
+        // Se for assinatura manual, mostrar mensagem mais amigável
+        if (data.isManual) {
+          toast.error(data.error || 'Esta assinatura foi criada manualmente. Entre em contato com o suporte através do WhatsApp.', {
+            duration: 6000
+          })
+        } else if (response.status === 401) {
+          toast.error('Erro de autenticação. Faça login novamente.', {
+            duration: 5000
+          })
+        } else {
+          toast.error(data.error || 'Erro ao abrir portal de assinatura', {
+            duration: 5000
+          })
+        }
+        return
+      }
       
       if (data.url) {
         window.location.href = data.url
       } else {
-        // Se for assinatura manual, mostrar mensagem mais amigável
-        if (data.isManual) {
-          toast.error(data.error || 'Esta assinatura foi criada manualmente. Entre em contato com o suporte.')
-        } else {
-          toast.error(data.error || 'Erro ao abrir portal de assinatura')
-        }
+        toast.error(data.error || 'Erro ao obter URL do portal')
       }
     } catch (error: any) {
       console.error('Erro ao abrir portal:', error)
-      toast.error(error.message || 'Erro ao abrir portal')
+      toast.error('Erro de conexão. Verifique sua internet e tente novamente.', {
+        duration: 5000
+      })
     } finally {
       setOpeningPortal(false)
     }
