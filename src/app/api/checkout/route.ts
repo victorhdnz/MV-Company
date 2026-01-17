@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createRouteHandlerClient } from '@/lib/supabase/server'
 import Stripe from 'stripe'
 
 // Inicializar Stripe (a chave será configurada nas variáveis de ambiente)
@@ -19,7 +18,7 @@ export async function POST(request: Request) {
     }
 
     // Verificar se o usuário está logado ANTES de criar sessão
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = createRouteHandlerClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

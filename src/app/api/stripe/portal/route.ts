@@ -1,19 +1,14 @@
 import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { Database } from '@/types/database.types'
+import { createRouteHandlerClient } from '@/lib/supabase/server'
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '')
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
-    // Verificar cookies recebidos
-    const cookieStore = cookies()
-    const hasAuthCookies = cookieStore.has('sb-access-token') || cookieStore.has('sb-refresh-token')
-    console.log('[Portal Stripe] Cookies de autenticação presentes:', hasAuthCookies)
-    
-    const supabase = createRouteHandlerClient<Database>({ cookies })
+    const supabase = createRouteHandlerClient()
 
     // Tentar obter sessão primeiro
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()

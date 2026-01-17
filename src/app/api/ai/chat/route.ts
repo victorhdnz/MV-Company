@@ -1,23 +1,15 @@
 import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createRouteHandlerClient } from '@/lib/supabase/server'
 import OpenAI from 'openai'
-import { Database } from '@/types/database.types'
 
 // Forçar renderização dinâmica para garantir que cookies sejam lidos corretamente
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
-    // Verificar cookies recebidos (para debug)
-    const cookieStore = cookies()
-    const hasAccessToken = cookieStore.has('sb-access-token')
-    const hasRefreshToken = cookieStore.has('sb-refresh-token')
-    console.log('[AI Chat] Cookies presentes:', { hasAccessToken, hasRefreshToken })
-    
     // IMPORTANTE: Autenticar PRIMEIRO (como na API de upload que funciona)
     // Isso garante que os cookies sejam lidos corretamente
-    const supabase = createRouteHandlerClient<Database>({ cookies })
+    const supabase = createRouteHandlerClient()
 
     // Tentar getSession primeiro (mais tolerante)
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -135,18 +127,25 @@ export async function POST(request: Request) {
     // Se encontrou assinatura, verificar se está dentro do período válido
     let hasValidSubscription = false
     if (subscription) {
-      const now = new Date()
-      const periodEnd = new Date(subscription.current_period_end)
-      hasValidSubscription = periodEnd >= now
-      
-      console.log('[AI Chat] Validação de período:', {
-        now: now.toISOString(),
-        periodEnd: periodEnd.toISOString(),
-        isValid: hasValidSubscription
-      })
-      
-      if (!hasValidSubscription) {
-        console.log('[AI Chat] Assinatura encontrada mas período expirado')
+      // Planos manuais não têm stripe_subscription_id (é NULL), então são sempre válidos
+      if (subscription.stripe_subscription_id === null) {
+        hasValidSubscription = true
+        console.log('[AI Chat] Assinatura manual detectada - sempre válida')
+      } else {
+        // Para planos Stripe, verificar se está dentro do período válido
+        const now = new Date()
+        const periodEnd = new Date(subscription.current_period_end)
+        hasValidSubscription = periodEnd >= now
+        
+        console.log('[AI Chat] Validação de período:', {
+          now: now.toISOString(),
+          periodEnd: periodEnd.toISOString(),
+          isValid: hasValidSubscription
+        })
+        
+        if (!hasValidSubscription) {
+          console.log('[AI Chat] Assinatura encontrada mas período expirado')
+        }
       }
     } else {
       console.log('[AI Chat] Nenhuma assinatura ativa encontrada - permitindo uso com limite padrão')

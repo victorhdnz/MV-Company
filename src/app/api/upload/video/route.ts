@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { Database } from '@/types/database.types'
+import { createRouteHandlerClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
     // IMPORTANTE: Autenticar PRIMEIRO antes de ler o FormData
     // Isso garante que os cookies sejam lidos corretamente
-    const supabase = createRouteHandlerClient<Database>({ cookies })
+    const supabase = createRouteHandlerClient()
 
     // Verificar autenticação usando getUser() que é mais confiável em API routes
     const { data: { user }, error: authError } = await supabase.auth.getUser()
