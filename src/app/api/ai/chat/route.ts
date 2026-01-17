@@ -81,14 +81,43 @@ export async function POST(request: Request) {
     }
 
     // Verificar assinatura ativa (aceita planos Stripe e manuais)
-    // Planos manuais não têm stripe_subscription_id, então verificamos se é null ou não
-    const { data: subscription } = await supabase
+    // Planos manuais não têm stripe_subscription_id (é NULL), então aceitamos ambos
+    const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
-      .select('plan_id, status, current_period_end, stripe_subscription_id')
+      .select('plan_id, status, current_period_end, current_period_start, stripe_subscription_id')
       .eq('user_id', user.id)
       .eq('status', 'active')
-      .gte('current_period_end', new Date().toISOString())
       .maybeSingle()
+
+    console.log('[AI Chat] Verificação de assinatura:', {
+      found: !!subscription,
+      planId: subscription?.plan_id,
+      status: subscription?.status,
+      hasStripeId: !!subscription?.stripe_subscription_id,
+      currentPeriodEnd: subscription?.current_period_end,
+      isManual: !subscription?.stripe_subscription_id,
+      error: subError ? subError.message : null
+    })
+
+    // Se encontrou assinatura, verificar se está dentro do período válido
+    let hasValidSubscription = false
+    if (subscription) {
+      const now = new Date()
+      const periodEnd = new Date(subscription.current_period_end)
+      hasValidSubscription = periodEnd >= now
+      
+      console.log('[AI Chat] Validação de período:', {
+        now: now.toISOString(),
+        periodEnd: periodEnd.toISOString(),
+        isValid: hasValidSubscription
+      })
+      
+      if (!hasValidSubscription) {
+        console.log('[AI Chat] Assinatura encontrada mas período expirado')
+      }
+    } else {
+      console.log('[AI Chat] Nenhuma assinatura ativa encontrada - permitindo uso com limite padrão')
+    }
 
     // Verificar limite de uso diário
     const today = new Date()
@@ -104,7 +133,15 @@ export async function POST(request: Request) {
 
     const currentUsage = usageData?.usage_count || 0
     // Limites diários: Pro = 20, Essencial ou sem assinatura = 8
-    const limit = subscription?.plan_id === 'gogh_pro' ? 20 : 8
+    // Aceita planos manuais e Stripe
+    const limit = (hasValidSubscription && subscription?.plan_id === 'gogh_pro') ? 20 : 8
+    
+    console.log('[AI Chat] Limite de uso:', {
+      currentUsage,
+      limit,
+      planId: subscription?.plan_id,
+      hasValidSubscription
+    })
 
     if (currentUsage >= limit) {
       return NextResponse.json({ 
