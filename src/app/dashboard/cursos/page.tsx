@@ -141,7 +141,6 @@ export default function CursosPage() {
             slug: 'capcut-do-zero-ao-avancado',
             order_position: 1,
             is_published: true, // Publicar automaticamente
-            is_active: true, // Garantir que está ativo também
             plan_required: 'all',
             lessons_count: 0,
             duration_hours: 0,
