@@ -803,31 +803,9 @@ function CourseCard({
       `}
       onClick={onSelect}
     >
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex-1">
-          <h3 className="font-bold text-gray-900">{course.title}</h3>
-          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{course.description}</p>
-        </div>
-        <div className="flex items-center gap-2 ml-4">
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onEdit()
-            }}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-          >
-            <Edit className="w-4 h-4" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onDelete()
-            }}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
+      <div className="mb-2">
+        <h3 className="font-bold text-gray-900">{course.title}</h3>
+        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{course.description}</p>
       </div>
       <div className="flex items-center gap-4 text-sm text-gray-500 mt-3">
         <span className="flex items-center gap-1">
