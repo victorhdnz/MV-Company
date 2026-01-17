@@ -400,8 +400,16 @@ export default function ChatPage() {
           setError('Erro de autenticação. Faça login novamente.')
           // Se for erro de autenticação, resetar flag para permitir nova tentativa
           nicheContextSentRef.current = false
+        } else if (response.status === 402 && data.code === 'OPENAI_INSUFFICIENT_QUOTA') {
+          // Erro específico de quota da OpenAI esgotada
+          setError(data.error || 'A cota da API OpenAI foi esgotada. Por favor, entre em contato com o suporte.')
         } else if (response.status === 429) {
-          setError(data.error || 'Você atingiu o limite de interações de hoje.')
+          // Pode ser limite do usuário ou rate limit da OpenAI
+          if (data.code === 'OPENAI_RATE_LIMIT') {
+            setError(data.error || 'Limite de requisições excedido. Tente novamente em alguns instantes.')
+          } else {
+            setError(data.error || 'Você atingiu o limite de interações de hoje.')
+          }
         } else {
           setError(data.error || 'Erro ao enviar mensagem')
         }

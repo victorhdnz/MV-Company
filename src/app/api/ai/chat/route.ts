@@ -331,18 +331,20 @@ export async function POST(request: Request) {
         }, { status: 500 })
       }
       
+      // Erro de quota insuficiente (pode vir como 429 ou 402, mas sempre com code 'insufficient_quota')
+      if (openaiError.code === 'insufficient_quota' || openaiError.error?.code === 'insufficient_quota') {
+        return NextResponse.json({ 
+          error: 'A cota da API OpenAI foi esgotada. Por favor, entre em contato com o suporte para resolver este problema.',
+          code: 'OPENAI_INSUFFICIENT_QUOTA'
+        }, { status: 402 })
+      }
+      
+      // Erro de rate limit (429 sem insufficient_quota)
       if (openaiError.status === 429) {
         return NextResponse.json({ 
           error: 'Limite de requisições excedido. Tente novamente em alguns instantes.',
           code: 'OPENAI_RATE_LIMIT'
         }, { status: 429 })
-      }
-      
-      if (openaiError.status === 402 || openaiError.code === 'insufficient_quota') {
-        return NextResponse.json({ 
-          error: 'Cota da API OpenAI esgotada. Entre em contato com o suporte.',
-          code: 'OPENAI_INSUFFICIENT_QUOTA'
-        }, { status: 402 })
       }
       
       return NextResponse.json({ 
