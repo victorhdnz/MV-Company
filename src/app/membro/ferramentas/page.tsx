@@ -50,6 +50,7 @@ export default function ToolsPage() {
   const [reportingError, setReportingError] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [showErrorModal, setShowErrorModal] = useState(false)
+  const [showCapcutCredentials, setShowCapcutCredentials] = useState(false)
   
   const supabase = createClient()
 
@@ -179,7 +180,7 @@ export default function ToolsPage() {
 
       if (error) throw error
 
-      toast.success('Erro reportado! Nossa equipe irá verificar e enviar um novo link.')
+      toast.success('Erro reportado! Nossa equipe irá verificar e enviar uma nova conta.')
       setShowErrorModal(false)
       setErrorMessage('')
       setReportingError(null)
@@ -337,7 +338,7 @@ export default function ToolsPage() {
                     </p>
                   </div>
                   
-                  {/* Link de Ativação */}
+                  {/* Link de Ativação / Credenciais */}
                   {tool.accessData.access_link && (
                     <div className="space-y-2">
                       {/* Alerta de Erro Reportado */}
@@ -350,43 +351,66 @@ export default function ToolsPage() {
                                 Erro reportado
                               </p>
                               <p className="text-xs text-amber-600 mt-1">
-                                Nossa equipe está verificando e enviará um novo link em breve.
+                                Nossa equipe está verificando e enviará uma nova conta em breve.
                               </p>
                             </div>
                           </div>
                         </div>
                       )}
                       
-                      <a
-                        href={tool.accessData.access_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gogh-yellow text-gogh-black font-medium rounded-lg hover:bg-gogh-yellow/90 transition-colors"
-                      >
-                        <LinkIcon className="w-4 h-4" />
-                        Link de Ativação {tool.name}
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
+                      {/* Informação de duração */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
+                        <p className="text-xs text-blue-700">
+                          <strong>Duração:</strong> O acesso é válido por <strong>30 dias</strong> a partir da liberação.
+                        </p>
+                      </div>
                       
-                      <button
-                        onClick={() => reportLinkError(tool.id as 'canva' | 'capcut')}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
-                      >
-                        <AlertTriangle className="w-4 h-4" />
-                        Reportar Erro no Link
-                      </button>
+                      {/* Canva: Link clicável */}
+                      {tool.id === 'canva' && (
+                        <>
+                          <a
+                            href={tool.accessData.access_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gogh-yellow text-gogh-black font-medium rounded-lg hover:bg-gogh-yellow/90 transition-colors"
+                          >
+                            <LinkIcon className="w-4 h-4" />
+                            Link de Ativação {tool.name}
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                          
+                          <button
+                            onClick={() => reportLinkError(tool.id as 'canva' | 'capcut')}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
+                          >
+                            <AlertTriangle className="w-4 h-4" />
+                            Reportar Erro na Conta
+                          </button>
+                        </>
+                      )}
+                      
+                      {/* CapCut: Botão para mostrar credenciais em modal */}
+                      {tool.id === 'capcut' && (
+                        <>
+                          <button
+                            onClick={() => setShowCapcutCredentials(true)}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gogh-yellow text-gogh-black font-medium rounded-lg hover:bg-gogh-yellow/90 transition-colors"
+                          >
+                            <LinkIcon className="w-4 h-4" />
+                            Ver Credenciais de Acesso {tool.name}
+                          </button>
+                          
+                          <button
+                            onClick={() => reportLinkError(tool.id as 'canva' | 'capcut')}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
+                          >
+                            <AlertTriangle className="w-4 h-4" />
+                            Reportar Erro na Conta
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
-                  
-                  <a
-                    href={tool.id === 'canva' ? 'https://canva.com' : 'https://capcut.com'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gogh-black text-white rounded-lg hover:bg-gogh-black/90 transition-colors"
-                  >
-                    Acessar {tool.name}
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
                 </div>
               )}
             </div>
@@ -463,15 +487,86 @@ export default function ToolsPage() {
             </h3>
           </div>
           <div className="aspect-video rounded-lg overflow-hidden bg-gogh-grayLight">
-            <iframe
+            <video
               src={tutorialVideoUrl}
-              title="Tutorial de Ativação"
+              controls
               className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+              title="Tutorial de Ativação"
+            >
+              Seu navegador não suporta a reprodução de vídeo.
+            </video>
           </div>
         </motion.div>
+      )}
+
+      {/* Modal de Credenciais CapCut */}
+      {showCapcutCredentials && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gogh-black">
+                Credenciais de Acesso CapCut Pro
+              </h3>
+              <button
+                onClick={() => setShowCapcutCredentials(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p className="text-xs text-blue-700">
+                  <strong>Duração:</strong> O acesso é válido por <strong>30 dias</strong> a partir da liberação.
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gogh-grayDark mb-2">
+                  Email / Usuário:
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={toolAccess.find(t => t.tool_type === 'capcut')?.access_link || ''}
+                    readOnly
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
+                  />
+                  <button
+                    onClick={() => {
+                      const text = toolAccess.find(t => t.tool_type === 'capcut')?.access_link || ''
+                      navigator.clipboard.writeText(text)
+                      toast.success('Credenciais copiadas!')
+                    }}
+                    className="px-4 py-2 bg-gogh-yellow text-gogh-black rounded-lg hover:bg-gogh-yellow/90 transition-colors text-sm font-medium"
+                  >
+                    Copiar
+                  </button>
+                </div>
+              </div>
+              
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p className="text-xs text-amber-700">
+                  <strong>Importante:</strong> Use essas credenciais para fazer login no CapCut. Se encontrar algum problema, clique em "Reportar Erro na Conta".
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowCapcutCredentials(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
+          </motion.div>
+        </div>
       )}
 
       {/* Modal de Reporte de Erro */}
@@ -484,7 +579,7 @@ export default function ToolsPage() {
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-gogh-black">
-                Reportar Erro no Link
+                Reportar Erro na Conta
               </h3>
               <button
                 onClick={() => {
@@ -499,13 +594,13 @@ export default function ToolsPage() {
             </div>
             
             <p className="text-sm text-gogh-grayDark mb-4">
-              Descreva o problema que você encontrou ao tentar usar o link de ativação:
+              Descreva o problema que você encontrou com a conta (ex: conta com menos dias de duração, credenciais não funcionam, etc.):
             </p>
             
             <textarea
               value={errorMessage}
               onChange={(e) => setErrorMessage(e.target.value)}
-              placeholder="Ex: O link não abre, aparece erro 404, o link expirou, etc..."
+              placeholder="Ex: A conta tem menos de 30 dias, as credenciais não funcionam, preciso de uma nova conta, etc..."
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gogh-yellow resize-none"
               rows={4}
             />
