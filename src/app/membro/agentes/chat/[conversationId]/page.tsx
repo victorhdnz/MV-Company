@@ -61,6 +61,7 @@ export default function ChatPage() {
   const [showNicheModal, setShowNicheModal] = useState(false)
   const [nicheProfileLoaded, setNicheProfileLoaded] = useState(false)
   const [shouldSendNicheContext, setShouldSendNicheContext] = useState(false)
+  const nicheContextSentRef = useRef(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -106,7 +107,10 @@ export default function ChatPage() {
 
   // Função para enviar contexto do nicho automaticamente na primeira mensagem
   const sendInitialNicheContext = useCallback(async (conv: any, profile: any) => {
-    if (!user || !conv || isSending) return
+    // Evitar múltiplas chamadas
+    if (nicheContextSentRef.current || !user || !conv || isSending) return
+    
+    nicheContextSentRef.current = true
 
     const nicheContext = buildNicheContext(profile)
     setIsSending(true)
@@ -139,10 +143,12 @@ export default function ChatPage() {
     } catch (error: any) {
       console.error('Error sending niche context:', error)
       setError(error.message || 'Erro ao enviar contexto do perfil')
+      // Resetar flag em caso de erro para permitir nova tentativa
+      nicheContextSentRef.current = false
     } finally {
       setIsSending(false)
     }
-  }, [user, isSending, buildNicheContext, isPro])
+  }, [user, buildNicheContext, isPro])
 
   // Buscar dados da conversa
   useEffect(() => {
@@ -193,9 +199,12 @@ export default function ChatPage() {
         // Se não tem perfil configurado e não há mensagens, mostrar modal
         if (!nicheData && (!messagesData || messagesData.length === 0)) {
           setShowNicheModal(true)
-        } else if (nicheData && (!messagesData || messagesData.length === 0)) {
+        } else if (nicheData && (!messagesData || messagesData.length === 0) && !nicheContextSentRef.current) {
           // Se tem perfil mas não há mensagens, enviar automaticamente o contexto
-          sendInitialNicheContext(convData, nicheData)
+          // Usar setTimeout para evitar chamada durante o render
+          setTimeout(() => {
+            sendInitialNicheContext(convData, nicheData)
+          }, 100)
         }
 
         // Buscar uso diário (hoje)
@@ -225,7 +234,9 @@ export default function ChatPage() {
     }
 
     fetchConversation()
-  }, [conversationId, user, subscription, sendInitialNicheContext])
+    // Resetar flag quando a conversa mudar
+    nicheContextSentRef.current = false
+  }, [conversationId, user, subscription])
 
   // Scroll quando mensagens mudam
   useEffect(() => {
