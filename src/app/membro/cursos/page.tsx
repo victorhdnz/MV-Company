@@ -70,30 +70,32 @@ export default function CoursesPage() {
 
         // Buscar lessons separadamente para cada curso
         const courseIds = coursesData.map((c: Course) => c.id)
+        console.log('IDs dos cursos para buscar lessons:', courseIds)
+        
         const { data: lessonsData, error: lessonsError } = await (supabase as any)
           .from('course_lessons')
           .select('*')
           .in('course_id', courseIds)
-          .order('order_position', { ascending: true, nullsLast: true })
-          .order('order', { ascending: true, nullsLast: true })
 
         if (lessonsError) {
           console.error('Erro ao buscar lessons:', lessonsError)
+          console.error('Detalhes do erro de lessons:', JSON.stringify(lessonsError, null, 2))
           // Continuar mesmo se houver erro nas lessons
         }
         
-        console.log('Lessons encontradas:', lessonsData?.length || 0)
+        console.log('Lessons encontradas:', lessonsData?.length || 0, lessonsData)
         
         // Combinar cursos com suas lessons
         const coursesWithOrderedLessons = coursesData.map((course: Course) => {
           const courseLessons = (lessonsData || []).filter((l: Lesson) => l.course_id === course.id)
+          console.log(`Curso ${course.title} (${course.id}): ${courseLessons.length} lessons`, courseLessons)
           return {
             ...course,
             lessons: courseLessons.sort((a: Lesson, b: Lesson) => (a.order_position || a.order || 0) - (b.order_position || b.order || 0))
           }
         })
         
-        console.log('Cursos finais:', coursesWithOrderedLessons.length, coursesWithOrderedLessons)
+        console.log('Cursos finais com lessons:', coursesWithOrderedLessons.length, coursesWithOrderedLessons)
         setCourses(coursesWithOrderedLessons)
       } catch (error: any) {
         console.error('Error fetching courses:', error)
