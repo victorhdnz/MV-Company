@@ -413,8 +413,8 @@ export default function ChatPage() {
           // Se for erro de autenticação, resetar flag para permitir nova tentativa
           nicheContextSentRef.current = false
         } else if (response.status === 402 && data.code === 'OPENAI_INSUFFICIENT_QUOTA') {
-          // Erro específico de quota da OpenAI esgotada - mensagem genérica como problema do agente
-          setError(data.error || 'O agente está temporariamente indisponível devido a um problema técnico. Nossa equipe já foi notificada e está trabalhando para resolver. Tente novamente em alguns instantes.')
+          // Erro específico de quota da OpenAI esgotada - mensagem sobre muitos usuários
+          setError(data.error || 'Estamos recebendo muitas solicitações no momento. Por favor, aguarde alguns instantes e tente novamente. O agente estará disponível em breve.')
         } else if (response.status === 429) {
           // Pode ser limite do usuário ou rate limit da OpenAI
           if (data.code === 'OPENAI_RATE_LIMIT') {

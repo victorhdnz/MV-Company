@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { FileText, Shield, Truck, RotateCcw, Loader2, ChevronRight, ArrowLeft, Home } from 'lucide-react'
-import { FadeInSection } from '@/components/ui/FadeInSection'
 import { TermsContent } from '@/components/ui/TermsContent'
 
 interface Term {
@@ -104,34 +103,30 @@ export default function TermosPage() {
 
   if (loading) {
     return (
-      <FadeInSection>
-        <div className="min-h-screen bg-white py-20">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-            <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-600">Carregando termos...</p>
-            </div>
+      <div className="min-h-screen bg-white py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
+            <p className="text-gray-600">Carregando termos...</p>
           </div>
         </div>
-      </FadeInSection>
+      </div>
     )
   }
 
   if (terms.length === 0) {
     return (
-      <FadeInSection>
-        <div className="min-h-screen bg-white py-20">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-            <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Termos e Políticas</h1>
-              <div className="w-24 h-1 bg-black mx-auto mb-6" />
-              <p className="text-gray-600 text-lg">
-                Nenhum termo disponível no momento.
-              </p>
-            </div>
+      <div className="min-h-screen bg-white py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">Termos e Políticas</h1>
+            <div className="w-24 h-1 bg-black mx-auto mb-6" />
+            <p className="text-gray-600 text-lg">
+              Nenhum termo disponível no momento.
+            </p>
           </div>
         </div>
-      </FadeInSection>
+      </div>
     )
   }
 

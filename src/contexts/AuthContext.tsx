@@ -13,6 +13,7 @@ interface UserSubscription {
   plan_id: PlanId
   status: SubscriptionStatus
   billing_cycle: 'monthly' | 'annual'
+  current_period_start: string
   current_period_end: string
   cancel_at_period_end: boolean
 }
@@ -106,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         plan_id: planId as PlanId,
         status: data.status as SubscriptionStatus,
         billing_cycle: billingCycle as 'monthly' | 'annual',
+        current_period_start: data.current_period_start,
         current_period_end: data.current_period_end,
         cancel_at_period_end: data.cancel_at_period_end || false
       } as UserSubscription

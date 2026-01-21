@@ -19,6 +19,7 @@ import {
   X
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import Link from 'next/link'
 
 interface ToolAccess {
   id: string
@@ -42,7 +43,7 @@ interface SupportTicket {
 }
 
 export default function ToolsPage() {
-  const { user } = useAuth()
+  const { user, subscription } = useAuth()
   const [toolAccess, setToolAccess] = useState<ToolAccess[]>([])
   const [pendingTickets, setPendingTickets] = useState<SupportTicket[]>([])
   const [loading, setLoading] = useState(true)
@@ -99,17 +100,93 @@ export default function ToolsPage() {
     }
 
     fetchData()
-  }, [user])
+  }, [user, subscription]) // Recarregar quando a assinatura for atualizada (renovação)
 
-  // Verificar se já tem acesso ou ticket pendente
-  const hasCanvaAccess = toolAccess.some(t => t.tool_type === 'canva' && t.is_active)
-  const hasCapcutAccess = toolAccess.some(t => t.tool_type === 'capcut' && t.is_active)
-  const hasBothAccess = hasCanvaAccess && hasCapcutAccess
+  // Verificar se o acesso foi concedido no período atual ou anterior
+  const isAccessFromCurrentPeriod = (access: ToolAccess): boolean => {
+    if (!subscription?.current_period_start || !access.access_granted_at) return false
+    
+    const periodStart = new Date(subscription.current_period_start)
+    const accessGranted = new Date(access.access_granted_at)
+    
+    // Se o acesso foi concedido após o início do período atual, é do período atual
+    return accessGranted >= periodStart
+  }
+
+  // Verificar se já tem acesso do período atual ou ticket pendente
+  const hasCanvaAccessCurrentPeriod = toolAccess.some(t => 
+    t.tool_type === 'canva' && t.is_active && isAccessFromCurrentPeriod(t)
+  )
+  const hasCapcutAccessCurrentPeriod = toolAccess.some(t => 
+    t.tool_type === 'capcut' && t.is_active && isAccessFromCurrentPeriod(t)
+  )
+  const hasBothAccessCurrentPeriod = hasCanvaAccessCurrentPeriod && hasCapcutAccessCurrentPeriod
+  
+  // Verificar se tem acesso de período anterior (para mostrar que pode solicitar novamente)
+  const hasCanvaAccessOldPeriod = toolAccess.some(t => 
+    t.tool_type === 'canva' && t.is_active && !isAccessFromCurrentPeriod(t)
+  )
+  const hasCapcutAccessOldPeriod = toolAccess.some(t => 
+    t.tool_type === 'capcut' && t.is_active && !isAccessFromCurrentPeriod(t)
+  )
+  const hasAccessFromOldPeriod = hasCanvaAccessOldPeriod || hasCapcutAccessOldPeriod
+  
   const hasPendingRequest = pendingTickets.length > 0
+
+  // Verificar se já passaram 8 dias desde o início da assinatura (oitavo dia)
+  const canRequestTools = () => {
+    if (!subscription) return false
+    
+    // Buscar a data de início da assinatura (current_period_start ou created_at)
+    const subscriptionStartDate = subscription.current_period_start 
+      ? new Date(subscription.current_period_start)
+      : null
+    
+    if (!subscriptionStartDate) {
+      // Se não tem current_period_start, buscar created_at da subscription
+      // Por enquanto, retornar false se não tiver data
+      return false
+    }
+    
+    const now = new Date()
+    const daysSinceStart = Math.floor((now.getTime() - subscriptionStartDate.getTime()) / (1000 * 60 * 60 * 24))
+    
+    // Oitavo dia = já passou o período de arrependimento de 7 dias
+    return daysSinceStart >= 8
+  }
+
+  // Calcular dias restantes até poder solicitar
+  const daysUntilCanRequest = () => {
+    if (!subscription) return null
+    
+    const subscriptionStartDate = subscription.current_period_start 
+      ? new Date(subscription.current_period_start)
+      : null
+    
+    if (!subscriptionStartDate) return null
+    
+    const now = new Date()
+    const daysSinceStart = Math.floor((now.getTime() - subscriptionStartDate.getTime()) / (1000 * 60 * 60 * 24))
+    const daysRemaining = 8 - daysSinceStart
+    
+    return daysRemaining > 0 ? daysRemaining : 0
+  }
 
   // Solicitar acesso para ambas as ferramentas
   const requestToolsAccess = async () => {
     if (!user) return
+    
+    // Verificar se já passaram 8 dias (oitavo dia)
+    if (!canRequestTools()) {
+      const daysRemaining = daysUntilCanRequest()
+      toast.error(
+        daysRemaining 
+          ? `Você poderá solicitar acesso às ferramentas em ${daysRemaining} dia${daysRemaining > 1 ? 's' : ''}. Isso é necessário para garantir o período de arrependimento de 7 dias conforme o Código de Defesa do Consumidor.`
+          : 'Não foi possível verificar o período de sua assinatura. Entre em contato com o suporte.'
+      )
+      return
+    }
+    
     setSubmitting(true)
 
     try {
@@ -139,7 +216,7 @@ export default function ToolsPage() {
 
       if (messageError) throw messageError
 
-      toast.success('Solicitação enviada! Você receberá o acesso em até 24 horas.')
+      toast.success('Solicitação enviada! Você receberá o acesso em até 24 horas após a aprovação.')
       
       // Atualizar lista de tickets pendentes
       const { data: ticketsData } = await (supabase as any)
@@ -211,8 +288,8 @@ export default function ToolsPage() {
       description: 'Crie designs profissionais com templates premium, elementos exclusivos e recursos avançados de edição.',
       icon: Palette,
       color: 'from-purple-500 to-indigo-600',
-      hasAccess: hasCanvaAccess,
-      accessData: toolAccess.find(t => t.tool_type === 'canva'),
+      hasAccess: hasCanvaAccessCurrentPeriod, // Apenas acesso do período atual
+      accessData: toolAccess.find(t => t.tool_type === 'canva' && isAccessFromCurrentPeriod(t)),
       features: [
         'Templates premium ilimitados',
         'Remoção de fundo com 1 clique',
@@ -227,8 +304,8 @@ export default function ToolsPage() {
       description: 'Editor de vídeo profissional com efeitos avançados, templates virais e sem marca d\'água.',
       icon: Scissors,
       color: 'from-emerald-500 to-teal-600',
-      hasAccess: hasCapcutAccess,
-      accessData: toolAccess.find(t => t.tool_type === 'capcut'),
+      hasAccess: hasCapcutAccessCurrentPeriod, // Apenas acesso do período atual
+      accessData: toolAccess.find(t => t.tool_type === 'capcut' && isAccessFromCurrentPeriod(t)),
       features: [
         'Sem marca d\'água',
         'Efeitos e transições premium',
@@ -432,7 +509,8 @@ export default function ToolsPage() {
       </div>
 
       {/* Request Button - Single button for both tools */}
-      {!hasBothAccess && (
+      {/* Mostrar botão se não tem acesso do período atual OU se tem acesso de período anterior (renovação) */}
+      {!hasBothAccessCurrentPeriod && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -452,34 +530,132 @@ export default function ToolsPage() {
           ) : (
             <div className="text-center">
               <h3 className="text-lg font-bold text-gogh-black mb-2">
-                Solicitar Acesso às Ferramentas
+                {hasAccessFromOldPeriod ? 'Solicitar Novo Acesso às Ferramentas' : 'Solicitar Acesso às Ferramentas'}
               </h3>
-              <p className="text-sm text-gogh-grayDark mb-6">
-                Clique no botão abaixo para solicitar acesso ao Canva Pro e CapCut Pro simultaneamente.
-              </p>
-              <button
-                onClick={requestToolsAccess}
-                disabled={submitting}
-                className={`
-                  inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
-                  ${submitting
-                    ? 'bg-gogh-grayLight text-gogh-grayDark cursor-not-allowed'
-                    : 'bg-gogh-yellow text-gogh-black hover:bg-gogh-yellow/80'
-                  }
-                `}
-              >
-                {submitting ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-gogh-grayDark border-t-transparent rounded-full animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    Solicitar Acesso às Ferramentas
-                  </>
-                )}
-              </button>
+              
+              {hasAccessFromOldPeriod ? (
+                <>
+                  <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200 mb-6">
+                    <div className="flex items-center gap-2 text-emerald-700 mb-2">
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span className="font-medium">Renovação Detectada</span>
+                    </div>
+                    <p className="text-sm text-emerald-700 text-left mb-2">
+                      Detectamos que sua assinatura foi renovada! Você pode solicitar um novo acesso às ferramentas Canva Pro e CapCut Pro para este novo período.
+                    </p>
+                    {!canRequestTools() ? (
+                      <p className="text-sm text-emerald-700 text-left">
+                        Aguarde <strong>{daysUntilCanRequest()} dia{daysUntilCanRequest()! > 1 ? 's' : ''}</strong> após a renovação para solicitar o novo acesso (período de arrependimento de 7 dias).
+                      </p>
+                    ) : (
+                      <p className="text-sm text-emerald-700 text-left">
+                        Você já pode solicitar o novo acesso! Após a aprovação, você terá <strong>30 dias de uso</strong> das ferramentas.
+                      </p>
+                    )}
+                  </div>
+                  {!canRequestTools() ? (
+                    <button
+                      disabled={true}
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all bg-gogh-grayLight text-gogh-grayDark cursor-not-allowed"
+                    >
+                      <Clock className="w-4 h-4" />
+                      Aguardando Oitavo Dia Após Renovação
+                    </button>
+                  ) : (
+                    <button
+                      onClick={requestToolsAccess}
+                      disabled={submitting}
+                      className={`
+                        inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
+                        ${submitting
+                          ? 'bg-gogh-grayLight text-gogh-grayDark cursor-not-allowed'
+                          : 'bg-gogh-yellow text-gogh-black hover:bg-gogh-yellow/80'
+                        }
+                      `}
+                    >
+                      {submitting ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-gogh-grayDark border-t-transparent rounded-full animate-spin" />
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          Solicitar Novo Acesso às Ferramentas
+                        </>
+                      )}
+                    </button>
+                  )}
+                </>
+              ) : !canRequestTools() ? (
+                <>
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mb-6">
+                    <div className="flex items-center gap-2 text-blue-700 mb-2">
+                      <AlertCircle className="w-5 h-5" />
+                      <span className="font-medium">Período de Arrependimento</span>
+                    </div>
+                    <p className="text-sm text-blue-600 text-left mb-2">
+                      Conforme o Código de Defesa do Consumidor (CDC), você tem 7 dias para exercer seu direito de arrependimento. 
+                      Por isso, o acesso às ferramentas Canva Pro e CapCut Pro será liberado apenas após o <strong>oitavo dia</strong> da sua assinatura, garantindo que o período de arrependimento já tenha sido concluído.
+                    </p>
+                    <p className="text-sm text-blue-600 text-left mb-2">
+                      Após a liberação, você terá <strong>30 dias de uso</strong> das ferramentas para aproveitar ao máximo seus recursos.
+                    </p>
+                    <p className="text-sm text-blue-600 text-left">
+                      Para mais informações sobre esta política, consulte nossos{' '}
+                      <Link 
+                        href="/termos-assinatura-planos" 
+                        target="_blank"
+                        className="underline font-medium text-blue-700 hover:text-blue-900"
+                      >
+                        Termos de Assinatura e Planos
+                      </Link>.
+                    </p>
+                    {daysUntilCanRequest() !== null && daysUntilCanRequest()! > 0 && (
+                      <p className="text-sm font-medium text-blue-700 mt-3">
+                        Você poderá solicitar acesso em {daysUntilCanRequest()} dia{daysUntilCanRequest()! > 1 ? 's' : ''}.
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    disabled={true}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all bg-gogh-grayLight text-gogh-grayDark cursor-not-allowed"
+                  >
+                    <Clock className="w-4 h-4" />
+                    Aguardando Oitavo Dia
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gogh-grayDark mb-6">
+                    Clique no botão abaixo para solicitar acesso ao Canva Pro e CapCut Pro simultaneamente.
+                    O acesso será liberado após a aprovação da solicitação e você terá <strong>30 dias de uso</strong> das ferramentas.
+                  </p>
+                  <button
+                    onClick={requestToolsAccess}
+                    disabled={submitting}
+                    className={`
+                      inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
+                      ${submitting
+                        ? 'bg-gogh-grayLight text-gogh-grayDark cursor-not-allowed'
+                        : 'bg-gogh-yellow text-gogh-black hover:bg-gogh-yellow/80'
+                      }
+                    `}
+                  >
+                    {submitting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-gogh-grayDark border-t-transparent rounded-full animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        Solicitar Acesso às Ferramentas
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
           )}
         </motion.div>

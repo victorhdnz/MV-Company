@@ -74,6 +74,11 @@ export default function SolicitacoesPage() {
   const [capcutTutorialVideo, setCapcutTutorialVideo] = useState<File | null>(null)
   const [capcutTutorialVideoUrl, setCapcutTutorialVideoUrl] = useState<string | null>(null)
   const [uploadingVideo, setUploadingVideo] = useState(false)
+  const [subscriptionInfo, setSubscriptionInfo] = useState<{
+    daysSinceStart: number | null
+    canRelease: boolean
+    daysRemaining: number | null
+  } | null>(null)
 
   useEffect(() => {
     loadTickets()
@@ -82,8 +87,64 @@ export default function SolicitacoesPage() {
   useEffect(() => {
     if (selectedTicket) {
       loadToolAccess(selectedTicket.user_id)
+      loadSubscriptionInfo(selectedTicket.user_id)
+    } else {
+      setSubscriptionInfo(null)
     }
   }, [selectedTicket])
+
+  const loadSubscriptionInfo = async (userId: string) => {
+    try {
+      const { data: subscriptionData } = await (supabase as any)
+        .from('subscriptions')
+        .select('current_period_start, created_at')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (subscriptionData) {
+        const subscriptionStartDate = subscriptionData.current_period_start 
+          ? new Date(subscriptionData.current_period_start)
+          : subscriptionData.created_at 
+            ? new Date(subscriptionData.created_at)
+            : null
+
+        if (subscriptionStartDate) {
+          const now = new Date()
+          const daysSinceStart = Math.floor((now.getTime() - subscriptionStartDate.getTime()) / (1000 * 60 * 60 * 24))
+          const canRelease = daysSinceStart >= 8
+          const daysRemaining = canRelease ? 0 : 8 - daysSinceStart
+
+          setSubscriptionInfo({
+            daysSinceStart,
+            canRelease,
+            daysRemaining: daysRemaining > 0 ? daysRemaining : 0
+          })
+        } else {
+          setSubscriptionInfo({
+            daysSinceStart: null,
+            canRelease: false,
+            daysRemaining: null
+          })
+        }
+      } else {
+        setSubscriptionInfo({
+          daysSinceStart: null,
+          canRelease: false,
+          daysRemaining: null
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao carregar informações da assinatura:', error)
+      setSubscriptionInfo({
+        daysSinceStart: null,
+        canRelease: false,
+        daysRemaining: null
+      })
+    }
+  }
 
   const loadTickets = async () => {
     setLoading(true)
@@ -237,6 +298,38 @@ export default function SolicitacoesPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Usuário não autenticado')
+
+      // Verificar se já passaram 8 dias desde o início da assinatura (oitavo dia)
+      const { data: subscriptionData } = await (supabase as any)
+        .from('subscriptions')
+        .select('current_period_start, created_at')
+        .eq('user_id', selectedTicket.user_id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (subscriptionData) {
+        const subscriptionStartDate = subscriptionData.current_period_start 
+          ? new Date(subscriptionData.current_period_start)
+          : subscriptionData.created_at 
+            ? new Date(subscriptionData.created_at)
+            : null
+
+        if (subscriptionStartDate) {
+          const now = new Date()
+          const daysSinceStart = Math.floor((now.getTime() - subscriptionStartDate.getTime()) / (1000 * 60 * 60 * 24))
+          
+          if (daysSinceStart < 8) {
+            const daysRemaining = 8 - daysSinceStart
+            toast.error(
+              `Não é possível liberar o acesso ainda. O cliente precisa aguardar ${daysRemaining} dia${daysRemaining > 1 ? 's' : ''} para completar o período de arrependimento de 7 dias conforme o CDC. O acesso será liberado no oitavo dia.`
+            )
+            setSaving(false)
+            return
+          }
+        }
+      }
 
       // Upload do vídeo do Canva se houver
       let canvaVideoUrl = canvaTutorialVideoUrl
@@ -713,6 +806,57 @@ export default function SolicitacoesPage() {
 
                 {/* Links Form */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                  {/* Informações da Assinatura - Período de 8 dias (oitavo dia) */}
+                  {subscriptionInfo && (
+                    <div className={`rounded-lg p-4 border ${
+                      subscriptionInfo.canRelease
+                        ? 'bg-emerald-50 border-emerald-200'
+                        : 'bg-blue-50 border-blue-200'
+                    }`}>
+                      <div className="flex items-start gap-3">
+                        {subscriptionInfo.canRelease ? (
+                          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <Clock className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1">
+                          <h4 className={`font-medium mb-1 ${
+                            subscriptionInfo.canRelease ? 'text-emerald-800' : 'text-blue-800'
+                          }`}>
+                            {subscriptionInfo.canRelease 
+                              ? '✅ Pode Liberar Acesso' 
+                              : '⏳ Aguardando Oitavo Dia'}
+                          </h4>
+                          {subscriptionInfo.daysSinceStart !== null ? (
+                            <>
+                              <p className={`text-sm mb-2 ${
+                                subscriptionInfo.canRelease ? 'text-emerald-700' : 'text-blue-700'
+                              }`}>
+                                Cliente está com a assinatura ativa há <strong>{subscriptionInfo.daysSinceStart} dia{subscriptionInfo.daysSinceStart !== 1 ? 's' : ''}</strong>.
+                              </p>
+                              {!subscriptionInfo.canRelease && subscriptionInfo.daysRemaining !== null && (
+                                <p className="text-sm font-medium text-blue-800">
+                                  ⚠️ Faltam <strong>{subscriptionInfo.daysRemaining} dia{subscriptionInfo.daysRemaining !== 1 ? 's' : ''}</strong> para completar o período de arrependimento de 7 dias (CDC). O acesso será liberado no <strong>oitavo dia</strong>.
+                                </p>
+                              )}
+                              {subscriptionInfo.canRelease && (
+                                <p className="text-sm text-emerald-700">
+                                  ✓ Período de arrependimento concluído. Você pode liberar o acesso às ferramentas. O cliente terá 30 dias de uso.
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <p className={`text-sm ${
+                              subscriptionInfo.canRelease ? 'text-emerald-700' : 'text-blue-700'
+                            }`}>
+                              Não foi possível verificar o período da assinatura. Verifique manualmente antes de liberar.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Alertas de Erro Reportado */}
                   {toolAccess.some(t => t.tool_type === 'canva' && t.error_reported) && (
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
