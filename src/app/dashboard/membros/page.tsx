@@ -231,9 +231,15 @@ export default function MembrosPage() {
             periodEnd.setMonth(periodEnd.getMonth() + 1)
           }
           
+          // Converter plan_id para plan_type (para compatibilidade com estrutura antiga)
+          const planType = editingPlan === 'gogh_pro' ? 'premium' : 
+                          editingPlan === 'gogh_essencial' ? 'essential' : null
+          
           // Tentar primeiro com estrutura nova (plan_id, billing_cycle)
+          // MAS também preencher plan_type para compatibilidade com estrutura antiga
           let updateData: any = {
             plan_id: editingPlan,
+            plan_type: planType, // Preencher também para compatibilidade
             billing_cycle: editingBillingCycle,
             current_period_start: now.toISOString(), // SEMPRE começar do dia atual
             current_period_end: periodEnd.toISOString(), // SEMPRE calcular a partir do dia atual
@@ -255,14 +261,28 @@ export default function MembrosPage() {
             .eq('id', member.subscription.id)
           
           if (error) {
-            // Se der erro de coluna não encontrada, tentar com estrutura antiga
-            if (error.code === '42703' || error.code === 'PGRST204' || error.message?.includes('does not exist')) {
+            // Se der erro de constraint (NOT NULL), tentar com estrutura antiga incluindo plan_type
+            if (error.code === '23502' || error.message?.includes('null value') || error.message?.includes('plan_type')) {
+              console.warn('Erro de constraint, tentando atualizar com plan_type incluído')
+              // Já temos planType definido acima, só garantir que está no updateData
+              updateData.plan_type = planType
+              
+              const { error: retryError } = await (supabase as any)
+                .from('subscriptions')
+                .update(updateData)
+                .eq('id', member.subscription.id)
+              
+              if (retryError) {
+                console.error('Erro ao atualizar assinatura (com plan_type):', retryError)
+                throw new Error(retryError.message || 'Erro ao atualizar plano')
+              }
+            } else if (error.code === '42703' || error.code === 'PGRST204' || error.message?.includes('does not exist')) {
               console.warn('Tentando atualizar com estrutura antiga (plan_type)')
-              const planType = editingPlan === 'gogh_pro' ? 'premium' : 
+              const planTypeAlt = editingPlan === 'gogh_pro' ? 'premium' : 
                               editingPlan === 'gogh_essencial' ? 'essential' : 'essential'
               
               updateData = {
-                plan_type: planType,
+                plan_type: planTypeAlt,
                 updated_at: new Date().toISOString()
               }
               
@@ -292,11 +312,17 @@ export default function MembrosPage() {
           }
           const manualId = `manual_${memberId.slice(0, 8)}_${Date.now()}`
           
+          // Converter plan_id para plan_type (para compatibilidade com estrutura antiga)
+          const planType = editingPlan === 'gogh_pro' ? 'premium' : 
+                          editingPlan === 'gogh_essencial' ? 'essential' : null
+          
           // Tentar primeiro com estrutura nova (plan_id, billing_cycle)
+          // MAS também preencher plan_type para compatibilidade com estrutura antiga
           // Planos manuais NÃO têm stripe_subscription_id (deve ser NULL)
           let insertData: any = {
             user_id: memberId,
             plan_id: editingPlan,
+            plan_type: planType, // Preencher também para compatibilidade
             status: 'active',
             billing_cycle: editingBillingCycle,
             stripe_customer_id: null, // Planos manuais não têm customer do Stripe
@@ -314,16 +340,32 @@ export default function MembrosPage() {
             .insert(insertData)
           
           if (error) {
-            // Se der erro de coluna não encontrada, tentar com estrutura antiga
-            if (error.code === '42703' || error.code === 'PGRST204' || error.message?.includes('does not exist')) {
+            // Se der erro de constraint (NOT NULL), tentar novamente (plan_type já está incluído)
+            if (error.code === '23502' || error.message?.includes('null value') || error.message?.includes('plan_type')) {
+              console.warn('Erro de constraint plan_type, mas já está incluído. Verificando...')
+              // O plan_type já está no insertData, então o erro pode ser de outro campo
+              // Mas vamos garantir que está correto
+              if (!insertData.plan_type && planType) {
+                insertData.plan_type = planType
+              }
+              
+              const { error: retryError } = await (supabase as any)
+                .from('subscriptions')
+                .insert(insertData)
+              
+              if (retryError) {
+                console.error('Erro ao criar assinatura (com plan_type):', retryError)
+                throw new Error(retryError.message || 'Erro ao criar plano. Verifique se todos os campos obrigatórios estão preenchidos.')
+              }
+            } else if (error.code === '42703' || error.code === 'PGRST204' || error.message?.includes('does not exist')) {
               console.warn('Tentando criar com estrutura antiga (plan_type)')
               // Converter para estrutura antiga
-              const planType = editingPlan === 'gogh_pro' ? 'premium' : 
+              const planTypeAlt = editingPlan === 'gogh_pro' ? 'premium' : 
                               editingPlan === 'gogh_essencial' ? 'essential' : 'essential'
               
               insertData = {
                 user_id: memberId,
-                plan_type: planType,
+                plan_type: planTypeAlt,
                 status: 'active',
                 stripe_customer_id: null, // Planos manuais não têm customer do Stripe
                 stripe_subscription_id: null, // Planos manuais não têm subscription do Stripe
