@@ -20,7 +20,6 @@ import {
   X
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import Link from 'next/link'
 
 interface ToolAccess {
   id: string
