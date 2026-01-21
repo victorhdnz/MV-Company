@@ -99,8 +99,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                  data.plan_type === 'essential' ? 'gogh_essencial' : null
       }
 
-      // Garantir billing_cycle
-      const billingCycle = data.billing_cycle || 'monthly'
+      // Garantir billing_cycle - se não tiver, tentar inferir pela duração do período
+      let billingCycle = data.billing_cycle
+      if (!billingCycle && data.current_period_start && data.current_period_end) {
+        const periodStart = new Date(data.current_period_start)
+        const periodEnd = new Date(data.current_period_end)
+        const daysDiff = Math.floor((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24))
+        // Se o período for maior que 30 dias, provavelmente é anual
+        billingCycle = daysDiff > 30 ? 'annual' : 'monthly'
+      }
+      // Se ainda não tiver, usar monthly como padrão
+      if (!billingCycle) {
+        billingCycle = 'monthly'
+      }
 
       return {
         id: data.id,

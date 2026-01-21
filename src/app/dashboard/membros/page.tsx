@@ -132,7 +132,9 @@ export default function MembrosPage() {
                     (subscription.plan_type === 'premium' ? 'gogh_pro' :
                      subscription.plan_type === 'essential' ? 'gogh_essencial' : null),
             status: subscription.status,
-            billing_cycle: subscription.billing_cycle || 'monthly',
+            billing_cycle: subscription.billing_cycle || (subscription.current_period_end && subscription.current_period_start ? 
+              (new Date(subscription.current_period_end).getTime() - new Date(subscription.current_period_start).getTime() > 30 * 24 * 60 * 60 * 1000 ? 'annual' : 'monthly') 
+              : 'monthly'),
             current_period_end: subscription.current_period_end,
             stripe_subscription_id: subscription.stripe_subscription_id || null,
             is_manual: !subscription.stripe_subscription_id
@@ -202,7 +204,18 @@ export default function MembrosPage() {
       } else {
         // Atualizar ou criar assinatura
         if (member.subscription) {
-          // Atualizar existente
+          // Verificar se é assinatura do Stripe (não deve alterar billing_cycle manualmente)
+          const isStripeSubscription = member.subscription.stripe_subscription_id && 
+                                      !member.subscription.stripe_subscription_id.startsWith('manual_')
+          
+          if (isStripeSubscription) {
+            // Para assinaturas do Stripe, apenas atualizar o plan_id
+            // O billing_cycle deve vir do Stripe via webhook
+            toast.error('Assinaturas do Stripe não podem ter o período alterado manualmente. O período é gerenciado automaticamente pelo Stripe.')
+            return
+          }
+          
+          // Atualizar existente (apenas para assinaturas manuais)
           const now = new Date()
           // Calcular novo período final baseado no billing_cycle escolhido
           const periodEnd = new Date(now)
@@ -325,6 +338,7 @@ export default function MembrosPage() {
       toast.success('Plano atualizado com sucesso!')
       setEditingMember(null)
       setEditingPlan('')
+      setEditingBillingCycle('monthly')
       
       // Recarregar membros para atualizar a exibição
       await loadMembers()

@@ -203,14 +203,26 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   // Atualizar período da assinatura
   const subscriptionResponse = await stripe.subscriptions.retrieve(subscriptionId)
   const sub = subscriptionResponse as any
+  const priceId = sub.items.data[0]?.price.id
+  const planInfo = PRICE_TO_PLAN[priceId]
+  
+  // Atualizar com billing_cycle correto
+  const updateData: any = {
+    status: 'active',
+    current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
+    current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+  }
+  
+  // Se encontrou planInfo, atualizar também billing_cycle e plan_id
+  if (planInfo) {
+    updateData.billing_cycle = planInfo.billing_cycle
+    updateData.plan_id = planInfo.plan_id
+    updateData.stripe_price_id = priceId
+  }
   
   const { error } = await supabaseAdmin
     .from('subscriptions')
-    .update({
-      status: 'active',
-      current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
-      current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
-    })
+    .update(updateData)
     .eq('stripe_subscription_id', subscriptionId)
 
   if (error) {
