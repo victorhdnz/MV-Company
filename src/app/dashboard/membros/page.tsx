@@ -34,6 +34,8 @@ interface Member {
     current_period_end: string
     stripe_subscription_id: string | null
     is_manual?: boolean
+    manually_edited?: boolean
+    manually_edited_at?: string | null
   } | null
 }
 
@@ -139,7 +141,9 @@ export default function MembrosPage() {
             stripe_subscription_id: subscription.stripe_subscription_id && subscription.stripe_subscription_id.trim() !== '' 
               ? subscription.stripe_subscription_id 
               : null,
-            is_manual: !subscription.stripe_subscription_id || subscription.stripe_subscription_id.trim() === ''
+            is_manual: !subscription.stripe_subscription_id || subscription.stripe_subscription_id.trim() === '',
+            manually_edited: subscription.manually_edited || false,
+            manually_edited_at: subscription.manually_edited_at || null
           } : null
         }
       })
@@ -206,9 +210,7 @@ export default function MembrosPage() {
       } else {
         // Atualizar ou criar assinatura
         if (member.subscription) {
-          // Verificar se é assinatura do Stripe (não deve alterar billing_cycle manualmente)
-          // Assinatura do Stripe = tem stripe_subscription_id válido (não null, não vazio, não começa com 'manual_')
-          // E não tem o flag is_manual = true
+          // Verificar se é assinatura do Stripe
           const stripeSubId = member.subscription.stripe_subscription_id
           const isManual = member.subscription.is_manual === true
           
@@ -218,16 +220,10 @@ export default function MembrosPage() {
                                       stripeSubId.trim() !== '' && 
                                       !stripeSubId.startsWith('manual_')
           
-          if (isStripeSubscription) {
-            // Para assinaturas do Stripe, apenas atualizar o plan_id
-            // O billing_cycle deve vir do Stripe via webhook
-            toast.error('Assinaturas do Stripe não podem ter o período alterado manualmente. O período é gerenciado automaticamente pelo Stripe.')
-            return
-          }
-          
-          // Atualizar existente (apenas para assinaturas manuais)
+          // Atualizar existente - SEMPRE recalcular datas a partir do dia atual
           const now = new Date()
           // Calcular novo período final baseado no billing_cycle escolhido
+          // SEMPRE começar do dia atual, independente da data anterior
           const periodEnd = new Date(now)
           if (editingBillingCycle === 'annual') {
             periodEnd.setFullYear(periodEnd.getFullYear() + 1)
@@ -239,9 +235,18 @@ export default function MembrosPage() {
           let updateData: any = {
             plan_id: editingPlan,
             billing_cycle: editingBillingCycle,
-            current_period_start: now.toISOString(),
-            current_period_end: periodEnd.toISOString(),
+            current_period_start: now.toISOString(), // SEMPRE começar do dia atual
+            current_period_end: periodEnd.toISOString(), // SEMPRE calcular a partir do dia atual
             updated_at: new Date().toISOString()
+          }
+          
+          // Se for assinatura do Stripe editada manualmente, marcar como editada
+          if (isStripeSubscription) {
+            updateData.manually_edited = true
+            updateData.manually_edited_at = now.toISOString()
+            toast.success('Plano atualizado! Esta assinatura do Stripe foi editada manualmente e será marcada com um selo.', {
+              duration: 5000
+            })
           }
           
           const { error } = await (supabase as any)
@@ -588,6 +593,12 @@ export default function MembrosPage() {
                                 <p className="text-xs text-amber-600 font-medium">
                                   Plano Manual
                                 </p>
+                              )}
+                              {member.subscription.manually_edited && !member.subscription.is_manual && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
+                                  <span className="w-1.5 h-1.5 bg-orange-600 rounded-full"></span>
+                                  Editado Manualmente
+                                </span>
                               )}
                             </div>
                           )}
