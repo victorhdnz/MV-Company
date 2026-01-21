@@ -619,7 +619,7 @@ export default function ChatPage() {
           >
             <Loader2 className="w-5 h-5 text-gogh-yellow animate-spin" />
             <span className="text-sm text-gogh-grayDark">
-              Configurando o agente com suas informações do perfil...
+              Configurando o agente com suas informações do perfil... (não desconta do seu limite diário)
             </span>
           </motion.div>
         )}
