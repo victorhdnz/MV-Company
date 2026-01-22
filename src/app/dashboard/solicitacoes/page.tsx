@@ -70,6 +70,11 @@ export default function SolicitacoesPage() {
   const [capcutPassword, setCapcutPassword] = useState('')
   const [canvaTutorialVideoUrl, setCanvaTutorialVideoUrl] = useState<string | null>(null)
   const [capcutTutorialVideoUrl, setCapcutTutorialVideoUrl] = useState<string | null>(null)
+  
+  // URLs fixas de vídeos de tutorial (salvas no site_settings)
+  const [defaultCanvaVideoUrl, setDefaultCanvaVideoUrl] = useState<string>('')
+  const [defaultCapcutVideoUrl, setDefaultCapcutVideoUrl] = useState<string>('')
+  const [savingDefaults, setSavingDefaults] = useState(false)
 
   // Função para validar URL do YouTube (suporta todos os formatos incluindo Shorts)
   const getYouTubeId = (url: string): string | null => {
@@ -94,7 +99,91 @@ export default function SolicitacoesPage() {
 
   useEffect(() => {
     loadTickets()
+    loadDefaultVideoUrls()
   }, [])
+  
+  // Carregar URLs fixas de vídeos de tutorial
+  const loadDefaultVideoUrls = async () => {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'general')
+        .maybeSingle()
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao carregar URLs fixas:', error)
+        return
+      }
+      
+      if (data?.value) {
+        const toolVideos = data.value.tool_tutorial_videos || {}
+        setDefaultCanvaVideoUrl(toolVideos.canva || '')
+        setDefaultCapcutVideoUrl(toolVideos.capcut || '')
+      }
+    } catch (error) {
+      console.error('Erro ao carregar URLs fixas:', error)
+    }
+  }
+  
+  // Salvar URLs fixas de vídeos de tutorial
+  const saveDefaultVideoUrls = async () => {
+    setSavingDefaults(true)
+    try {
+      // Validar URLs
+      if (defaultCanvaVideoUrl && !getYouTubeId(defaultCanvaVideoUrl)) {
+        toast.error('URL do vídeo tutorial do Canva deve ser do YouTube')
+        setSavingDefaults(false)
+        return
+      }
+      
+      if (defaultCapcutVideoUrl && !getYouTubeId(defaultCapcutVideoUrl)) {
+        toast.error('URL do vídeo tutorial do CapCut deve ser do YouTube')
+        setSavingDefaults(false)
+        return
+      }
+      
+      // Buscar dados existentes
+      const { data: existing, error: fetchError } = await (supabase as any)
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'general')
+        .maybeSingle()
+      
+      const existingValue = existing?.value || {}
+      
+      // Atualizar apenas as URLs de vídeos de tutorial
+      const updatedValue = {
+        ...existingValue,
+        tool_tutorial_videos: {
+          canva: defaultCanvaVideoUrl || null,
+          capcut: defaultCapcutVideoUrl || null
+        }
+      }
+      
+      // Salvar no banco
+      const { error: updateError } = await (supabase as any)
+        .from('site_settings')
+        .upsert({
+          key: 'general',
+          value: updatedValue,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'key'
+        })
+      
+      if (updateError) {
+        throw updateError
+      }
+      
+      toast.success('URLs fixas de vídeos de tutorial salvas com sucesso!')
+    } catch (error: any) {
+      console.error('Erro ao salvar URLs fixas:', error)
+      toast.error(`Erro ao salvar: ${error.message || 'Erro desconhecido'}`)
+    } finally {
+      setSavingDefaults(false)
+    }
+  }
 
   useEffect(() => {
     if (selectedTicket) {
@@ -628,6 +717,103 @@ export default function SolicitacoesPage() {
           <p className="text-gray-600">
             Gerencie solicitações de acesso ao Canva Pro e CapCut Pro
           </p>
+        </div>
+
+        {/* Seção de URLs Fixas de Vídeos de Tutorial */}
+        <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Video className="w-5 h-5" />
+                URLs Fixas de Vídeos de Tutorial
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Configure URLs padrão de vídeos de tutorial que serão usadas para todos os clientes. Se um cliente tiver um vídeo específico, ele terá prioridade.
+              </p>
+            </div>
+            <button
+              onClick={saveDefaultVideoUrls}
+              disabled={savingDefaults}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              {savingDefaults ? 'Salvando...' : 'Salvar URLs Fixas'}
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Canva */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-gray-700">
+                <div className="flex items-center gap-2">
+                  <Video className="w-4 h-4" />
+                  URL do Vídeo Tutorial - Canva Pro
+                </div>
+              </label>
+              <input
+                type="url"
+                value={defaultCanvaVideoUrl}
+                onChange={(e) => setDefaultCanvaVideoUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {defaultCanvaVideoUrl && getYouTubeId(defaultCanvaVideoUrl) && (
+                <div className="mt-2">
+                  <div className="relative max-w-[200px] mx-auto">
+                    <div className="bg-gradient-to-br from-gogh-yellow/10 to-gogh-yellow/5 p-1 rounded-xl">
+                      <div className="bg-black rounded-lg overflow-hidden">
+                        <div className="relative aspect-[9/16] bg-black">
+                          <iframe
+                            src={`https://www.youtube.com/embed/${getYouTubeId(defaultCanvaVideoUrl)}`}
+                            title="Preview Canva"
+                            className="w-full h-full rounded-lg"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* CapCut */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-gray-700">
+                <div className="flex items-center gap-2">
+                  <Video className="w-4 h-4" />
+                  URL do Vídeo Tutorial - CapCut Pro
+                </div>
+              </label>
+              <input
+                type="url"
+                value={defaultCapcutVideoUrl}
+                onChange={(e) => setDefaultCapcutVideoUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {defaultCapcutVideoUrl && getYouTubeId(defaultCapcutVideoUrl) && (
+                <div className="mt-2">
+                  <div className="relative max-w-[200px] mx-auto">
+                    <div className="bg-gradient-to-br from-gogh-yellow/10 to-gogh-yellow/5 p-1 rounded-xl">
+                      <div className="bg-black rounded-lg overflow-hidden">
+                        <div className="relative aspect-[9/16] bg-black">
+                          <iframe
+                            src={`https://www.youtube.com/embed/${getYouTubeId(defaultCapcutVideoUrl)}`}
+                            title="Preview CapCut"
+                            className="w-full h-full rounded-lg"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

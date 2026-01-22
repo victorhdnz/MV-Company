@@ -102,11 +102,26 @@ export default function ToolsPage() {
         const canvaAccess = accessData?.find((t: ToolAccess) => t.tool_type === 'canva')
         const capcutAccess = accessData?.find((t: ToolAccess) => t.tool_type === 'capcut')
         
+        // Buscar vídeos fixos padrão do site_settings (uma única busca)
+        const { data: settingsData } = await (supabase as any)
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'general')
+          .maybeSingle()
+        
+        const defaultVideos = settingsData?.value?.tool_tutorial_videos || {}
+        
+        // Prioridade: vídeo específico do cliente > vídeo fixo padrão
         if (canvaAccess?.tutorial_video_url) {
           setCanvaVideoUrl(canvaAccess.tutorial_video_url)
+        } else if (defaultVideos.canva) {
+          setCanvaVideoUrl(defaultVideos.canva)
         }
+        
         if (capcutAccess?.tutorial_video_url) {
           setCapcutVideoUrl(capcutAccess.tutorial_video_url)
+        } else if (defaultVideos.capcut) {
+          setCapcutVideoUrl(defaultVideos.capcut)
         }
       } catch (error) {
         console.error('Error fetching tools data:', error)
