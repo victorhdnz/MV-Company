@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, X, Image as ImageIcon, Video, File, Trash2, Eye, Download, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
+import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/hooks/useAuth'
 
 interface MediaFile {
   id: string
@@ -35,10 +37,83 @@ export function MediaManager({
   const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const supabase = createClient()
+  const { isAuthenticated, isEditor } = useAuth()
+
+  // Carregar mídias do Supabase Storage ao abrir
+  useEffect(() => {
+    if (isOpen && folder) {
+      loadMediaFromStorage()
+    }
+  }, [isOpen, folder])
+
+  const loadMediaFromStorage = async () => {
+    try {
+      const bucketName = folder === 'videos' ? 'videos' : 'images'
+      
+      console.log('📂 Carregando mídias do bucket:', bucketName)
+      
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .list('', {
+          limit: 100,
+          offset: 0,
+        })
+      
+      // Ordenar por data de criação (mais recentes primeiro)
+      const sortedData = data?.sort((a, b) => {
+        const dateA = new Date(a.created_at || a.updated_at || 0).getTime()
+        const dateB = new Date(b.created_at || b.updated_at || 0).getTime()
+        return dateB - dateA // Mais recentes primeiro
+      })
+
+      if (error) {
+        console.error('❌ Erro ao carregar mídias:', error)
+        // Não mostrar erro se o bucket não existir ou estiver vazio
+        if (error.message?.includes('not found') || error.message?.includes('does not exist')) {
+          console.log('Bucket não encontrado ou vazio, continuando...')
+          setMediaFiles([])
+          return
+        }
+        return
+      }
+
+      console.log('✅ Mídias carregadas:', data?.length || 0)
+
+      const files: MediaFile[] = (sortedData || [])
+        .filter(file => file.name && !file.name.startsWith('.')) // Filtrar arquivos ocultos
+        .map((file) => {
+          const { data: urlData } = supabase.storage
+            .from(bucketName)
+            .getPublicUrl(file.name)
+
+          return {
+            id: file.id || file.name,
+            name: file.name,
+            url: urlData.publicUrl,
+            type: file.name.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) ? 'image' :
+                  file.name.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i) ? 'video' : 'other',
+            size: (file.metadata as any)?.size || file.metadata?.size || 0,
+            uploadedAt: file.created_at || file.updated_at || new Date().toISOString()
+          }
+        })
+
+      setMediaFiles(files)
+      console.log('✅ Arquivos processados:', files.length)
+    } catch (error) {
+      console.error('❌ Erro ao carregar mídias do storage:', error)
+    }
+  }
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files || files.length === 0) return
+
+    // Verificar autenticação
+    if (!isAuthenticated || !isEditor) {
+      toast.error('Faça login e tenha permissão de editor para fazer upload')
+      return
+    }
 
     setUploading(true)
     
@@ -51,14 +126,73 @@ export function MediaManager({
           continue
         }
 
-        // Simular upload (aqui você integraria com Cloudinary ou Supabase Storage)
-        const mockUrl = URL.createObjectURL(file)
+        // Determinar bucket baseado no tipo de arquivo
+        const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i)
+        const bucketName = isVideo ? 'videos' : 'images'
+        
+        // Gerar nome único
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || ''
+        const sanitizedName = file.name
+          .replace(/[^a-zA-Z0-9.-]/g, '_')
+          .replace(/\s+/g, '_')
+          .toLowerCase()
+        
+        // Mapear MIME types
+        const mimeTypeMap: Record<string, string> = {
+          'mp4': 'video/mp4',
+          'webm': 'video/webm',
+          'ogg': 'video/ogg',
+          'mov': 'video/quicktime',
+          'avi': 'video/x-msvideo',
+          'mkv': 'video/x-matroska',
+          'jpg': 'image/jpeg',
+          'jpeg': 'image/jpeg',
+          'png': 'image/png',
+          'gif': 'image/gif',
+          'webp': 'image/webp',
+        }
+        
+        let contentType = file.type
+        if (!contentType || contentType === '') {
+          contentType = mimeTypeMap[fileExt] || (isVideo ? `video/${fileExt}` : `image/${fileExt}`)
+        }
+        
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt || (isVideo ? 'mp4' : 'jpg')}`
+
+        console.log('📤 Fazendo upload para Supabase Storage...', { fileName, bucketName, contentType })
+
+        // Fazer upload para Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from(bucketName)
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: contentType,
+          })
+
+        if (uploadError) {
+          console.error('❌ Erro no upload:', uploadError)
+          toast.error(`Erro ao fazer upload de ${file.name}: ${uploadError.message}`)
+          continue
+        }
+
+        // Obter URL pública
+        const { data: urlData } = supabase.storage
+          .from(bucketName)
+          .getPublicUrl(fileName)
+
+        if (!urlData?.publicUrl) {
+          toast.error(`Erro ao obter URL de ${file.name}`)
+          continue
+        }
+
+        console.log('✅ Upload concluído, URL:', urlData.publicUrl)
+
         const newFile: MediaFile = {
-          id: Math.random().toString(36).substr(2, 9),
+          id: fileName,
           name: file.name,
-          url: mockUrl,
-          type: file.type.startsWith('image/') ? 'image' : 
-                file.type.startsWith('video/') ? 'video' : 'other',
+          url: urlData.publicUrl, // URL pública do Supabase, não blob URL
+          type: isVideo ? 'video' : 'image',
           size: file.size,
           uploadedAt: new Date().toISOString()
         }
@@ -66,8 +200,12 @@ export function MediaManager({
         setMediaFiles(prev => [newFile, ...prev])
         toast.success(`${file.name} enviado com sucesso!`)
       }
-    } catch (error) {
-      toast.error('Erro ao fazer upload dos arquivos')
+      
+      // Recarregar lista após upload
+      await loadMediaFromStorage()
+    } catch (error: any) {
+      console.error('❌ Erro ao fazer upload:', error)
+      toast.error(error.message || 'Erro ao fazer upload dos arquivos')
     } finally {
       setUploading(false)
       if (fileInputRef.current) {
@@ -76,15 +214,57 @@ export function MediaManager({
     }
   }
 
-  const handleDeleteFile = (fileId: string) => {
-    setMediaFiles(prev => prev.filter(file => file.id !== fileId))
-    if (selectedFile?.id === fileId) {
-      setSelectedFile(null)
+  const handleDeleteFile = async (fileId: string) => {
+    const file = mediaFiles.find(f => f.id === fileId)
+    if (!file) return
+
+    // Se for blob URL, apenas remover da lista local
+    if (file.url.startsWith('blob:')) {
+      setMediaFiles(prev => prev.filter(f => f.id !== fileId))
+      if (selectedFile?.id === fileId) {
+        setSelectedFile(null)
+      }
+      toast.success('Arquivo removido')
+      return
     }
-    toast.success('Arquivo removido')
+
+    // Extrair nome do arquivo da URL do Supabase
+    try {
+      const urlParts = file.url.split('/')
+      const fileName = urlParts[urlParts.length - 1].split('?')[0] // Remover query params
+      const bucketName = file.type === 'video' ? 'videos' : 'images'
+
+      console.log('🗑️ Deletando arquivo do storage:', { fileName, bucketName })
+
+      const { error: deleteError } = await supabase.storage
+        .from(bucketName)
+        .remove([fileName])
+
+      if (deleteError) {
+        console.error('❌ Erro ao deletar:', deleteError)
+        toast.error('Erro ao deletar arquivo do servidor')
+        return
+      }
+
+      setMediaFiles(prev => prev.filter(f => f.id !== fileId))
+      if (selectedFile?.id === fileId) {
+        setSelectedFile(null)
+      }
+      toast.success('Arquivo removido com sucesso!')
+    } catch (error: any) {
+      console.error('❌ Erro ao deletar arquivo:', error)
+      toast.error('Erro ao deletar arquivo')
+    }
   }
 
   const handleSelectFile = (file: MediaFile) => {
+    // Validar que não é blob URL
+    if (file.url.startsWith('blob:')) {
+      toast.error('Esta mídia não está salva no servidor. Por favor, faça upload novamente.')
+      return
+    }
+    
+    console.log('🔔 Selecionando mídia:', file.url)
     onSelectMedia(file.url)
     setIsOpen(false)
     toast.success('Mídia selecionada!')

@@ -193,6 +193,14 @@ export function VideoUploader({
   }
 
   const handleMediaSelect = (url: string) => {
+    // Validar que não é blob URL
+    if (url.startsWith('blob:')) {
+      toast.error('Esta URL é temporária. Por favor, faça upload do vídeo novamente ou selecione um vídeo já salvo no servidor.')
+      console.error('❌ Tentativa de usar blob URL:', url)
+      return
+    }
+    
+    console.log('🔔 handleMediaSelect chamado com URL:', url)
     setPreview(url)
     onChange(url)
   }

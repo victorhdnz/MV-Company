@@ -113,40 +113,64 @@ export function HomepageVideo({ enabled = true, videoUrl, videoAutoplay = false,
             />
           ) : (
             <div className="relative w-full h-full">
-              <video
-                ref={videoRef}
-                src={videoUrl}
-                preload="metadata"
-                playsInline
-                controls={isPlaying}
-                className="w-full h-full object-contain bg-black rounded-lg"
-                onPlay={() => setIsPlaying(true)}
-                onError={(e) => {
-                  console.error('Erro ao carregar vídeo:', e)
-                  const video = e.currentTarget
-                  // Tentar recarregar o vídeo
-                  if (videoUrl && video) {
-                    const currentSrc = video.currentSrc || video.src
-                    video.load()
-                    // Se ainda falhar, tentar recarregar a URL
-                    setTimeout(() => {
-                      if (video.error && video.error.code === 4) {
-                        // MEDIA_ELEMENT_ERROR: Format error
-                        video.src = videoUrl
-                        video.load()
+              {/* Validar que não é blob URL */}
+              {videoUrl && videoUrl.startsWith('blob:') ? (
+                <div className="w-full h-full flex items-center justify-center bg-black rounded-lg">
+                  <div className="text-center text-white p-4">
+                    <p className="text-sm mb-2">⚠️ URL temporária detectada</p>
+                    <p className="text-xs text-gray-400">Por favor, faça upload do vídeo novamente no dashboard.</p>
+                  </div>
+                </div>
+              ) : (
+                <video
+                  ref={videoRef}
+                  src={videoUrl}
+                  preload="metadata"
+                  playsInline
+                  controls={isPlaying}
+                  className="w-full h-full object-contain bg-black rounded-lg"
+                  onPlay={() => setIsPlaying(true)}
+                  onError={(e) => {
+                    console.error('Erro ao carregar vídeo:', e)
+                    const video = e.currentTarget
+                    const error = video.error
+                    
+                    if (error) {
+                      console.error('Detalhes do erro:', {
+                        code: error.code,
+                        message: error.message,
+                        videoUrl: videoUrl,
+                        currentSrc: video.currentSrc
+                      })
+                      
+                      // Não tentar recarregar infinitamente
+                      if (error.code === 4) {
+                        // MEDIA_ELEMENT_ERROR: Format error ou source não suportado
+                        console.error('Formato de vídeo não suportado ou URL inválida')
                       }
-                    }, 1000)
-                  }
-                }}
-                onLoadedMetadata={() => {
-                  // Verificar se o vídeo tem fontes suportadas
-                  const video = videoRef.current
-                  if (video && video.readyState >= 2) {
-                    // Vídeo carregou corretamente
-                    console.log('Vídeo carregado com sucesso')
-                  }
-                }}
-              />
+                    }
+                    
+                    // Se for blob URL, não tentar recarregar
+                    if (videoUrl && videoUrl.startsWith('blob:')) {
+                      console.error('Blob URL detectada - não é possível recarregar')
+                      return
+                    }
+                    
+                    // Tentar recarregar apenas uma vez
+                    if (video && videoUrl && !videoUrl.startsWith('blob:')) {
+                      video.load()
+                    }
+                  }}
+                  onLoadedMetadata={() => {
+                    // Verificar se o vídeo tem fontes suportadas
+                    const video = videoRef.current
+                    if (video && video.readyState >= 2) {
+                      // Vídeo carregou corretamente
+                      console.log('✅ Vídeo carregado com sucesso')
+                    }
+                  }}
+                />
+              )}
               {!isPlaying && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/90 cursor-pointer group z-10 rounded-lg" onClick={() => {
                   if (videoRef.current) {

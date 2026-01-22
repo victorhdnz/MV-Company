@@ -459,6 +459,13 @@ export default function HomepageEditorPage() {
           console.log('🔍 video_url do banco:', content.video_url)
           console.log('🔍 video_enabled do banco:', content.video_enabled)
           
+          // Limpar blob URLs antigas (são temporárias e expiram)
+          let videoUrl = content.video_url || prev.video_url || ''
+          if (videoUrl.startsWith('blob:')) {
+            console.warn('⚠️ Blob URL detectada no banco, limpando...', videoUrl)
+            videoUrl = '' // Limpar blob URL antiga
+          }
+          
           return {
             ...prev,
             ...content,
@@ -468,8 +475,8 @@ export default function HomepageEditorPage() {
             services_cards: servicesCards,
             notifications_items: notificationsItems,
             testimonials_items: testimonialsItems,
-            // Garantir que video_url seja sempre preservado do banco
-            video_url: content.video_url || prev.video_url || '',
+            // Garantir que video_url seja sempre preservado do banco (mas limpar blob URLs)
+            video_url: videoUrl,
             video_enabled: content.video_enabled !== undefined ? content.video_enabled : (prev.video_enabled !== undefined ? prev.video_enabled : false),
             video_title: content.video_title || prev.video_title || '',
             video_subtitle: content.video_subtitle || prev.video_subtitle || '',
@@ -640,11 +647,18 @@ export default function HomepageEditorPage() {
         testimonials_items: Array.isArray(formData.testimonials_items) ? formData.testimonials_items : [],
         section_order: sectionOrder,
         section_visibility: sectionVisibility,
-        // Garantir que video_url seja sempre salvo (mesmo que vazio)
-        video_url: formData.video_url || '',
+        // Garantir que video_url seja sempre salvo (mas limpar blob URLs)
+        video_url: (formData.video_url && !formData.video_url.startsWith('blob:')) ? formData.video_url : '',
         video_enabled: formData.video_enabled !== undefined ? formData.video_enabled : false,
         video_title: formData.video_title || '',
         video_subtitle: formData.video_subtitle || '',
+      }
+      
+      // Validar e limpar blob URLs antes de salvar
+      if (contentToSave.video_url && contentToSave.video_url.startsWith('blob:')) {
+        console.warn('⚠️ Tentativa de salvar blob URL, limpando...')
+        contentToSave.video_url = ''
+        toast.error('URL temporária detectada. Por favor, faça upload do vídeo novamente antes de salvar.')
       }
       
       console.log('🔍 Salvando video_url:', contentToSave.video_url)
@@ -861,6 +875,14 @@ export default function HomepageEditorPage() {
                     onChange={(url) => {
                       console.log('🔔 onChange do VideoUploader chamado no dashboard!', url)
                       console.trace('Stack trace do onChange no dashboard')
+                      
+                      // Validar que não é blob URL
+                      if (url && url.startsWith('blob:')) {
+                        console.error('❌ Blob URL detectada no onChange, rejeitando...')
+                        toast.error('URL temporária detectada. Por favor, faça upload do vídeo novamente.')
+                        return
+                      }
+                      
                       setFormData({ ...formData, video_url: url })
                     }}
                     placeholder="URL do vídeo ou upload"
