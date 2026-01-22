@@ -25,9 +25,9 @@ export const TermsContent = ({ termKey, defaultTitle, defaultContent, cachedCont
     // Caso contrário, carregar da API
     const loadTerm = async () => {
       try {
-        // Usar API com cache (5 minutos)
+        // Carregar da API sem cache para garantir conteúdo atualizado
         const response = await fetch('/api/terms', {
-          next: { revalidate: 300 } // Cache de 5 minutos
+          cache: 'no-store' // Sem cache para garantir conteúdo atualizado
         })
         
         if (!response.ok) {
@@ -94,7 +94,7 @@ export const TermsContent = ({ termKey, defaultTitle, defaultContent, cachedCont
         flushList()
         const level = line.match(/^#+/)?.[0]?.length || 1
         const text = line.replace(/^#+\s*/, '').trim()
-        const type = level === 1 ? 'h1' : level === 2 ? 'h2' : 'h3'
+        const type = level === 1 ? 'h1' : level === 2 ? 'h2' : level === 3 ? 'h3' : 'h4'
         blocks.push({ type, text, key: `${type}-${blocks.length}` })
         continue
       }
@@ -170,6 +170,12 @@ export const TermsContent = ({ termKey, defaultTitle, defaultContent, cachedCont
                 <h3 key={item.key} className="text-xl font-bold mb-3 mt-4">
                   {item.text}
                 </h3>
+              )
+            } else if (item.type === 'h4') {
+              return (
+                <h4 key={item.key} className="text-lg font-bold mb-2 mt-3">
+                  {item.text}
+                </h4>
               )
             } else if (item.type === 'ul') {
               return (

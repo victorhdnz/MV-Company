@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 
-// Cache por 300 segundos (5 minutos) - termos não mudam frequentemente
-export const revalidate = 300
+// Cache por 60 segundos (1 minuto) - termos podem ser atualizados
+export const revalidate = 60
 
 export async function GET() {
   try {
@@ -28,8 +28,8 @@ export async function GET() {
       terms: terms || [],
     }, {
       headers: {
-        // Cache por 5 minutos no cliente e CDN
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        // Cache por 1 minuto no cliente e CDN
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
       }
     })
   } catch (error: any) {
