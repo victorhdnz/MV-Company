@@ -573,58 +573,8 @@ export default function DashboardTermsPage() {
 
   useEffect(() => {
     // Carregar termos - autenticação é verificada pelo middleware
-    loadTerms().then(() => {
-      // Deletar termos antigos que não são mais necessários após carregar
-      deleteOldTerms()
-    })
+    loadTerms()
   }, [])
-
-  const deleteOldTerms = async () => {
-    try {
-      // Termos antigos que devem ser removidos
-      const oldTermKeys = ['politica-entrega', 'trocas-devolucoes']
-      let deletedCount = 0
-      
-      for (const key of oldTermKeys) {
-        // Primeiro verificar se existe
-        const { data: existing, error: checkError } = await (supabase as any)
-          .from('site_terms')
-          .select('id, key')
-          .eq('key', key)
-          .maybeSingle()
-        
-        if (checkError && checkError.code !== 'PGRST116') {
-          console.warn(`Erro ao verificar termo ${key}:`, checkError)
-          continue
-        }
-        
-        if (existing) {
-          // Se existe, deletar
-          const { error: deleteError } = await (supabase as any)
-            .from('site_terms')
-            .delete()
-            .eq('key', key)
-          
-          if (deleteError) {
-            console.error(`Erro ao deletar termo ${key}:`, deleteError)
-            // Não mostrar toast para cada erro, apenas logar
-          } else {
-            console.log(`✓ Termo ${key} deletado com sucesso`)
-            deletedCount++
-          }
-        }
-      }
-      
-      if (deletedCount > 0) {
-        // Recarregar termos após deletar
-        await loadTerms()
-        toast.success(`${deletedCount} termo(s) antigo(s) removido(s)`)
-      }
-    } catch (error) {
-      console.error('Erro ao deletar termos antigos:', error)
-      // Não mostrar toast de erro para não incomodar o usuário
-    }
-  }
 
   // Parsear conteúdo em seções quando termo é selecionado
   useEffect(() => {
@@ -681,7 +631,7 @@ export default function DashboardTermsPage() {
           id: `section-${Date.now()}-${parsedSections.length}`,
           title,
           content: '',
-          level: Math.min(level, 3) // Limitar a 3 níveis
+          level: Math.min(level, 4) // Suportar até 4 níveis (####)
         }
       } else if (currentSection && line) {
         // Adicionar conteúdo à seção atual
@@ -713,7 +663,7 @@ export default function DashboardTermsPage() {
     let content = `# ${mainTitle}\n\n`
 
     sections.forEach((section) => {
-      // O nível já está correto (1 = #, 2 = ##, 3 = ###)
+      // O nível já está correto (1 = #, 2 = ##, 3 = ###, 4 = ####)
       const prefix = '#'.repeat(section.level)
       content += `${prefix} ${section.title}\n\n`
       
@@ -728,15 +678,6 @@ export default function DashboardTermsPage() {
   const loadTerms = async () => {
     try {
       setLoading(true)
-      
-      // Primeiro, deletar termos antigos que não devem mais existir
-      const oldTermKeys = ['politica-entrega', 'trocas-devolucoes']
-      for (const key of oldTermKeys) {
-        await (supabase as any)
-          .from('site_terms')
-          .delete()
-          .eq('key', key)
-      }
       
       const { data, error } = await (supabase as any)
         .from('site_terms')
