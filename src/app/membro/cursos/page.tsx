@@ -14,6 +14,11 @@ import {
   Clock
 } from 'lucide-react'
 import Link from 'next/link'
+import { 
+  getYouTubeId, 
+  getYouTubeEmbedUrl,
+  getYouTubeContainerClasses 
+} from '@/lib/utils/youtube'
 
 interface Course {
   id: string
@@ -246,27 +251,6 @@ export default function CoursesPage() {
   )
 }
 
-// Função para detectar se é YouTube e extrair ID (suporta todos os formatos incluindo Shorts)
-function getYouTubeId(url: string): string | null {
-  if (!url) return null
-  
-  // Primeiro, verificar se é formato Shorts: youtube.com/shorts/VIDEO_ID
-  const shortsMatch = url.match(/(?:youtube\.com\/shorts\/)([^#&?\/\s]{11})/)
-  if (shortsMatch && shortsMatch[1]) {
-    return shortsMatch[1]
-  }
-  
-  // Depois, verificar outros formatos:
-  // - https://www.youtube.com/watch?v=VIDEO_ID
-  // - https://youtu.be/VIDEO_ID
-  // - https://www.youtube.com/embed/VIDEO_ID
-  // - https://www.youtube.com/v/VIDEO_ID
-  // - https://www.youtube.com/watch?v=VIDEO_ID&t=30s
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-  const match = url.match(regExp)
-  return (match && match[2] && match[2].length === 11) ? match[2] : null
-}
-
 function CourseCard({ 
   course, 
   index, 
@@ -326,26 +310,37 @@ function CourseCard({
                     const youtubeId = getYouTubeId(lesson.video_url)
                     const isYouTube = !!youtubeId
                     
+                    if (!isYouTube || !youtubeId) {
+                      return (
+                        <div className="mt-3 p-4 bg-gogh-grayLight rounded-lg">
+                          <div className="flex justify-center">
+                            <div className="relative w-full max-w-sm mx-auto">
+                              <div className="relative aspect-[9/16] rounded-xl overflow-hidden bg-gray-900 flex items-center justify-center">
+                                <p className="text-white text-sm">URL de vídeo inválida. Use uma URL do YouTube.</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    }
+                    
+                    const containerClasses = getYouTubeContainerClasses(lesson.video_url)
+                    const embedUrl = getYouTubeEmbedUrl(lesson.video_url)
+                    
                     return (
                       <div className="mt-3 p-4 bg-gogh-grayLight rounded-lg">
                         <div className="flex justify-center">
-                          <div className="relative w-full max-w-sm mx-auto">
+                          <div className={`relative w-full ${containerClasses.wrapper}`}>
                             {/* Container com gradiente sutil ao redor */}
                             <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-1 shadow-2xl">
-                              <div className="relative aspect-[9/16] rounded-xl overflow-hidden bg-black">
-                                {isYouTube && youtubeId ? (
-                                  <iframe
-                                    src={`https://www.youtube.com/embed/${youtubeId}`}
-                                    title={lesson.title}
-                                    className="w-full h-full"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center bg-gray-900">
-                                    <p className="text-white text-sm">URL de vídeo inválida. Use uma URL do YouTube.</p>
-                                  </div>
-                                )}
+                              <div className={`relative ${containerClasses.aspectRatio} rounded-xl overflow-hidden bg-black`}>
+                                <iframe
+                                  src={embedUrl || ''}
+                                  title={lesson.title}
+                                  className="w-full h-full"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                />
                               </div>
                             </div>
                           </div>

@@ -19,23 +19,12 @@ import {
   X,
   Play
 } from 'lucide-react'
-
-// Função para detectar se é YouTube e extrair ID (suporta todos os formatos incluindo Shorts)
-function getYouTubeId(url: string): string | null {
-  if (!url) return null
-  
-  // Primeiro, verificar se é formato Shorts: youtube.com/shorts/VIDEO_ID
-  const shortsMatch = url.match(/(?:youtube\.com\/shorts\/)([^#&?\/\s]{11})/)
-  if (shortsMatch && shortsMatch[1]) {
-    return shortsMatch[1]
-  }
-  
-  // Depois, verificar outros formatos
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-  const match = url.match(regExp)
-  return (match && match[2] && match[2].length === 11) ? match[2] : null
-}
 import toast from 'react-hot-toast'
+import { 
+  getYouTubeId, 
+  getYouTubeEmbedUrl,
+  getYouTubeContainerClasses 
+} from '@/lib/utils/youtube'
 
 interface ToolAccess {
   id: string
@@ -1008,21 +997,27 @@ export default function ToolsPage() {
               </button>
             </div>
             <div className="relative max-w-sm mx-auto">
-              {canvaVideoUrl && getYouTubeId(canvaVideoUrl) ? (
-                <div className="bg-gradient-to-br from-gogh-yellow/10 to-gogh-yellow/5 p-1 rounded-xl">
-                  <div className="bg-black rounded-lg overflow-hidden">
-                    <div className="relative aspect-[9/16] bg-black">
-                      <iframe
-                        src={`https://www.youtube.com/embed/${getYouTubeId(canvaVideoUrl)}`}
-                        title="Tutorial de Ativação Canva Pro"
-                        className="w-full h-full rounded-lg"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
+              {canvaVideoUrl && getYouTubeId(canvaVideoUrl) ? (() => {
+                const containerClasses = getYouTubeContainerClasses(canvaVideoUrl)
+                const embedUrl = getYouTubeEmbedUrl(canvaVideoUrl)
+                return (
+                  <div className={`${containerClasses.wrapper}`}>
+                    <div className="bg-gradient-to-br from-gogh-yellow/10 to-gogh-yellow/5 p-1 rounded-xl">
+                      <div className="bg-black rounded-lg overflow-hidden">
+                        <div className={`relative ${containerClasses.aspectRatio} bg-black`}>
+                          <iframe
+                            src={embedUrl || ''}
+                            title="Tutorial de Ativação Canva Pro"
+                            className="w-full h-full rounded-lg"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : (
+                )
+              })() : (
                 <div className="aspect-[9/16] w-full flex items-center justify-center bg-black rounded-lg">
                   <p className="text-white text-sm">Vídeo não disponível</p>
                 </div>
@@ -1064,21 +1059,27 @@ export default function ToolsPage() {
               </button>
             </div>
             <div className="relative max-w-sm mx-auto">
-              {capcutVideoUrl && getYouTubeId(capcutVideoUrl) ? (
-                <div className="bg-gradient-to-br from-gogh-yellow/10 to-gogh-yellow/5 p-1 rounded-xl">
-                  <div className="bg-black rounded-lg overflow-hidden">
-                    <div className="relative aspect-[9/16] bg-black">
-                      <iframe
-                        src={`https://www.youtube.com/embed/${getYouTubeId(capcutVideoUrl)}`}
-                        title="Tutorial de Ativação CapCut Pro"
-                        className="w-full h-full rounded-lg"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
+              {capcutVideoUrl && getYouTubeId(capcutVideoUrl) ? (() => {
+                const containerClasses = getYouTubeContainerClasses(capcutVideoUrl)
+                const embedUrl = getYouTubeEmbedUrl(capcutVideoUrl)
+                return (
+                  <div className={`${containerClasses.wrapper}`}>
+                    <div className="bg-gradient-to-br from-gogh-yellow/10 to-gogh-yellow/5 p-1 rounded-xl">
+                      <div className="bg-black rounded-lg overflow-hidden">
+                        <div className={`relative ${containerClasses.aspectRatio} bg-black`}>
+                          <iframe
+                            src={embedUrl || ''}
+                            title="Tutorial de Ativação CapCut Pro"
+                            className="w-full h-full rounded-lg"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : (
+                )
+              })() : (
                 <div className="aspect-[9/16] w-full flex items-center justify-center bg-black rounded-lg">
                   <p className="text-white text-sm">Vídeo não disponível</p>
                 </div>

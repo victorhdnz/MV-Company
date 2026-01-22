@@ -4,47 +4,18 @@ import { useState, useEffect } from 'react'
 import { X, Video as VideoIcon, ExternalLink } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import toast from 'react-hot-toast'
+import { 
+  getYouTubeId, 
+  getYouTubeEmbedUrl, 
+  getYouTubeThumbnail,
+  getYouTubeContainerClasses 
+} from '@/lib/utils/youtube'
 
 interface VideoUploaderProps {
   value?: string
   onChange: (url: string) => void
   placeholder?: string
   className?: string
-}
-
-// Função para detectar se é YouTube e extrair ID (suporta todos os formatos incluindo Shorts)
-function getYouTubeId(url: string): string | null {
-  if (!url) return null
-  
-  // Primeiro, verificar se é formato Shorts: youtube.com/shorts/VIDEO_ID
-  const shortsMatch = url.match(/(?:youtube\.com\/shorts\/)([^#&?\/\s]{11})/)
-  if (shortsMatch && shortsMatch[1]) {
-    return shortsMatch[1]
-  }
-  
-  // Depois, verificar outros formatos:
-  // - https://www.youtube.com/watch?v=VIDEO_ID
-  // - https://youtu.be/VIDEO_ID
-  // - https://www.youtube.com/embed/VIDEO_ID
-  // - https://www.youtube.com/v/VIDEO_ID
-  // - https://www.youtube.com/watch?v=VIDEO_ID&t=30s
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-  const match = url.match(regExp)
-  return (match && match[2] && match[2].length === 11) ? match[2] : null
-}
-
-// Função para gerar URL de embed do YouTube
-function getYouTubeEmbedUrl(url: string): string | null {
-  const videoId = getYouTubeId(url)
-  if (!videoId) return null
-  return `https://www.youtube.com/embed/${videoId}`
-}
-
-// Função para gerar URL de thumbnail do YouTube
-function getYouTubeThumbnail(url: string): string | null {
-  const videoId = getYouTubeId(url)
-  if (!videoId) return null
-  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
 }
 
 export function VideoUploader({ 
@@ -114,41 +85,44 @@ export function VideoUploader({
         </p>
       </div>
 
-      {/* Preview do YouTube - Formato Vertical */}
-      {youtubeId && embedUrl && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <VideoIcon size={16} />
-            <span>Preview do vídeo:</span>
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
-            >
-              Abrir no YouTube
-              <ExternalLink size={14} />
-            </a>
-          </div>
-          <div className="relative max-w-[360px] mx-auto">
-            {/* Container com gradiente sutil */}
-            <div className="bg-gradient-to-br from-gogh-yellow/10 to-gogh-yellow/5 p-1 rounded-xl">
-              <div className="bg-black rounded-lg overflow-hidden">
-                {/* Container vertical 9:16 */}
-                <div className="relative aspect-[9/16] bg-black">
-                  <iframe
-                    src={embedUrl}
-                    title="Preview do vídeo"
-                    className="w-full h-full rounded-lg"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+      {/* Preview do YouTube - Formato Adaptativo */}
+      {youtubeId && embedUrl && (() => {
+        const containerClasses = getYouTubeContainerClasses(url)
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <VideoIcon size={16} />
+              <span>Preview do vídeo:</span>
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              >
+                Abrir no YouTube
+                <ExternalLink size={14} />
+              </a>
+            </div>
+            <div className={`relative ${containerClasses.wrapper}`}>
+              {/* Container com gradiente sutil */}
+              <div className="bg-gradient-to-br from-gogh-yellow/10 to-gogh-yellow/5 p-1 rounded-xl">
+                <div className="bg-black rounded-lg overflow-hidden">
+                  {/* Container com aspect ratio dinâmico */}
+                  <div className={`relative ${containerClasses.aspectRatio} bg-black`}>
+                    <iframe
+                      src={embedUrl}
+                      title="Preview do vídeo"
+                      className="w-full h-full rounded-lg"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Placeholder quando não há URL */}
       {!url && (
