@@ -456,6 +456,8 @@ export default function HomepageEditorPage() {
           console.log('🔍 Logo final a ser usada:', heroLogo)
           console.log('🔍 site_name do banco:', rawData.site_name)
           console.log('🔍 site_title do banco:', rawData.site_title)
+          console.log('🔍 video_url do banco:', content.video_url)
+          console.log('🔍 video_enabled do banco:', content.video_enabled)
           
           return {
             ...prev,
@@ -466,6 +468,11 @@ export default function HomepageEditorPage() {
             services_cards: servicesCards,
             notifications_items: notificationsItems,
             testimonials_items: testimonialsItems,
+            // Garantir que video_url seja sempre preservado do banco
+            video_url: content.video_url || prev.video_url || '',
+            video_enabled: content.video_enabled !== undefined ? content.video_enabled : (prev.video_enabled !== undefined ? prev.video_enabled : false),
+            video_title: content.video_title || prev.video_title || '',
+            video_subtitle: content.video_subtitle || prev.video_subtitle || '',
           }
         })
         
@@ -633,7 +640,15 @@ export default function HomepageEditorPage() {
         testimonials_items: Array.isArray(formData.testimonials_items) ? formData.testimonials_items : [],
         section_order: sectionOrder,
         section_visibility: sectionVisibility,
+        // Garantir que video_url seja sempre salvo (mesmo que vazio)
+        video_url: formData.video_url || '',
+        video_enabled: formData.video_enabled !== undefined ? formData.video_enabled : false,
+        video_title: formData.video_title || '',
+        video_subtitle: formData.video_subtitle || '',
       }
+      
+      console.log('🔍 Salvando video_url:', contentToSave.video_url)
+      console.log('🔍 Salvando video_enabled:', contentToSave.video_enabled)
       
       // Preparar campos para atualizar
       const fieldsToUpdate: Record<string, any> = {
