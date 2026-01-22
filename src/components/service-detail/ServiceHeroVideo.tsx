@@ -8,11 +8,25 @@ interface ServiceHeroVideoProps {
   serviceName: string
 }
 
-// Função para detectar se é YouTube e extrair ID
+// Função para detectar se é YouTube e extrair ID (suporta todos os formatos incluindo Shorts)
 function getYouTubeId(url: string): string | null {
-  const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
-  const match = url.match(youtubeRegex)
-  return match ? match[1] : null
+  if (!url) return null
+  
+  // Primeiro, verificar se é formato Shorts: youtube.com/shorts/VIDEO_ID
+  const shortsMatch = url.match(/(?:youtube\.com\/shorts\/)([^#&?\/\s]{11})/)
+  if (shortsMatch && shortsMatch[1]) {
+    return shortsMatch[1]
+  }
+  
+  // Depois, verificar outros formatos:
+  // - https://www.youtube.com/watch?v=VIDEO_ID
+  // - https://youtu.be/VIDEO_ID
+  // - https://www.youtube.com/embed/VIDEO_ID
+  // - https://www.youtube.com/v/VIDEO_ID
+  // - https://www.youtube.com/watch?v=VIDEO_ID&t=30s
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const match = url.match(regExp)
+  return (match && match[2] && match[2].length === 11) ? match[2] : null
 }
 
 export function ServiceHeroVideo({ content, serviceName }: ServiceHeroVideoProps) {
