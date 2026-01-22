@@ -235,6 +235,13 @@ export default function ToolsPage() {
 
       if (messageError) throw messageError
 
+      // Disparar evento Lead do Meta Pixel
+      if (typeof window !== 'undefined' && (window as any).fbq) {
+        (window as any).fbq('track', 'Lead', {
+          content_name: 'Solicitação de Acesso às Ferramentas Pro'
+        })
+      }
+
       toast.success('Solicitação enviada! Você receberá o acesso em até 24 horas após a aprovação.')
       
       // Atualizar lista de tickets pendentes

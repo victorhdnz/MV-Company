@@ -19,6 +19,17 @@ export default function CheckoutSuccessPage() {
         .then(res => res.json())
         .then(data => {
           setSessionData(data)
+          
+          // Disparar evento Purchase do Meta Pixel quando a compra for confirmada
+          if (data && typeof window !== 'undefined' && (window as any).fbq) {
+            const price = data.amountTotal ? data.amountTotal / 100 : 0 // Converter de centavos para reais
+            ;(window as any).fbq('track', 'Purchase', {
+              value: price,
+              currency: 'BRL',
+              content_name: data.planName || 'Assinatura'
+            })
+          }
+          
           setLoading(false)
         })
         .catch(err => {

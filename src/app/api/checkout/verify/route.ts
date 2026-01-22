@@ -28,6 +28,7 @@ export async function GET(request: Request) {
       planName: session.metadata?.planName,
       billingCycle: session.metadata?.billingCycle,
       customerEmail: session.customer_email,
+      amountTotal: session.amount_total, // Valor total em centavos
     })
   } catch (error: any) {
     console.error('Erro ao verificar sessão:', error)

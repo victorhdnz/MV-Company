@@ -9,6 +9,7 @@ import { getSiteUrl } from '@/lib/utils/siteUrl'
 import { createServerClient } from '@/lib/supabase/server'
 import { NotFoundProvider } from '@/contexts/NotFoundContext'
 import { Providers } from '@/components/providers/Providers'
+import { MetaPixelWrapper } from '@/components/analytics/MetaPixelWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -273,6 +274,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
+        <MetaPixelWrapper />
         <ScrollEnabler />
         <Providers>
           <NotFoundProvider>

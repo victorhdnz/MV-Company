@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { PricingComponent, PriceTier, BillingCycle, FeatureCategory } from '@/components/ui/pricing-card'
 import { FadeInElement } from '@/components/ui/FadeInElement'
@@ -28,11 +28,31 @@ export function PricingSection({
 
   if (!enabled || !plans) return null
 
+  // Disparar evento ViewContent quando a seção de preços for visualizada
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      ;(window as any).fbq('track', 'ViewContent', {
+        content_name: 'Planos e Preços',
+        content_category: 'Pricing'
+      })
+    }
+  }, [])
+
   const handlePlanSelect = async (planId: string, cycle: BillingCycle, plan: PriceTier) => {
     // Obter o Price ID do Stripe baseado no ciclo
     const priceId = cycle === 'monthly' 
       ? plan.stripePriceIdMonthly 
       : plan.stripePriceIdAnnually
+
+    // Disparar evento InitiateCheckout do Meta Pixel
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      const price = cycle === 'monthly' ? plan.priceMonthly : plan.priceAnnually
+      ;(window as any).fbq('track', 'InitiateCheckout', {
+        value: price,
+        currency: 'BRL',
+        content_name: plan.name
+      })
+    }
 
     // Se tiver Price ID configurado, verificar login primeiro
     if (priceId) {
