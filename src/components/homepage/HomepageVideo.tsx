@@ -81,7 +81,7 @@ export function HomepageVideo({ enabled = true, videoUrl, videoAutoplay = false,
   }, [videoUrl, isYouTube])
 
   return (
-    <div className={`${isVertical && !isYouTube ? 'w-full max-w-[400px] mx-auto' : 'w-full'}`}>
+    <div className={`${isVertical && !isYouTube ? 'w-full max-w-[360px] mx-auto' : 'w-full'}`}>
       {/* Título com animação Pointer Highlight - Antes do vídeo */}
       {title && (
         <div className="mb-8">
@@ -96,8 +96,8 @@ export function HomepageVideo({ enabled = true, videoUrl, videoAutoplay = false,
         </div>
       )}
 
-      {/* Vídeo Principal */}
-      <div className={`relative rounded-2xl overflow-hidden shadow-lg border border-gogh-yellow/30 ${
+      {/* Vídeo Principal - Sem container de fundo */}
+      <div className={`relative ${
         isVertical && !isYouTube 
           ? 'aspect-[9/16] w-full' 
           : 'aspect-video w-full'
@@ -112,14 +112,14 @@ export function HomepageVideo({ enabled = true, videoUrl, videoAutoplay = false,
               allowFullScreen
             />
           ) : (
-            <div className="relative w-full h-full bg-black">
+            <div className="relative w-full h-full">
               <video
                 ref={videoRef}
                 src={videoUrl}
                 preload="metadata"
                 playsInline
                 controls={isPlaying}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain bg-black rounded-lg"
                 onPlay={() => setIsPlaying(true)}
                 onError={(e) => {
                   console.error('Erro ao carregar vídeo:', e)
@@ -148,7 +148,7 @@ export function HomepageVideo({ enabled = true, videoUrl, videoAutoplay = false,
                 }}
               />
               {!isPlaying && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/80 cursor-pointer group z-10" onClick={() => {
+                <div className="absolute inset-0 flex items-center justify-center bg-black/90 cursor-pointer group z-10 rounded-lg" onClick={() => {
                   if (videoRef.current) {
                     videoRef.current.play().catch((error) => {
                       console.error('Erro ao reproduzir vídeo:', error)
