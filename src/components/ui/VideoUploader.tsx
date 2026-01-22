@@ -209,8 +209,16 @@ export function VideoUploader({
             <video
               src={preview}
               controls
+              preload="metadata"
               className="w-full rounded-lg border aspect-[9/16] object-contain"
               style={{ backgroundColor: '#000000' }}
+              onError={(e) => {
+                console.error('Erro ao carregar vídeo no preview:', e)
+                const video = e.currentTarget
+                if (preview) {
+                  video.load()
+                }
+              }}
             />
             <div className="absolute top-2 right-2">
               <Button

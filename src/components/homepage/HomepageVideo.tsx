@@ -81,7 +81,7 @@ export function HomepageVideo({ enabled = true, videoUrl, videoAutoplay = false,
   }, [videoUrl, isYouTube])
 
   return (
-    <div className={`${isVertical && !isYouTube ? 'w-full max-w-[1120px] mx-auto' : 'w-full'}`}>
+    <div className={`${isVertical && !isYouTube ? 'w-full max-w-[400px] mx-auto' : 'w-full'}`}>
       {/* Título com animação Pointer Highlight - Antes do vídeo */}
       {title && (
         <div className="mb-8">
@@ -112,20 +112,56 @@ export function HomepageVideo({ enabled = true, videoUrl, videoAutoplay = false,
               allowFullScreen
             />
           ) : (
-            <div className="relative w-full h-full">
+            <div className="relative w-full h-full bg-black">
               <video
                 ref={videoRef}
                 src={videoUrl}
-                preload="none"
+                preload="metadata"
                 playsInline
                 controls={isPlaying}
                 className="w-full h-full object-contain"
                 onPlay={() => setIsPlaying(true)}
+                onError={(e) => {
+                  console.error('Erro ao carregar vídeo:', e)
+                  const video = e.currentTarget
+                  // Tentar recarregar o vídeo
+                  if (videoUrl && video) {
+                    const currentSrc = video.currentSrc || video.src
+                    video.load()
+                    // Se ainda falhar, tentar recarregar a URL
+                    setTimeout(() => {
+                      if (video.error && video.error.code === 4) {
+                        // MEDIA_ELEMENT_ERROR: Format error
+                        video.src = videoUrl
+                        video.load()
+                      }
+                    }, 1000)
+                  }
+                }}
+                onLoadedMetadata={() => {
+                  // Verificar se o vídeo tem fontes suportadas
+                  const video = videoRef.current
+                  if (video && video.readyState >= 2) {
+                    // Vídeo carregou corretamente
+                    console.log('Vídeo carregado com sucesso')
+                  }
+                }}
               />
               {!isPlaying && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black cursor-pointer group" onClick={() => {
-                  videoRef.current?.play()
-                  setIsPlaying(true)
+                <div className="absolute inset-0 flex items-center justify-center bg-black/80 cursor-pointer group z-10" onClick={() => {
+                  if (videoRef.current) {
+                    videoRef.current.play().catch((error) => {
+                      console.error('Erro ao reproduzir vídeo:', error)
+                      // Tentar recarregar e reproduzir
+                      if (videoRef.current && videoUrl) {
+                        videoRef.current.load()
+                        setTimeout(() => {
+                          videoRef.current?.play().catch(console.error)
+                        }, 500)
+                      }
+                    })
+                    setIsPlaying(true)
+                  }
                 }}>
                   <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gogh-yellow/90 group-hover:bg-gogh-yellow flex items-center justify-center transition-all transform group-hover:scale-110 shadow-lg">
                     <Play className="w-10 h-10 md:w-12 md:h-12 text-gogh-black ml-1" fill="currentColor" />
