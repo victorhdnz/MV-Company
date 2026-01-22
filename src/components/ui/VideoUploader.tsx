@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { X, Video as VideoIcon, ExternalLink } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Input } from '@/components/ui/Input'
 import toast from 'react-hot-toast'
 
 interface VideoUploaderProps {
