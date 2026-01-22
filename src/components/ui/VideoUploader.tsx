@@ -43,13 +43,23 @@ export function VideoUploader({
     const file = event.target.files?.[0]
     if (!file) return
 
-    // Validar se é um vídeo
-    if (!file.type.startsWith('video/')) {
+    // IMPORTANTE: Arquivos .mov podem ter file.type vazio ou incorreto
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || ''
+    const isMov = fileExt === 'mov'
+    
+    // Para .mov, aceitar mesmo se file.type estiver vazio
+    if (!file.type.startsWith('video/') && !isMov) {
       toast.error('Por favor, selecione apenas arquivos de vídeo')
       return
     }
 
-    // Sem limite de tamanho para vídeos (removido para permitir alta qualidade)
+    console.log('📋 Informações do arquivo:', {
+      nome: file.name,
+      tipo: file.type,
+      extensao: fileExt,
+      tamanho: file.size,
+      isMov: isMov
+    })
 
     // Verificar autenticação e permissões
     if (!isAuthenticated) {
@@ -66,20 +76,6 @@ export function VideoUploader({
     setUploadProgress(0)
     
     try {
-      // Gerar nome único para o arquivo (sanitizado)
-      const sanitizedName = file.name
-        .replace(/[^a-zA-Z0-9.-]/g, '_')
-        .replace(/\s+/g, '_')
-        .toLowerCase()
-      
-      const fileExt = sanitizedName.split('.').pop() || 'mp4'
-      const validExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv']
-      const finalExt = validExtensions.includes(fileExt.toLowerCase()) ? fileExt.toLowerCase() : 'mp4'
-      
-      // Gerar nome único: timestamp + random + extensão
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${finalExt}`
-      const filePath = fileName
-
       // Verificar autenticação
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       if (authError || !user) {
@@ -101,17 +97,49 @@ export function VideoUploader({
         throw new Error('Apenas administradores e editores podem fazer upload de vídeos')
       }
 
-      // Fazer upload DIRETO para Supabase Storage (seguindo o guia)
+      // Gerar nome único para o arquivo (sanitizado)
+      const sanitizedName = file.name
+        .replace(/[^a-zA-Z0-9.-]/g, '_')
+        .replace(/\s+/g, '_')
+        .toLowerCase()
+      
+      const validExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv']
+      const finalExt = validExtensions.includes(fileExt.toLowerCase()) ? fileExt.toLowerCase() : 'mp4'
+      
+      // Mapear MIME types corretos para cada extensão
+      const mimeTypeMap: Record<string, string> = {
+        'mp4': 'video/mp4',
+        'webm': 'video/webm',
+        'ogg': 'video/ogg',
+        'mov': 'video/quicktime', // MIME type correto para .mov
+        'avi': 'video/x-msvideo',
+        'mkv': 'video/x-matroska'
+      }
+      
+      // Determinar contentType: usar file.type se válido, senão usar mapeamento
+      let contentType = file.type
+      if (!contentType || contentType === '' || (isMov && !contentType.includes('quicktime'))) {
+        contentType = mimeTypeMap[finalExt] || `video/${finalExt}`
+        console.log('⚠️ file.type inválido ou vazio, usando mapeamento:', contentType)
+      }
+      
+      // Gerar nome único: timestamp + random + extensão
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${finalExt}`
+      const filePath = fileName
+
+      console.log('📤 Iniciando upload...', { fileName, contentType, finalExt })
+
+      // Fazer upload DIRETO para Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('videos') // Nome do bucket
+        .from('videos')
         .upload(filePath, file, {
-          cacheControl: '3600', // Cache de 1 hora
-          upsert: false, // Não sobrescrever se existir
-          contentType: file.type || `video/${finalExt}`, // Tipo MIME
+          cacheControl: '3600',
+          upsert: false,
+          contentType: contentType, // Usar contentType determinado acima
         })
 
       if (uploadError) {
-        console.error('Erro no upload:', uploadError)
+        console.error('❌ Erro no upload:', uploadError)
         
         // Tratar erros comuns
         let errorMessage = uploadError.message || 'Erro ao fazer upload do vídeo'
@@ -129,6 +157,8 @@ export function VideoUploader({
         throw new Error(errorMessage)
       }
 
+      console.log('✅ Upload concluído:', uploadData)
+
       // Obter URL pública do vídeo
       const { data: urlData } = supabase.storage
         .from('videos')
@@ -138,13 +168,20 @@ export function VideoUploader({
         throw new Error('Erro ao obter URL do vídeo')
       }
 
+      console.log('🔗 URL gerada:', urlData.publicUrl)
+      console.log('🔔 Chamando onChange com URL:', urlData.publicUrl)
+
       setUploadProgress(100)
 
+      // Atualizar preview e chamar onChange
       setPreview(urlData.publicUrl)
       onChange(urlData.publicUrl)
+      
+      console.log('✅ Estado local atualizado e onChange chamado')
+      
       toast.success('Vídeo carregado com sucesso!')
     } catch (error: any) {
-      console.error('Erro no upload:', error)
+      console.error('❌ Erro completo no upload:', error)
       toast.error(error.message || 'Erro ao fazer upload do vídeo')
     } finally {
       setUploading(false)

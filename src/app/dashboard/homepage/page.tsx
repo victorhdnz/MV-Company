@@ -649,6 +649,7 @@ export default function HomepageEditorPage() {
       
       console.log('🔍 Salvando video_url:', contentToSave.video_url)
       console.log('🔍 Salvando video_enabled:', contentToSave.video_enabled)
+      console.log('🔍 Conteúdo completo a ser salvo:', JSON.stringify(contentToSave, null, 2))
       
       // Preparar campos para atualizar
       const fieldsToUpdate: Record<string, any> = {
@@ -663,6 +664,8 @@ export default function HomepageEditorPage() {
         site_name: formData.site_name,
         site_title: formData.site_title
       })
+      console.log('💾 Iniciando salvamento no banco de dados...')
+      console.log('💾 fieldsToUpdate:', JSON.stringify(fieldsToUpdate, null, 2))
       
       const { success, error } = await saveSiteSettings({
         fieldsToUpdate,
@@ -670,9 +673,28 @@ export default function HomepageEditorPage() {
       })
 
       if (!success) {
-        console.error('Erro ao salvar configurações:', error)
+        console.error('❌ Erro ao salvar configurações:', error)
         toast.error(error?.message || 'Erro ao salvar configurações da homepage.')
         return
+      }
+      
+      console.log('✅ Configurações salvas com sucesso!')
+      
+      // Verificar se foi salvo corretamente
+      const { data: verifyData, error: verifyError } = await (supabase as any)
+        .from('site_settings')
+        .select('homepage_content')
+        .eq('key', 'general')
+        .maybeSingle()
+      
+      if (!verifyError && verifyData?.homepage_content) {
+        const savedVideoUrl = verifyData.homepage_content.video_url
+        console.log('✅ Verificação: video_url salvo no banco:', savedVideoUrl)
+        if (savedVideoUrl === contentToSave.video_url) {
+          console.log('✅✅✅ CONFIRMADO: video_url salvo corretamente!')
+        } else {
+          console.warn('⚠️ video_url salvo diferente:', { esperado: contentToSave.video_url, salvo: savedVideoUrl })
+        }
       }
       
       // FALLBACK: Atualizar campos diretamente caso o helper não funcione
@@ -836,9 +858,18 @@ export default function HomepageEditorPage() {
                   <label className="block text-sm font-medium mb-2">URL do Vídeo</label>
                   <VideoUploader
                     value={formData.video_url || ''}
-                    onChange={(url) => setFormData({ ...formData, video_url: url })}
+                    onChange={(url) => {
+                      console.log('🔔 onChange do VideoUploader chamado no dashboard!', url)
+                      console.trace('Stack trace do onChange no dashboard')
+                      setFormData({ ...formData, video_url: url })
+                    }}
                     placeholder="URL do vídeo ou upload"
                   />
+                  {formData.video_url && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      URL atual: {formData.video_url.substring(0, 60)}...
+                    </p>
+                  )}
                 </div>
                 <Input
                   label="Título Principal"
