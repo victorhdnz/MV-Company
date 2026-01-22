@@ -81,7 +81,7 @@ export function HomepageVideo({ enabled = true, videoUrl, videoAutoplay = false,
   }, [videoUrl, isYouTube])
 
   return (
-    <div className="w-full">
+    <div className={`${isVertical && !isYouTube ? 'w-full max-w-sm mx-auto' : 'w-full'}`}>
       {/* Título com animação Pointer Highlight - Antes do vídeo */}
       {title && (
         <div className="mb-8">
@@ -97,9 +97,9 @@ export function HomepageVideo({ enabled = true, videoUrl, videoAutoplay = false,
       )}
 
       {/* Vídeo Principal */}
-      <div className={`relative rounded-2xl overflow-hidden shadow-lg border border-gogh-yellow/30 ${
+      <div className={`relative rounded-2xl overflow-hidden shadow-lg border border-gogh-yellow/30 w-full ${
         isVertical && !isYouTube 
-          ? 'aspect-[9/16] max-w-sm mx-auto' 
+          ? 'aspect-[9/16]' 
           : 'aspect-video'
       }`}>
         {videoUrl ? (

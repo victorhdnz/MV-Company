@@ -67,7 +67,7 @@ export function HomepageSections({
       <section className="py-16 md:py-24 px-4 bg-gogh-beige">
         <div className="container mx-auto max-w-7xl">
           <div className={`flex flex-col ${showAwardWithVideo ? 'lg:flex-row' : ''} items-center justify-center gap-8`}>
-            <div className={showAwardWithVideo ? 'lg:w-2/3' : 'w-full'}>
+            <div className={showAwardWithVideo ? 'lg:w-2/3 w-full flex justify-center' : 'w-full flex justify-center'}>
               <HomepageVideo
                 enabled={homepageContent.video_enabled !== false}
                 videoUrl={homepageContent.video_url}
