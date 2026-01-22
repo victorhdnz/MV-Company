@@ -45,6 +45,7 @@ interface ToolAccess {
   password?: string
   tutorial_video_url?: string
   access_granted_at: string
+  updated_at?: string
   is_active: boolean
   error_reported?: boolean
   error_message?: string
@@ -236,13 +237,22 @@ export default function ToolsPage() {
     setSubmitting(true)
 
     try {
+      // Determinar se é renovação ou primeira solicitação
+      const isRenewal = hasAccessFromOldPeriod
+      const subject = isRenewal 
+        ? 'Solicitação de acesso às ferramentas Pro após renovação (Canva e CapCut)'
+        : 'Solicitação de acesso às ferramentas Pro (Canva e CapCut)'
+      const messageContent = isRenewal
+        ? 'Olá! Minha assinatura foi renovada e gostaria de solicitar um novo acesso às ferramentas Canva Pro e CapCut Pro para este novo período. Aguardo instruções para receber as credenciais.'
+        : 'Olá! Gostaria de solicitar acesso às ferramentas Canva Pro e CapCut Pro. Aguardo instruções para receber as credenciais.'
+
       // Criar ticket único para ambas as ferramentas
       const { data: ticketData, error: ticketError } = await (supabase as any)
         .from('support_tickets')
         .insert({
           user_id: user.id,
           ticket_type: 'tools_access',
-          subject: 'Solicitação de acesso às ferramentas Pro (Canva e CapCut)',
+          subject: subject,
           status: 'open',
           priority: 'normal'
         })
@@ -257,7 +267,7 @@ export default function ToolsPage() {
         .insert({
           ticket_id: ticketData.id,
           sender_id: user.id,
-          content: 'Olá! Gostaria de solicitar acesso às ferramentas Canva Pro e CapCut Pro. Aguardo instruções para receber as credenciais.'
+          content: messageContent
         })
 
       if (messageError) throw messageError
@@ -304,7 +314,8 @@ export default function ToolsPage() {
         return
       }
 
-      const { error } = await (supabase as any)
+      // Atualizar credenciais com flag de erro reportado
+      const { error: updateError } = await (supabase as any)
         .from('tool_access_credentials')
         .update({
           error_reported: true,
@@ -313,9 +324,72 @@ export default function ToolsPage() {
         })
         .eq('id', toolAccessData.id)
 
-      if (error) throw error
+      if (updateError) throw updateError
 
-      toast.success('Erro reportado! Nossa equipe irá verificar e enviar uma nova conta.')
+      // Buscar ou criar ticket para este reporte
+      // Primeiro, verificar se existe ticket aberto para este usuário e tipo
+      const { data: existingTickets } = await (supabase as any)
+        .from('support_tickets')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('ticket_type', 'tools_access')
+        .in('status', ['open', 'in_progress'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      let ticketId: string
+
+      if (existingTickets && existingTickets.length > 0) {
+        // Reabrir ticket existente se estiver fechado, ou usar o aberto
+        const existingTicket = existingTickets[0]
+        if (existingTicket.status === 'closed' || existingTicket.status === 'resolved') {
+          // Reabrir ticket fechado
+          const { data: reopenedTicket, error: reopenError } = await (supabase as any)
+            .from('support_tickets')
+            .update({
+              status: 'open',
+              subject: `[REPORTE] ${existingTicket.subject} - Problema com ${reportingError === 'canva' ? 'Canva Pro' : 'CapCut Pro'}`,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingTicket.id)
+            .select()
+            .single()
+
+          if (reopenError) throw reopenError
+          ticketId = reopenedTicket.id
+        } else {
+          ticketId = existingTicket.id
+        }
+      } else {
+        // Criar novo ticket para o reporte
+        const { data: newTicket, error: ticketError } = await (supabase as any)
+          .from('support_tickets')
+          .insert({
+            user_id: user.id,
+            ticket_type: 'tools_access',
+            subject: `[REPORTE] Problema reportado com ${reportingError === 'canva' ? 'Canva Pro' : 'CapCut Pro'}`,
+            status: 'open',
+            priority: 'high'
+          })
+          .select()
+          .single()
+
+        if (ticketError) throw ticketError
+        ticketId = newTicket.id
+      }
+
+      // Criar mensagem no ticket explicando o problema
+      const { error: messageError } = await (supabase as any)
+        .from('support_messages')
+        .insert({
+          ticket_id: ticketId,
+          sender_id: user.id,
+          content: `[REPORTE DE PROBLEMA - ${reportingError === 'canva' ? 'Canva Pro' : 'CapCut Pro'}]\n\n${errorMessage.trim()}\n\nPor favor, envie novas credenciais de acesso.`
+        })
+
+      if (messageError) throw messageError
+
+      toast.success('Erro reportado! Nossa equipe irá verificar e enviar uma nova conta. Um ticket foi criado para acompanhamento.')
       setShowErrorModal(false)
       setErrorMessage('')
       setReportingError(null)
@@ -585,26 +659,53 @@ export default function ToolsPage() {
               </ul>
 
               {/* Link de Ativação / Credenciais */}
-              {tool.hasAccess && tool.accessData && (
-                <div className="space-y-3">
-                  {tool.accessData.access_link && (
-                    <div className="space-y-2">
-                      {/* Alerta de Erro Reportado */}
-                      {tool.accessData.error_reported && (
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                          <div className="flex items-start gap-2">
-                            <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-amber-800">
-                                Erro reportado
-                              </p>
-                              <p className="text-xs text-amber-600 mt-1">
-                                Nossa equipe está verificando e enviará uma nova conta em breve.
-                              </p>
+              {tool.hasAccess && tool.accessData && (() => {
+                // Verificar se há novos acessos após reporte
+                // Se error_reported era true mas foi atualizado recentemente (últimas 24h), mostrar indicativo
+                const accessData = tool.accessData
+                const updatedAt = accessData.updated_at ? new Date(accessData.updated_at) : null
+                const grantedAt = accessData.access_granted_at ? new Date(accessData.access_granted_at) : null
+                const hasNewAccess = updatedAt && grantedAt && updatedAt > grantedAt && 
+                  (new Date().getTime() - updatedAt.getTime()) < (24 * 60 * 60 * 1000) // Últimas 24h
+                const wasErrorReported = accessData.error_reported
+                
+                return (
+                  <div className="space-y-3">
+                    {tool.accessData.access_link && (
+                      <div className="space-y-2">
+                        {/* Alerta de Novos Acessos Após Reporte */}
+                        {hasNewAccess && wasErrorReported && (
+                          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                            <div className="flex items-start gap-2">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-emerald-800">
+                                  ✅ Novos Acessos Disponíveis!
+                                </p>
+                                <p className="text-xs text-emerald-600 mt-1">
+                                  Nossa equipe atualizou suas credenciais após o reporte. Verifique os novos acessos abaixo.
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                        
+                        {/* Alerta de Erro Reportado */}
+                        {tool.accessData.error_reported && !hasNewAccess && (
+                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                            <div className="flex items-start gap-2">
+                              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-amber-800">
+                                  Erro reportado
+                                </p>
+                                <p className="text-xs text-amber-600 mt-1">
+                                  Nossa equipe está verificando e enviará uma nova conta em breve.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       
                       {/* Informação de duração */}
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
@@ -723,15 +824,43 @@ export default function ToolsPage() {
                     <p className="text-sm text-emerald-700 text-left mb-2">
                       Detectamos que sua assinatura foi renovada! Você pode solicitar um novo acesso às ferramentas Canva Pro e CapCut Pro para este novo período.
                     </p>
-                    {!canRequestTools() ? (
-                      <p className="text-sm text-emerald-700 text-left">
-                        Aguarde <strong>{daysUntilCanRequest()} dia{daysUntilCanRequest()! > 1 ? 's' : ''}</strong> após a renovação para solicitar o novo acesso (período de arrependimento de 7 dias).
-                      </p>
-                    ) : (
-                      <p className="text-sm text-emerald-700 text-left">
-                        Você já pode solicitar o novo acesso! Após a aprovação, você terá <strong>30 dias de uso</strong> das ferramentas.
-                      </p>
-                    )}
+                    {(() => {
+                      const daysRemaining = daysUntilCanRequest()
+                      const subscriptionStartDate = subscription?.current_period_start 
+                        ? new Date(subscription.current_period_start)
+                        : (subscription as any)?.created_at 
+                          ? new Date((subscription as any).created_at)
+                          : null
+                      const daysActive = subscriptionStartDate 
+                        ? Math.floor((new Date().getTime() - subscriptionStartDate.getTime()) / (1000 * 60 * 60 * 24))
+                        : 0
+                      
+                      return !canRequestTools() ? (
+                        <>
+                          <p className="text-sm text-emerald-700 text-left mb-2">
+                            Sua assinatura renovada está ativa há <strong>{daysActive} dia{daysActive !== 1 ? 's' : ''}</strong>. 
+                            Aguarde após a renovação para solicitar o novo acesso (período de arrependimento de 7 dias).
+                          </p>
+                          {daysRemaining !== null && daysRemaining > 0 && (
+                            <div className="mt-3 p-3 bg-emerald-100 rounded-lg border border-emerald-300">
+                              <p className="text-sm font-semibold text-emerald-900 mb-1">
+                                ⏳ Faltam {daysRemaining} dia{daysRemaining > 1 ? 's' : ''} para você poder solicitar acesso às ferramentas
+                              </p>
+                              <div className="w-full bg-emerald-200 rounded-full h-2 mt-2">
+                                <div 
+                                  className="bg-emerald-600 h-2 rounded-full transition-all duration-300"
+                                  style={{ width: `${Math.min(100, ((8 - daysRemaining) / 8) * 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-sm text-emerald-700 text-left">
+                          Você já pode solicitar o novo acesso! Após a aprovação, você terá <strong>30 dias de uso</strong> das ferramentas.
+                        </p>
+                      )
+                    })()}
                   </div>
                   {!canRequestTools() ? (
                     <button

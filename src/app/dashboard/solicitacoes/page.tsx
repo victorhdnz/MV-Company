@@ -387,14 +387,23 @@ export default function SolicitacoesPage() {
         
         if (canvaAccess) {
           // Atualizar existente
+          // Se havia um erro reportado, resetar ao atualizar
+          const updateData: any = {
+            access_link: canvaLink.trim(),
+            email: selectedTicket.user?.email || 'noreply@example.com',
+            tutorial_video_url: canvaVideoUrl,
+            updated_at: new Date().toISOString()
+          }
+          
+          // Se havia erro reportado, resetar
+          if (canvaAccess.error_reported) {
+            updateData.error_reported = false
+            updateData.error_message = null
+          }
+          
           const { data, error } = await (supabase as any)
             .from('tool_access_credentials')
-            .update({
-              access_link: canvaLink.trim(),
-              email: selectedTicket.user?.email || 'noreply@example.com',
-              tutorial_video_url: canvaVideoUrl, // Vídeo específico do Canva
-              updated_at: new Date().toISOString()
-            })
+            .update(updateData)
             .eq('id', canvaAccess.id)
             .select()
 
@@ -441,6 +450,12 @@ export default function SolicitacoesPage() {
           email: selectedTicket.user?.email || 'noreply@example.com',
           tutorial_video_url: capcutVideoUrl, // Vídeo específico do CapCut
           updated_at: new Date().toISOString()
+        }
+        
+        // Se havia erro reportado, resetar ao atualizar
+        if (capcutAccess?.error_reported) {
+          capcutData.error_reported = false
+          capcutData.error_message = null
         }
         
         // Adicionar password apenas se a coluna existir (pode não existir se o SQL não foi executado)
