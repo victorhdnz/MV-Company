@@ -339,7 +339,7 @@ Conforme o Código de Defesa do Consumidor (CDC), você tem 7 (sete) dias corrid
 
 Para garantir que o período de arrependimento seja respeitado e evitar que credenciais de acesso sejam fornecidas antes do término deste prazo, o **acesso às ferramentas profissionais Canva Pro e CapCut Pro será liberado apenas a partir do oitavo dia** após a data de início da sua assinatura.
 
-**IMPORTANTE:** Esta regra se aplica tanto para **compras iniciais** (primeira contratação de um plano) quanto para **renovações** (renovação automática ou manual da assinatura). Em ambos os casos, o período de espera de 8 dias é contado a partir da data de início do novo período de assinatura (`current_period_start`), garantindo que o direito de arrependimento seja respeitado em cada ciclo contratual.
+**IMPORTANTE:** Esta regra se aplica tanto para **compras iniciais** (primeira contratação de um plano) quanto para **renovações** (renovação automática ou manual da assinatura). Em ambos os casos, o período de espera de 8 dias é contado a partir da data de início do novo período de assinatura (current_period_start), garantindo que o direito de arrependimento seja respeitado em cada ciclo contratual.
 
 #### 2.4.2. Processo de Solicitação
 
