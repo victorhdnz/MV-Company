@@ -239,28 +239,6 @@ export function VideoUploader({
             </div>
             
             <div className="flex gap-2 justify-center flex-col items-center">
-              <Button
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                isLoading={uploading}
-                disabled={uploading}
-              >
-                <Upload size={16} className="mr-2" />
-                {uploading ? 'Carregando...' : 'Upload'}
-              </Button>
-              {uploading && uploadProgress > 0 && (
-                <div className="w-full max-w-xs mt-2">
-                  <div className="bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-600 mt-1 text-center">
-                    {uploadProgress}% completo
-                  </p>
-                </div>
-              )}
               {showMediaManager && (
                 <MediaManager
                   onSelectMedia={handleMediaSelect}
@@ -274,13 +252,6 @@ export function VideoUploader({
         )}
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="video/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
     </div>
   )
 }
