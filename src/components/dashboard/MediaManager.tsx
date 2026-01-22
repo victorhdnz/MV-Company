@@ -44,8 +44,9 @@ export function MediaManager({
     
     try {
       for (const file of Array.from(files)) {
-        // Validar tamanho
-        if (file.size > maxSizeMB * 1024 * 1024) {
+        // Validar tamanho (apenas para imagens, vídeos sem limite prático)
+        // Se maxSizeMB >= 10000, considera sem limite (para vídeos)
+        if (maxSizeMB < 10000 && file.size > maxSizeMB * 1024 * 1024) {
           toast.error(`Arquivo ${file.name} é muito grande. Máximo: ${maxSizeMB}MB`)
           continue
         }

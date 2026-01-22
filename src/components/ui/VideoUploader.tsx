@@ -49,11 +49,7 @@ export function VideoUploader({
       return
     }
 
-    // Validar tamanho (máximo 100MB)
-    if (file.size > 100 * 1024 * 1024) {
-      toast.error('O vídeo deve ter no máximo 100MB')
-      return
-    }
+    // Sem limite de tamanho para vídeos (removido para permitir alta qualidade)
 
     // Verificar autenticação e permissões
     if (!isAuthenticated) {
@@ -125,7 +121,7 @@ export function VideoUploader({
         } else if (errorMessage.includes('duplicate') || errorMessage.includes('exists')) {
           errorMessage = 'Um arquivo com este nome já existe. Tente novamente.'
         } else if (errorMessage.includes('413') || errorMessage.includes('too large')) {
-          errorMessage = 'Arquivo muito grande. Tamanho máximo: 100MB'
+          errorMessage = 'Erro ao fazer upload do vídeo. Verifique sua conexão e tente novamente.'
         } else if (errorMessage.includes('new row violates row-level security') || errorMessage.includes('row-level security')) {
           errorMessage = 'Erro de permissão. Verifique as políticas RLS do bucket. Execute o SQL em supabase/storage_videos_rls.sql'
         }
@@ -289,7 +285,7 @@ export function VideoUploader({
                 <MediaManager
                   onSelectMedia={handleMediaSelect}
                   acceptedTypes={['video/*']}
-                  maxSizeMB={50}
+                  maxSizeMB={10000}
                   folder="videos"
                 />
               )}

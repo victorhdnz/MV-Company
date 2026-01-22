@@ -29,9 +29,15 @@ function isValidImageFile(file: File): boolean {
 }
 
 // Validar tamanho do arquivo
+// Vídeos: sem limite (removido para permitir alta qualidade)
+// Imagens: 5MB
 function isValidFileSize(size: number, isVideo: boolean = false): boolean {
-  const maxSize = isVideo ? 50 * 1024 * 1024 : MAX_FILE_SIZE // 50MB para vídeos, 5MB para imagens
-  return size <= maxSize
+  if (isVideo) {
+    // Sem limite para vídeos
+    return true
+  }
+  // 5MB para imagens
+  return size <= MAX_FILE_SIZE
 }
 
 export async function POST(request: NextRequest) {
@@ -80,11 +86,11 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Validar tamanho
+    // Validar tamanho (apenas para imagens, vídeos sem limite)
     if (!isValidFileSize(file.size, isVideo)) {
-      const maxSizeMB = isVideo ? 50 : 5 // 5MB para imagens (conforme exemplo fornecido)
+      // Apenas imagens têm limite (5MB)
       return NextResponse.json({ 
-        error: `Arquivo muito grande. Tamanho máximo: ${maxSizeMB}MB` 
+        error: `Arquivo muito grande. Tamanho máximo: 5MB para imagens` 
       }, { status: 400 })
     }
 

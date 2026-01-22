@@ -339,9 +339,11 @@ Conforme o Código de Defesa do Consumidor (CDC), você tem 7 (sete) dias corrid
 
 Para garantir que o período de arrependimento seja respeitado e evitar que credenciais de acesso sejam fornecidas antes do término deste prazo, o **acesso às ferramentas profissionais Canva Pro e CapCut Pro será liberado apenas a partir do oitavo dia** após a data de início da sua assinatura.
 
+**IMPORTANTE:** Esta regra se aplica tanto para **compras iniciais** (primeira contratação de um plano) quanto para **renovações** (renovação automática ou manual da assinatura). Em ambos os casos, o período de espera de 8 dias é contado a partir da data de início do novo período de assinatura (`current_period_start`), garantindo que o direito de arrependimento seja respeitado em cada ciclo contratual.
+
 #### 2.4.2. Processo de Solicitação
 
-- Após o oitavo dia da assinatura, você poderá solicitar acesso às ferramentas através da área de membros
+- Após o oitavo dia da assinatura (seja compra inicial ou renovação), você poderá solicitar acesso às ferramentas através da área de membros
 - A solicitação será processada e o acesso será liberado em até 24 horas após a aprovação
 - Você receberá as credenciais de acesso (link de ativação do Canva Pro e login/senha do CapCut Pro) através da plataforma
 
@@ -351,7 +353,7 @@ Após a liberação do acesso, você terá **30 (trinta) dias de uso** das ferra
 
 #### 2.4.4. Renovação do Acesso
 
-O acesso às ferramentas pode ser renovado mediante nova solicitação, desde que sua assinatura esteja ativa e em dia. A renovação seguirá o mesmo processo descrito acima.
+O acesso às ferramentas pode ser renovado mediante nova solicitação, desde que sua assinatura esteja ativa e em dia. **A renovação seguirá o mesmo processo descrito acima, incluindo o período de espera de 8 dias a partir da data de início do novo período de assinatura.** Ou seja, mesmo que você já tenha tido acesso às ferramentas em um período anterior, ao renovar sua assinatura, será necessário aguardar novamente o oitavo dia do novo período para solicitar um novo acesso.
 
 #### 2.4.5. Responsabilidade pelo Uso
 

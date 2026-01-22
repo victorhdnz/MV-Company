@@ -65,13 +65,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Validar tamanho (máximo 100MB)
-    const MAX_SIZE = 100 * 1024 * 1024 // 100MB
-    if (file.size > MAX_SIZE) {
-      return NextResponse.json({ 
-        error: `Arquivo muito grande. Tamanho máximo: 100MB` 
-      }, { status: 400 })
-    }
+    // Sem limite de tamanho para vídeos (removido para permitir alta qualidade)
 
     console.log('Usuário autenticado para upload:', user.id)
 

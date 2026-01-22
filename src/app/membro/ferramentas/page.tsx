@@ -43,7 +43,7 @@ interface SupportTicket {
 }
 
 export default function ToolsPage() {
-  const { user, subscription, hasActiveSubscription } = useAuth()
+  const { user, subscription, hasActiveSubscription, isPro } = useAuth()
   const [toolAccess, setToolAccess] = useState<ToolAccess[]>([])
   const [pendingTickets, setPendingTickets] = useState<SupportTicket[]>([])
   const [loading, setLoading] = useState(true)
@@ -134,17 +134,23 @@ export default function ToolsPage() {
   const hasPendingRequest = pendingTickets.length > 0
 
   // Verificar se já passaram 8 dias desde o início da assinatura (oitavo dia)
+  // Funciona tanto para novos clientes quanto para renovações
   const canRequestTools = () => {
     if (!subscription) return false
     
-    // Buscar a data de início da assinatura (current_period_start ou created_at)
-    const subscriptionStartDate = subscription.current_period_start 
-      ? new Date(subscription.current_period_start)
-      : null
+    // Buscar a data de início da assinatura
+    // Prioridade: current_period_start (período atual) > created_at (data de criação)
+    let subscriptionStartDate: Date | null = null
+    
+    if (subscription.current_period_start) {
+      subscriptionStartDate = new Date(subscription.current_period_start)
+    } else if ((subscription as any).created_at) {
+      // Fallback para created_at se current_period_start não existir
+      subscriptionStartDate = new Date((subscription as any).created_at)
+    }
     
     if (!subscriptionStartDate) {
-      // Se não tem current_period_start, buscar created_at da subscription
-      // Por enquanto, retornar false se não tiver data
+      // Se não tem nenhuma data, retornar false
       return false
     }
     
@@ -152,16 +158,25 @@ export default function ToolsPage() {
     const daysSinceStart = Math.floor((now.getTime() - subscriptionStartDate.getTime()) / (1000 * 60 * 60 * 24))
     
     // Oitavo dia = já passou o período de arrependimento de 7 dias
+    // Funciona para novos clientes (primeira compra) e renovações
     return daysSinceStart >= 8
   }
 
   // Calcular dias restantes até poder solicitar
+  // Funciona tanto para novos clientes quanto para renovações
   const daysUntilCanRequest = () => {
     if (!subscription) return null
     
-    const subscriptionStartDate = subscription.current_period_start 
-      ? new Date(subscription.current_period_start)
-      : null
+    // Buscar a data de início da assinatura
+    // Prioridade: current_period_start (período atual) > created_at (data de criação)
+    let subscriptionStartDate: Date | null = null
+    
+    if (subscription.current_period_start) {
+      subscriptionStartDate = new Date(subscription.current_period_start)
+    } else if ((subscription as any).created_at) {
+      // Fallback para created_at se current_period_start não existir
+      subscriptionStartDate = new Date((subscription as any).created_at)
+    }
     
     if (!subscriptionStartDate) return null
     
@@ -362,6 +377,94 @@ export default function ToolsPage() {
             </div>
           </div>
         </motion.div>
+      </div>
+    )
+  }
+
+  // Verificar se tem acesso às ferramentas (apenas Pro)
+  const hasToolsAccess = isPro && hasActiveSubscription
+
+  // Se não for Pro, mostrar tela de bloqueio similar à de cursos
+  if (!hasToolsAccess && hasActiveSubscription) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-bold text-gogh-black mb-2">
+            Ferramentas Pro
+          </h1>
+          <p className="text-gogh-grayDark">
+            Acesse as melhores ferramentas de criação incluídas na sua assinatura.
+          </p>
+        </div>
+
+        {/* Banner de Upgrade */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-6"
+        >
+          <p className="text-amber-800">
+            As ferramentas Pro são exclusivas para o plano Pro. <Link href="/#pricing" className="font-medium underline">Faça upgrade agora</Link>
+          </p>
+        </motion.div>
+
+        {/* Tools Grid com Overlay */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+          {/* Overlay de bloqueio */}
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 rounded-xl flex items-center justify-center">
+            <div className="text-center p-8">
+              <Wrench className="w-16 h-16 text-gogh-grayDark mx-auto mb-4 opacity-50" />
+              <h3 className="text-xl font-bold text-gogh-black mb-2">
+                Ferramentas Exclusivas do Plano Pro
+              </h3>
+              <p className="text-gogh-grayDark mb-6 max-w-md">
+                Faça upgrade para o plano Pro e tenha acesso completo às ferramentas Canva Pro e CapCut Pro.
+              </p>
+              <Link
+                href="/#pricing"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gogh-yellow text-gogh-black font-medium rounded-xl hover:bg-gogh-yellow/90 transition-colors"
+              >
+                Fazer Upgrade
+              </Link>
+            </div>
+          </div>
+
+          {/* Cards das ferramentas (borrados) */}
+          {tools.map((tool, index) => (
+            <motion.div
+              key={tool.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 0.3, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white rounded-xl border border-gogh-grayLight shadow-sm overflow-hidden blur-sm pointer-events-none"
+            >
+              <div className={`bg-gradient-to-r ${tool.color} p-6 text-white`}>
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                    <tool.icon className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">{tool.name}</h3>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                <p className="text-gogh-grayDark text-sm mb-4">
+                  {tool.description}
+                </p>
+                <ul className="space-y-2">
+                  {tool.features.map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="w-4 h-4 text-gogh-yellow flex-shrink-0" />
+                      <span className="text-gogh-grayDark">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     )
   }

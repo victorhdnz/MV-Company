@@ -221,10 +221,7 @@ export default function SolicitacoesPage() {
         throw new Error('Apenas arquivos de vídeo são permitidos')
       }
 
-      const MAX_SIZE = 100 * 1024 * 1024 // 100MB
-      if (file.size > MAX_SIZE) {
-        throw new Error('Arquivo muito grande. Máximo: 100MB')
-      }
+      // Sem limite de tamanho para vídeos (removido para permitir alta qualidade)
 
       // 2. VERIFICAR AUTENTICAÇÃO
       const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -264,7 +261,7 @@ export default function SolicitacoesPage() {
         } else if (errorMessage.includes('duplicate') || errorMessage.includes('exists')) {
           errorMessage = 'Um arquivo com este nome já existe. Tente novamente.'
         } else if (errorMessage.includes('413') || errorMessage.includes('too large')) {
-          errorMessage = 'Arquivo muito grande. Tamanho máximo: 100MB'
+          errorMessage = 'Erro ao fazer upload do vídeo. Verifique sua conexão e tente novamente.'
         } else if (errorMessage.includes('new row violates row-level security') || errorMessage.includes('row-level security')) {
           errorMessage = 'Erro de permissão. Verifique as políticas RLS do bucket. Execute o SQL em supabase/storage_videos_rls.sql'
         }
