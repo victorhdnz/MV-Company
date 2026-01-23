@@ -303,7 +303,6 @@ function CourseCard({
                         )}
                       </div>
                     </div>
-                    <span className="text-xs text-gogh-grayDark">#{lesson.order_position || lesson.order || 0}</span>
                   </button>
                   
                   {selectedLesson?.id === lesson.id && lesson.video_url && (() => {

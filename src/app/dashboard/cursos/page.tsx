@@ -613,7 +613,6 @@ export default function CursosPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <Video className="w-4 h-4 text-gray-400" />
                         <h4 className="font-medium text-gray-900">{lesson.title}</h4>
-                        <span className="text-xs text-gray-500">#{lesson.order_position || lesson.order || 0}</span>
                       </div>
                       <p className="text-sm text-gray-600">{lesson.description}</p>
                     </div>
