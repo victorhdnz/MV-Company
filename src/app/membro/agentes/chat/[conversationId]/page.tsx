@@ -73,6 +73,22 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [])
 
+  // Função para verificar se o perfil de nicho está completo
+  const isNicheProfileComplete = useCallback((profile: any): boolean => {
+    if (!profile) return false
+    
+    // Verificar todos os campos obrigatórios
+    if (!profile.business_name?.trim()) return false
+    if (!profile.niche?.trim()) return false
+    if (!profile.target_audience?.trim()) return false
+    if (!profile.brand_voice?.trim()) return false
+    if (!profile.goals?.trim()) return false
+    if (!profile.content_pillars || !Array.isArray(profile.content_pillars) || profile.content_pillars.length === 0) return false
+    if (!profile.platforms || !Array.isArray(profile.platforms) || profile.platforms.length === 0) return false
+    
+    return true
+  }, [])
+
   // Função para construir contexto do nicho
   const buildNicheContext = useCallback((profile: any): string => {
     let context = '=== CONTEXTO DO MEU NEGÓCIO ===\n\n'
@@ -286,10 +302,13 @@ export default function ChatPage() {
         setNicheProfile(nicheData)
         setNicheProfileLoaded(true)
 
-        // Se não tem perfil configurado e não há mensagens, mostrar modal
-        if (!nicheData && (!messagesData || messagesData.length === 0)) {
+        // Verificar se o perfil está completo
+        const profileComplete = isNicheProfileComplete(nicheData)
+
+        // Se não tem perfil configurado OU perfil incompleto, mostrar modal
+        if ((!nicheData || !profileComplete) && (!messagesData || messagesData.length === 0)) {
           setShowNicheModal(true)
-        } else if (nicheData && (!messagesData || messagesData.length === 0) && !nicheContextSentRef.current) {
+        } else if (nicheData && profileComplete && (!messagesData || messagesData.length === 0) && !nicheContextSentRef.current) {
           // Se tem perfil mas não há mensagens, enviar automaticamente o contexto
           // Aguardar que o AuthContext termine de carregar e o usuário esteja autenticado
           console.log('[Chat] Preparando para enviar contexto do nicho automaticamente...')
@@ -345,7 +364,40 @@ export default function ChatPage() {
     fetchConversation()
     // Resetar flag quando a conversa mudar
     nicheContextSentRef.current = false
-  }, [conversationId, user, subscription])
+  }, [conversationId, user, subscription, isNicheProfileComplete, sendInitialNicheContext, authLoading, isPro, supabase, router])
+
+  // Verificar perfil quando a página ganha foco (usuário voltou de outra página)
+  useEffect(() => {
+    const handleFocus = async () => {
+      if (!user || !nicheProfileLoaded) return
+      
+      try {
+        const { data: nicheData } = await (supabase as any)
+          .from('user_niche_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle()
+
+        setNicheProfile(nicheData)
+        
+        // Verificar se o perfil está completo
+        const profileComplete = isNicheProfileComplete(nicheData)
+        
+        // Se o perfil não estiver completo e não houver mensagens, mostrar modal
+        if ((!nicheData || !profileComplete) && messages.length === 0) {
+          setShowNicheModal(true)
+        } else {
+          // Se o perfil estiver completo agora, fechar o modal
+          setShowNicheModal(false)
+        }
+      } catch (error) {
+        console.error('Error checking niche profile:', error)
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [user, nicheProfileLoaded, messages.length, isNicheProfileComplete, supabase])
 
   // Scroll quando mensagens mudam
   useEffect(() => {
@@ -355,6 +407,14 @@ export default function ChatPage() {
   // Função para enviar mensagem
   const sendMessage = async () => {
     if (!inputValue.trim() || isSending || !user || !conversation) return
+
+    // Verificar se o perfil de nicho está completo
+    const profileComplete = isNicheProfileComplete(nicheProfile)
+    if (!profileComplete) {
+      setShowNicheModal(true)
+      setError('Por favor, complete seu perfil de nicho antes de enviar mensagens.')
+      return
+    }
 
     // Verificar limite de uso ANTES de enviar
     if (usageInfo && usageInfo.current >= usageInfo.limit) {
@@ -562,39 +622,52 @@ export default function ChatPage() {
   return (
     <>
       {/* Modal para configurar perfil de nicho - OBRIGATÓRIO */}
-      {showNicheModal && nicheProfileLoaded && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
-          >
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gogh-yellow rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="w-8 h-8 text-gogh-black" />
+      {showNicheModal && nicheProfileLoaded && (() => {
+        const profileExists = !!nicheProfile
+        const profileComplete = isNicheProfileComplete(nicheProfile)
+        
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+            >
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-gogh-yellow rounded-full flex items-center justify-center mx-auto mb-4">
+                  <User className="w-8 h-8 text-gogh-black" />
+                </div>
+                <h3 className="text-xl font-bold text-gogh-black mb-2">
+                  {profileExists && !profileComplete ? 'Complete seu Perfil' : 'Configure seu Perfil'}
+                </h3>
+                <p className="text-gogh-grayDark mb-2">
+                  {profileExists && !profileComplete ? (
+                    <>
+                      Seu perfil de nicho está <strong>incompleto</strong>. Para que os agentes de IA possam te ajudar da melhor forma, é <strong>obrigatório</strong> preencher todos os campos do perfil.
+                    </>
+                  ) : (
+                    <>
+                      Para que os agentes de IA possam te ajudar da melhor forma, é <strong>obrigatório</strong> configurar seu perfil de nicho primeiro.
+                    </>
+                  )}
+                </p>
+                <p className="text-sm text-gogh-grayDark">
+                  Após {profileExists && !profileComplete ? 'completar' : 'configurar'}, o agente será treinado automaticamente com suas informações.
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-gogh-black mb-2">
-                Configure seu Perfil
-              </h3>
-              <p className="text-gogh-grayDark mb-2">
-                Para que os agentes de IA possam te ajudar da melhor forma, é <strong>obrigatório</strong> configurar seu perfil de nicho primeiro.
-              </p>
-              <p className="text-sm text-gogh-grayDark">
-                Após configurar, o agente será treinado automaticamente com suas informações.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Link
-                href="/membro/perfil"
-                className="flex-1 px-4 py-2 bg-gogh-yellow text-gogh-black rounded-lg hover:bg-gogh-yellow/80 transition-colors text-center font-medium"
-                onClick={() => setShowNicheModal(false)}
-              >
-                Configurar Agora
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      )}
+              <div className="flex gap-3">
+                <Link
+                  href="/membro/perfil"
+                  className="flex-1 px-4 py-2 bg-gogh-yellow text-gogh-black rounded-lg hover:bg-gogh-yellow/80 transition-colors text-center font-medium"
+                  onClick={() => setShowNicheModal(false)}
+                >
+                  {profileExists && !profileComplete ? 'Completar Perfil' : 'Configurar Agora'}
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        )
+      })()}
 
       <div className="flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)] max-w-4xl mx-auto">
       {/* Header */}
