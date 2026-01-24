@@ -386,7 +386,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                               R$ {optionPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               <span className="text-xs text-gray-500 ml-1">{priceSuffix}</span>
                             </div>
-                            {billingCycle === 'annual' && (
+                            {billingCycle === 'annually' && (
                               <p className="text-xs text-gray-400 mt-0.5 font-normal">
                                 Total anual: R$ {annualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
