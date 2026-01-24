@@ -53,7 +53,7 @@ A Gogh Lab oferece os seguintes serviços personalizados:
 ## 3. Contratação e Seleção de Serviços
 
 ### 3.1. Seleção de Serviços
-O cliente pode selecionar quais serviços deseja contratar durante o processo de checkout. Todos os serviços começam selecionados por padrão, mas o cliente pode desmarcar os que não deseja antes de finalizar a contratação.
+O cliente pode selecionar quais serviços deseja contratar durante o processo de checkout. O cliente deve marcar os serviços desejados antes de finalizar a contratação. O preço total será calculado automaticamente com base nos serviços selecionados.
 
 ### 3.2. Preços e Pagamento
 - Os preços são calculados dinamicamente com base nos serviços selecionados

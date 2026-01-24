@@ -118,8 +118,8 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
   const [selectedServiceOptions, setSelectedServiceOptions] = useState<Record<string, string[]>>({})
 
   const getDefaultSelectedOptions = React.useCallback((plan: PriceTier): string[] => {
-    if (!plan.serviceOptions || plan.serviceOptions.length === 0) return []
-    return plan.serviceOptions.map(option => option.id)
+    // Começar sem nada selecionado - o usuário escolhe o que quer
+    return []
   }, [])
 
   const getSelectedOptionsForPlan = React.useCallback((plan: PriceTier): string[] => {
@@ -352,7 +352,10 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                     {plan.serviceOptions.map(option => {
                       const selectedIds = getSelectedOptionsForPlan(plan)
                       const isSelected = selectedIds.includes(option.id)
-                      const optionPrice = billingCycle === 'monthly' ? option.priceMonthly : option.priceAnnually
+                      // Para anual, mostrar mensal equivalente em destaque
+                      const optionPrice = billingCycle === 'monthly' ? option.priceMonthly : (option.priceAnnually / 12)
+                      const priceSuffix = billingCycle === 'monthly' ? '/mês' : '/mês'
+                      const annualTotal = option.priceAnnually
 
                       return (
                         <label
@@ -378,9 +381,16 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                               )}
                             </div>
                           </div>
-                          <div className="text-sm font-semibold text-[#0A0A0A]">
-                            R$ {optionPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            <span className="text-xs text-gray-500 ml-1">{priceSuffix}</span>
+                          <div className="text-sm font-semibold text-[#0A0A0A] text-right">
+                            <div>
+                              R$ {optionPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              <span className="text-xs text-gray-500 ml-1">{priceSuffix}</span>
+                            </div>
+                            {billingCycle === 'annual' && (
+                              <p className="text-xs text-gray-400 mt-0.5 font-normal">
+                                Total anual: R$ {annualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </p>
+                            )}
                           </div>
                         </label>
                       )
@@ -389,14 +399,28 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                   {serviceSelection && (
                     <div className="mt-4 flex items-center justify-between text-sm font-semibold text-[#0A0A0A]">
                       <span>Total com serviços selecionados:</span>
-                      <span>
-                        R$ {serviceSelection.totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        <span className="text-xs text-gray-500 ml-1">{priceSuffix}</span>
-                      </span>
+                      <div className="text-right">
+                        {billingCycle === 'monthly' ? (
+                          <span>
+                            R$ {serviceSelection.totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            <span className="text-xs text-gray-500 ml-1">/mês</span>
+                          </span>
+                        ) : (
+                          <>
+                            <span>
+                              R$ {(serviceSelection.totalPrice / 12).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              <span className="text-xs text-gray-500 ml-1">/mês</span>
+                            </span>
+                            <p className="text-xs text-gray-400 mt-0.5 font-normal">
+                              Total anual: R$ {serviceSelection.totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                          </>
+                        )}
+                      </div>
                     </div>
                   )}
                   <p className="text-xs text-gray-500 mt-2">
-                    Todos os serviços começam selecionados. Você pode ajustar antes de contratar.
+                    Selecione os serviços que deseja contratar. O preço será calculado automaticamente.
                   </p>
                 </div>
               )}
@@ -406,22 +430,32 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                 onClick={() => {
                   if (plan.planType === 'service') {
                     const selection = getServiceSelectionSummary(plan, billingCycle)
+                    // Validar se pelo menos um serviço foi selecionado
+                    if (!selection || selection.selectedServiceOptions.length === 0) {
+                      return // Não fazer nada se nenhum serviço estiver selecionado
+                    }
                     onPlanSelect(plan.id, billingCycle, plan, selection)
                     return
                   }
                   onPlanSelect(plan.id, billingCycle, plan)
                 }}
+                disabled={plan.planType === 'service' && (!serviceSelection || serviceSelection.selectedServiceOptions.length === 0)}
                 className={cn(
                   "w-full transition-all duration-200",
                   isFeatured
-                    ? "bg-[#F7C948] hover:bg-[#E5A800] text-[#0A0A0A] shadow-lg font-semibold"
-                    : "bg-transparent text-[#0A0A0A] hover:bg-[#F7C948] hover:text-[#0A0A0A] border-2 border-[#F7C948]/50 hover:border-[#F7C948]"
+                    ? "bg-[#F7C948] hover:bg-[#E5A800] text-[#0A0A0A] shadow-lg font-semibold disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
+                    : "bg-transparent text-[#0A0A0A] hover:bg-[#F7C948] hover:text-[#0A0A0A] border-2 border-[#F7C948]/50 hover:border-[#F7C948] disabled:border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                 )}
                 size="lg"
                 aria-label={`Select ${plan.name} plan for ${currentPrice} ${priceSuffix}`}
               >
                 {plan.buttonLabel || (plan.planType === 'service' ? 'Adquirir' : 'Assinar')}
               </Button>
+              {plan.planType === 'service' && (!serviceSelection || serviceSelection.selectedServiceOptions.length === 0) && (
+                <p className="text-xs text-gray-500 text-center mt-2">
+                  Selecione pelo menos um serviço para continuar
+                </p>
+              )}
             </CardFooter>
           </Card>
         )

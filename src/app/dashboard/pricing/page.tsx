@@ -742,7 +742,7 @@ export default function PricingEditorPage() {
                         <h4 className="font-semibold mb-3">🧩 Serviços Selecionáveis</h4>
                         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
                           <p className="text-xs text-yellow-800">
-                            <strong>Como funciona:</strong> Todos os serviços começam selecionados no checkout. O usuário pode remover itens antes de contratar.
+                            <strong>Como funciona:</strong> O usuário seleciona os serviços desejados no checkout. O preço é calculado automaticamente com base nas seleções.
                           </p>
                         </div>
                         <div className="space-y-3">
