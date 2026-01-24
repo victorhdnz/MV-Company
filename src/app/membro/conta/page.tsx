@@ -348,10 +348,10 @@ export default function AccountPage() {
     { id: 'plan' as TabType, label: 'Plano & Uso', icon: CreditCard },
   ]
 
-  let planFeatures: { text: string; icon: typeof MessageSquare }[] = []
+  const planFeatures = (() => {
+    if (!hasActiveSubscription) return []
 
-  if (hasActiveSubscription) {
-    planFeatures = isPro
+    return isPro
       ? [
           { text: '20 interações por dia', icon: MessageSquare },
           { text: 'Todos os agentes', icon: Sparkles },
@@ -366,7 +366,7 @@ export default function AccountPage() {
           { text: 'Canva Pro', icon: Palette },
           { text: 'CapCut Pro', icon: Scissors },
         ]
-  }
+  })()
 
   return (
     <div className="max-w-4xl mx-auto">
