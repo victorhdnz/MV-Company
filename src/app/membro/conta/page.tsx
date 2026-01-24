@@ -66,6 +66,7 @@ export default function AccountPage() {
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null)
   const [loadingUsage, setLoadingUsage] = useState(false)
   const [hasServiceSubscriptions, setHasServiceSubscriptions] = useState(false)
+  const [hasStripeServiceSubscription, setHasStripeServiceSubscription] = useState(false)
   
   // Form state
   const [fullName, setFullName] = useState('')
@@ -77,13 +78,14 @@ export default function AccountPage() {
     const checkServiceSubscriptions = async () => {
       if (!user) {
         setHasServiceSubscriptions(false)
+        setHasStripeServiceSubscription(false)
         return
       }
 
       try {
         const { data, error } = await (supabase as any)
           .from('service_subscriptions')
-          .select('id')
+          .select('id, stripe_customer_id, stripe_subscription_id')
           .eq('user_id', user.id)
           .in('status', ['active', 'trialing'])
           .limit(1)
@@ -91,13 +93,26 @@ export default function AccountPage() {
         if (error) {
           console.error('Erro ao verificar serviços:', error)
           setHasServiceSubscriptions(false)
+          setHasStripeServiceSubscription(false)
           return
         }
 
-        setHasServiceSubscriptions((data && data.length > 0) || false)
+        const hasServices = (data && data.length > 0) || false
+        setHasServiceSubscriptions(hasServices)
+        
+        // Verificar se tem stripe_customer_id (não é manual)
+        if (hasServices && data[0]) {
+          const hasStripeId = data[0].stripe_customer_id && 
+                             !data[0].stripe_customer_id.startsWith('manual_') &&
+                             data[0].stripe_subscription_id
+          setHasStripeServiceSubscription(hasStripeId || false)
+        } else {
+          setHasStripeServiceSubscription(false)
+        }
       } catch (error) {
         console.error('Erro ao verificar serviços:', error)
         setHasServiceSubscriptions(false)
+        setHasStripeServiceSubscription(false)
       }
     }
 
@@ -496,15 +511,37 @@ export default function AccountPage() {
                       <span className="font-bold">Serviços Personalizados</span>
                     </div>
                     <p className="text-gogh-grayDark mb-6">
-                      Você tem serviços personalizados contratados. Acesse a aba "Meus Serviços" para mais detalhes.
+                      {hasStripeServiceSubscription 
+                        ? 'Você tem serviços personalizados contratados. Gerencie sua assinatura para cancelar ou alterar.'
+                        : 'Você tem serviços personalizados contratados. Acesse a aba "Meus Serviços" para mais detalhes.'}
                     </p>
-                    <Link
-                      href="/membro/servicos"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-gogh-yellow text-gogh-black font-medium rounded-xl hover:bg-gogh-yellow/90 transition-colors"
-                    >
-                      Ver Meus Serviços
-                      <ExternalLink className="w-4 h-4" />
-                    </Link>
+                    {hasStripeServiceSubscription ? (
+                      <button
+                        onClick={handleManageSubscription}
+                        disabled={openingPortal}
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-gogh-black text-white font-medium rounded-xl hover:bg-gogh-black/90 transition-colors disabled:opacity-50"
+                      >
+                        {openingPortal ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Abrindo...
+                          </>
+                        ) : (
+                          <>
+                            Gerenciar Assinatura
+                            <ExternalLink className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      <Link
+                        href="/membro/servicos"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-gogh-yellow text-gogh-black font-medium rounded-xl hover:bg-gogh-yellow/90 transition-colors"
+                      >
+                        Ver Meus Serviços
+                        <ExternalLink className="w-4 h-4" />
+                      </Link>
+                    )}
                   </>
                 ) : (
                   <>
