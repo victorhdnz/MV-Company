@@ -46,6 +46,26 @@ interface ServiceSubscription {
   selected_services: string[]
 }
 
+const getPlanFeatures = (hasActive: boolean, pro: boolean) => {
+  if (!hasActive) return []
+
+  return pro
+    ? [
+        { text: '20 interações por dia', icon: MessageSquare },
+        { text: 'Todos os agentes', icon: Sparkles },
+        { text: 'Todos os cursos', icon: BookOpen },
+        { text: 'Canva Pro', icon: Palette },
+        { text: 'CapCut Pro', icon: Scissors },
+      ]
+    : [
+        { text: '8 interações por dia', icon: MessageSquare },
+        { text: 'Agentes básicos', icon: Sparkles },
+        { text: 'Cursos de Canva e CapCut', icon: BookOpen },
+        { text: 'Canva Pro', icon: Palette },
+        { text: 'CapCut Pro', icon: Scissors },
+      ]
+}
+
 export default function AccountPage() {
   const { user, profile, subscription, hasActiveSubscription, isPro, refreshSubscription } = useAuth()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
@@ -348,25 +368,7 @@ export default function AccountPage() {
     { id: 'plan' as TabType, label: 'Plano & Uso', icon: CreditCard },
   ]
 
-  const planFeatures = (() => {
-    if (!hasActiveSubscription) return []
-
-    return isPro
-      ? [
-          { text: '20 interações por dia', icon: MessageSquare },
-          { text: 'Todos os agentes', icon: Sparkles },
-          { text: 'Todos os cursos', icon: BookOpen },
-          { text: 'Canva Pro', icon: Palette },
-          { text: 'CapCut Pro', icon: Scissors },
-        ]
-      : [
-          { text: '8 interações por dia', icon: MessageSquare },
-          { text: 'Agentes básicos', icon: Sparkles },
-          { text: 'Cursos de Canva e CapCut', icon: BookOpen },
-          { text: 'Canva Pro', icon: Palette },
-          { text: 'CapCut Pro', icon: Scissors },
-        ]
-  })();
+  const planFeatures = getPlanFeatures(hasActiveSubscription, isPro)
 
   return (
     <div className="max-w-4xl mx-auto">
