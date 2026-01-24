@@ -333,7 +333,19 @@ export default function PricingEditorPage() {
 
     const newPlans = [...formData.pricing_plans]
     const options = [...(newPlans[planIndex].serviceOptions || [])]
-    options[optionIndex] = { ...options[optionIndex], [field]: value }
+    const updatedOption = { ...options[optionIndex], [field]: value }
+    
+    // Se o preço mensal foi alterado, calcular automaticamente o preço anual com desconto
+    if (field === 'priceMonthly' && typeof value === 'number' && value > 0) {
+      const discountPercent = formData.pricing_annual_discount || 20
+      const monthlyPrice = value
+      const yearlyTotal = monthlyPrice * 12
+      const discountAmount = yearlyTotal * (discountPercent / 100)
+      const annualPrice = yearlyTotal - discountAmount
+      updatedOption.priceAnnually = Math.round(annualPrice * 100) / 100 // Arredondar para 2 casas decimais
+    }
+    
+    options[optionIndex] = updatedOption
     newPlans[planIndex] = { ...newPlans[planIndex], serviceOptions: options }
     setFormData({ ...formData, pricing_plans: newPlans })
   }
@@ -738,23 +750,50 @@ export default function PricingEditorPage() {
                                   onChange={(e) => updateServiceOption(planIndex, optionIndex, 'description', e.target.value)}
                                 />
                               </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                                <Input
-                                  label="Preço Mensal (R$)"
-                                  value={option.priceMonthly.toString()}
-                                  onChange={(e) => updateServiceOption(planIndex, optionIndex, 'priceMonthly', parseFloat(e.target.value) || 0)}
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                />
-                                <Input
-                                  label="Preço Anual (R$)"
-                                  value={option.priceAnnually.toString()}
-                                  onChange={(e) => updateServiceOption(planIndex, optionIndex, 'priceAnnually', parseFloat(e.target.value) || 0)}
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                />
+                              <div className="space-y-4 mt-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <Input
+                                    label="Preço Mensal (R$)"
+                                    value={option.priceMonthly.toString()}
+                                    onChange={(e) => updateServiceOption(planIndex, optionIndex, 'priceMonthly', parseFloat(e.target.value) || 0)}
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                  <Input
+                                    label="Preço Anual (R$) - Calculado automaticamente"
+                                    value={option.priceAnnually.toString()}
+                                    onChange={(e) => updateServiceOption(planIndex, optionIndex, 'priceAnnually', parseFloat(e.target.value) || 0)}
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                </div>
+                                {option.priceMonthly > 0 && (
+                                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                      <div>
+                                        <p className="text-gray-600">
+                                          <strong>Parcela mensal equivalente:</strong> R$ {(option.priceAnnually / 12).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mês
+                                        </p>
+                                      </div>
+                                      <div className="space-y-1">
+                                        <p className="text-gray-600">
+                                          <strong>Total sem desconto (12x):</strong> R$ {(option.priceMonthly * 12).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </p>
+                                        <p className="text-green-600 font-semibold">
+                                          <strong>Economia total:</strong> R$ {((option.priceMonthly * 12) - option.priceAnnually).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </p>
+                                        <p className="text-blue-600 font-semibold">
+                                          <strong>Desconto aplicado:</strong> {formData.pricing_annual_discount || 20}%
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="text-xs text-gray-500 bg-yellow-50 border border-yellow-200 rounded-lg p-2 mt-2">
+                                      <strong>💡 Nota:</strong> O preço anual é calculado automaticamente quando você altera o preço mensal. Você pode editá-lo manualmente se necessário, mas será recalculado novamente se alterar o preço mensal.
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                               <div className="flex justify-end mt-3">
                                 <button
