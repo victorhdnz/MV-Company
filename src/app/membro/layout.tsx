@@ -84,6 +84,7 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
   const [siteLogo, setSiteLogo] = useState<string | null>(null)
   const [whatsappNumber, setWhatsappNumber] = useState<string>('5534999999999')
   const [signingOut, setSigningOut] = useState(false)
+  const [hasServiceSubscriptions, setHasServiceSubscriptions] = useState(false)
   const supabase = createClient()
 
   // Carregar logo e WhatsApp do site
@@ -117,6 +118,48 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
     }
     loadSiteData()
   }, [supabase])
+
+  // Verificar se o usuário tem serviços contratados
+  useEffect(() => {
+    const checkServiceSubscriptions = async () => {
+      if (!user) {
+        setHasServiceSubscriptions(false)
+        return
+      }
+
+      try {
+        const { data, error } = await (supabase as any)
+          .from('service_subscriptions')
+          .select('id')
+          .eq('user_id', user.id)
+          .in('status', ['active', 'trialing'])
+          .limit(1)
+
+        if (error) {
+          console.error('Erro ao verificar serviços:', error)
+          setHasServiceSubscriptions(false)
+          return
+        }
+
+        setHasServiceSubscriptions((data && data.length > 0) || false)
+      } catch (error) {
+        console.error('Erro ao verificar serviços:', error)
+        setHasServiceSubscriptions(false)
+      }
+    }
+
+    checkServiceSubscriptions()
+    
+    // Atualizar quando a página ganha foco
+    const handleFocus = () => {
+      checkServiceSubscriptions()
+    }
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [user, supabase])
 
   // Abrir portal de gerenciamento do Stripe
   const handleManageSubscription = async () => {
@@ -327,8 +370,8 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
               )
             }            )}
 
-            {/* Itens sempre visíveis (não requerem assinatura) */}
-            {alwaysVisibleMenuItems.map((item) => {
+            {/* Itens sempre visíveis (não requerem assinatura) - apenas se tiver serviços */}
+            {hasServiceSubscriptions && alwaysVisibleMenuItems.map((item) => {
               const isActive = pathname === item.href || 
                 (item.href !== '/membro' && pathname.startsWith(item.href))
               
