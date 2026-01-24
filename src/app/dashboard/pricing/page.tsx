@@ -43,13 +43,66 @@ export default function PricingEditorPage() {
   const [saving, setSaving] = useState(false)
   const [categoriesExpanded, setCategoriesExpanded] = useState(true)
   const [featureCategories, setFeatureCategories] = useState<FeatureCategory[]>([])
+  const defaultAgencyPlan: PriceTier = {
+    id: 'gogh-agencia',
+    name: 'Gogh Agency',
+    description: 'Serviços completos de agência. Escolha o que você quer que a gente faça por você.',
+    priceMonthly: 0,
+    priceAnnually: 0,
+    isPopular: false,
+    buttonLabel: 'Solicitar serviço',
+    planType: 'service',
+    features: [
+      { name: 'Gestão feita pela equipe', isIncluded: true },
+      { name: 'Planejamento e execução completos', isIncluded: true },
+      { name: 'Relatórios e acompanhamento', isIncluded: true },
+    ],
+    serviceOptions: [
+      {
+        id: 'marketing-trafego-pago',
+        name: 'Marketing (Tráfego Pago)',
+        description: 'Campanhas, otimizações e relatórios contínuos.',
+        priceMonthly: 1200,
+        priceAnnually: 12000,
+      },
+      {
+        id: 'criacao-sites',
+        name: 'Criação de sites completos',
+        description: 'Projeto, design, desenvolvimento e publicação.',
+        priceMonthly: 900,
+        priceAnnually: 9000,
+      },
+      {
+        id: 'criacao-conteudo',
+        name: 'Criação de conteúdo completa',
+        description: 'Roteiro, produção, edição e pós-produção.',
+        priceMonthly: 1600,
+        priceAnnually: 16000,
+      },
+      {
+        id: 'gestao-redes-sociais',
+        name: 'Gestão de redes sociais',
+        description: 'Calendário, postagem e interação com a audiência.',
+        priceMonthly: 1400,
+        priceAnnually: 14000,
+      },
+    ],
+  }
+
+  const ensureAgencyPlan = (plans: PriceTier[] | undefined) => {
+    const currentPlans = plans || []
+    const hasAgency = currentPlans.some(plan => plan.id === defaultAgencyPlan.id)
+    if (hasAgency) return currentPlans
+    return [...currentPlans, defaultAgencyPlan]
+  }
+
   const [formData, setFormData] = useState<PricingSettings>({
     pricing_enabled: true,
     pricing_title: 'Escolha seu plano e comece a criar',
     pricing_description: 'Acesse a plataforma com IA e, se preferir, contrate nossa equipe para executar tudo como agência completa.',
     pricing_annual_discount: 20, // 20% de desconto no plano anual
     pricing_whatsapp_number: '',
-    pricing_plans: [
+    pricing_plans: ensureAgencyPlan([
       {
         id: 'gogh-essencial',
         name: 'Gogh Essencial',
@@ -92,52 +145,7 @@ export default function PricingEditorPage() {
         stripePriceIdMonthly: 'price_1SpjJIJmSvvqlkSQpBHztwk6',
         stripePriceIdAnnually: 'price_1SpjKSJmSvvqlkSQlr8jNDTf',
       },
-      {
-        id: 'gogh-agencia',
-        name: 'Gogh Agency',
-        description: 'Serviços completos de agência. Escolha o que você quer que a gente faça por você.',
-        priceMonthly: 0,
-        priceAnnually: 0,
-        isPopular: false,
-        buttonLabel: 'Solicitar serviço',
-        planType: 'service',
-        features: [
-          { name: 'Gestão feita pela equipe', isIncluded: true },
-          { name: 'Planejamento e execução completos', isIncluded: true },
-          { name: 'Relatórios e acompanhamento', isIncluded: true },
-        ],
-        serviceOptions: [
-          {
-            id: 'marketing-trafego-pago',
-            name: 'Marketing (Tráfego Pago)',
-            description: 'Campanhas, otimizações e relatórios contínuos.',
-            priceMonthly: 1200,
-            priceAnnually: 12000,
-          },
-          {
-            id: 'criacao-sites',
-            name: 'Criação de sites completos',
-            description: 'Projeto, design, desenvolvimento e publicação.',
-            priceMonthly: 900,
-            priceAnnually: 9000,
-          },
-          {
-            id: 'criacao-conteudo',
-            name: 'Criação de conteúdo completa',
-            description: 'Roteiro, produção, edição e pós-produção.',
-            priceMonthly: 1600,
-            priceAnnually: 16000,
-          },
-          {
-            id: 'gestao-redes-sociais',
-            name: 'Gestão de redes sociais',
-            description: 'Calendário, postagem e interação com a audiência.',
-            priceMonthly: 1400,
-            priceAnnually: 14000,
-          },
-        ],
-      },
-    ],
+    ]),
   })
 
   useEffect(() => {
@@ -162,7 +170,7 @@ export default function PricingEditorPage() {
         
         setFormData(prev => {
           const dbPlans = pricing.pricing_plans || []
-          const plans = dbPlans.length > 0 ? dbPlans : prev.pricing_plans
+          const plans = ensureAgencyPlan(dbPlans.length > 0 ? dbPlans : prev.pricing_plans)
           
           return {
             ...prev,

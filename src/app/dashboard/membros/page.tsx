@@ -61,7 +61,6 @@ export default function MembrosPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterPlan, setFilterPlan] = useState<string>('all')
-  const [viewTab, setViewTab] = useState<'subscriptions' | 'services'>('subscriptions')
   const [editingMember, setEditingMember] = useState<string | null>(null)
   const [editingPlan, setEditingPlan] = useState<string>('')
   const [editingBillingCycle, setEditingBillingCycle] = useState<'monthly' | 'annual'>('monthly')
@@ -454,21 +453,18 @@ export default function MembrosPage() {
     const matchesSearch = 
       member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (member.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-    
-    const matchesPlan = 
+
+    const hasSubscription = !!member.subscription
+    const hasServices = (member.serviceSubscriptions || []).length > 0
+
+    const matchesPlan =
       filterPlan === 'all' ||
-      (filterPlan === 'none' && !member.subscription) ||
-      (filterPlan !== 'none' && member.subscription?.plan_id === filterPlan)
+      (filterPlan === 'subscription' && hasSubscription) ||
+      (filterPlan === 'service' && hasServices) ||
+      (filterPlan === 'both' && hasSubscription && hasServices) ||
+      (filterPlan === 'none' && !hasSubscription && !hasServices)
 
     return matchesSearch && matchesPlan
-  })
-
-  const filteredServiceMembers = members.filter(member => {
-    const matchesSearch = 
-      member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (member.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-    const hasServices = (member.serviceSubscriptions || []).length > 0
-    return matchesSearch && hasServices
   })
 
   const getPlanBadge = (member: Member) => {
@@ -554,30 +550,6 @@ export default function MembrosPage() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-3 mb-4">
-          <button
-            onClick={() => setViewTab('subscriptions')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              viewTab === 'subscriptions'
-                ? 'bg-black text-white'
-                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            Assinaturas do site
-          </button>
-          <button
-            onClick={() => setViewTab('services')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              viewTab === 'services'
-                ? 'bg-black text-white'
-                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            Serviços personalizados
-          </button>
-        </div>
-
         {/* Filters */}
         <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
@@ -594,43 +566,44 @@ export default function MembrosPage() {
             </div>
 
             {/* Plan Filter */}
-            {viewTab === 'subscriptions' && (
-              <select
-                value={filterPlan}
-                onChange={(e) => setFilterPlan(e.target.value)}
-                className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 bg-white"
-              >
-                <option value="all">Todos os planos</option>
-                <option value="gogh_pro">Gogh Pro</option>
-                <option value="gogh_essencial">Gogh Essencial</option>
-                <option value="none">Sem plano</option>
-              </select>
-            )}
+            <select
+              value={filterPlan}
+              onChange={(e) => setFilterPlan(e.target.value)}
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 bg-white"
+            >
+              <option value="all">Todos os membros</option>
+              <option value="subscription">Com assinatura</option>
+              <option value="service">Com serviços personalizados</option>
+              <option value="both">Assinatura + Serviços</option>
+              <option value="none">Gratuito (sem nada)</option>
+            </select>
           </div>
         </div>
 
-        {viewTab === 'subscriptions' && (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Usuário
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Plano
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cadastro
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ações
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredMembers.map((member) => (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Usuário
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Assinatura
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Serviços personalizados
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cadastro
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredMembers.map((member) => (
                     <tr key={member.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -711,6 +684,20 @@ export default function MembrosPage() {
                         )}
                       </td>
                       <td className="px-6 py-4">
+                        {(member.serviceSubscriptions || []).length === 0 ? (
+                          <span className="text-sm text-gray-400">—</span>
+                        ) : (
+                          <div className="space-y-1 text-sm text-gray-700">
+                            {(member.serviceSubscriptions || []).map((service) => (
+                              <div key={service.id}>
+                                <span className="font-medium">{service.plan_name || 'Serviços Personalizados'}:</span>{' '}
+                                {service.selected_services?.length ? service.selected_services.join(', ') : 'Serviços personalizados'}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-1 text-sm text-gray-500">
                           <Calendar className="w-4 h-4" />
                           {new Date(member.created_at).toLocaleDateString('pt-BR')}
@@ -752,7 +739,7 @@ export default function MembrosPage() {
 
                   {filteredMembers.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
                         Nenhum membro encontrado
                       </td>
                     </tr>
@@ -761,103 +748,6 @@ export default function MembrosPage() {
               </table>
             </div>
           </div>
-        )}
-
-        {viewTab === 'services' && (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Usuário
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Serviços contratados
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ciclo
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredServiceMembers.map((member) => (
-                    <tr key={member.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          {member.avatar_url ? (
-                            <img
-                              src={member.avatar_url}
-                              alt=""
-                              className="w-10 h-10 rounded-full"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                              <Users className="w-5 h-5 text-gray-500" />
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {member.full_name || 'Sem nome'}
-                            </p>
-                            <p className="text-sm text-gray-500 flex items-center gap-1">
-                              <Mail className="w-3 h-3" />
-                              {member.email}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="space-y-2">
-                          {(member.serviceSubscriptions || []).map((service) => (
-                            <div key={service.id} className="text-sm text-gray-700">
-                              <span className="font-medium">{service.plan_name || 'Serviços Personalizados'}:</span>{' '}
-                              {service.selected_services?.length ? service.selected_services.join(', ') : 'Serviços personalizados'}
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="space-y-2 text-sm text-gray-600">
-                          {(member.serviceSubscriptions || []).map((service) => (
-                            <div key={service.id}>
-                              {service.billing_cycle === 'annual' ? 'Anual' : 'Mensal'}
-                              {service.current_period_end && (
-                                <> • Até {new Date(service.current_period_end).toLocaleDateString('pt-BR')}</>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="space-y-2 text-sm">
-                          {(member.serviceSubscriptions || []).map((service) => (
-                            <div key={service.id} className={`font-medium ${
-                              service.status === 'active' ? 'text-emerald-600' : 'text-gray-500'
-                            }`}>
-                              {service.status}
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {filteredServiceMembers.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
-                        Nenhum cliente com serviços encontrados
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
