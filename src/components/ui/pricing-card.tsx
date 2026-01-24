@@ -138,20 +138,20 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
     })
   }, [getDefaultSelectedOptions])
 
-  const getServiceSelectionSummary = React.useCallback((plan: PriceTier, cycle: BillingCycle) => {
+  const getServiceSelectionSummary = React.useCallback((plan: PriceTier, cycle: BillingCycle): PlanSelection => {
     if (!plan.serviceOptions || plan.serviceOptions.length === 0) {
-      return { selectedOptions: [], total: plan.priceMonthly }
+      return { selectedServiceOptions: [], totalPrice: plan.priceMonthly }
     }
     const selectedIds = getSelectedOptionsForPlan(plan)
-    const selectedOptions = plan.serviceOptions.filter(option => selectedIds.includes(option.id))
+    const selectedServiceOptions = plan.serviceOptions.filter(option => selectedIds.includes(option.id))
     const basePrice = cycle === 'monthly' ? plan.priceMonthly : plan.priceAnnually
-    const optionsTotal = selectedOptions.reduce((sum, option) => {
+    const optionsTotal = selectedServiceOptions.reduce((sum, option) => {
       const optionPrice = cycle === 'monthly' ? option.priceMonthly : option.priceAnnually
       return sum + optionPrice
     }, 0)
     return {
-      selectedOptions,
-      total: basePrice + optionsTotal
+      selectedServiceOptions,
+      totalPrice: basePrice + optionsTotal
     }
   }, [getSelectedOptionsForPlan])
 
@@ -374,7 +374,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                     <div className="mt-4 flex items-center justify-between text-sm font-semibold text-[#0A0A0A]">
                       <span>Total com serviços selecionados:</span>
                       <span>
-                        R$ {serviceSelection.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {serviceSelection.totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         <span className="text-xs text-gray-500 ml-1">{priceSuffix}</span>
                       </span>
                     </div>
