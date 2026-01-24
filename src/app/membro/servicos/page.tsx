@@ -56,7 +56,42 @@ export default function ServicosPage() {
           return
         }
 
-        const services = (data || []) as ServiceSubscription[]
+        let services = (data || []) as ServiceSubscription[]
+        
+        // Remover duplicatas: manter apenas a mais recente
+        if (services.length > 1) {
+          // Agrupar por serviços selecionados e manter apenas a mais recente de cada grupo
+          const serviceMap = new Map<string, ServiceSubscription>()
+          services.forEach((service) => {
+            const serviceKey = JSON.stringify(
+              ((service.selected_services || []) as string[]).sort().join(',')
+            )
+            const existing = serviceMap.get(serviceKey)
+            if (!existing || new Date(service.created_at) > new Date(existing.created_at)) {
+              serviceMap.set(serviceKey, {
+                ...service,
+                selected_services: [...new Set(service.selected_services || [])] as string[]
+              })
+            }
+          })
+          
+          // Converter de volta para array
+          services = Array.from(serviceMap.values())
+          
+          // Se ainda houver múltiplas assinaturas, manter apenas a mais recente
+          if (services.length > 1) {
+            services = [services.sort((a, b) => 
+              new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            )[0]]
+          }
+        } else if (services.length === 1) {
+          // Remover duplicatas dentro do array de serviços selecionados
+          services = [{
+            ...services[0],
+            selected_services: [...new Set(services[0].selected_services || [])] as string[]
+          }]
+        }
+        
         console.log('📦 Serviços carregados:', services.length, services)
         setServiceSubscriptions(services)
       } catch (error) {

@@ -146,9 +146,43 @@ export default function MembrosPage() {
         const subscription = subscriptions.find(
           (sub: any) => sub.user_id === profile.id
         )
-        const memberServices = serviceSubscriptions.filter(
+        let memberServices = serviceSubscriptions.filter(
           (sub: any) => sub.user_id === profile.id
         )
+        
+        // Remover duplicatas: manter apenas a mais recente e consolidar serviços
+        if (memberServices.length > 1) {
+          // Agrupar por serviços selecionados e manter apenas a mais recente
+          const serviceMap = new Map<string, any>()
+          memberServices.forEach((service: any) => {
+            const serviceKey = JSON.stringify(
+              ((service.selected_services || []) as string[]).sort().join(',')
+            )
+            const existing = serviceMap.get(serviceKey)
+            if (!existing || new Date(service.created_at) > new Date(existing.created_at)) {
+              serviceMap.set(serviceKey, {
+                ...service,
+                selected_services: [...new Set(service.selected_services || [])] as string[]
+              })
+            }
+          })
+          
+          // Converter de volta para array
+          memberServices = Array.from(serviceMap.values())
+          
+          // Se ainda houver múltiplas assinaturas, manter apenas a mais recente
+          if (memberServices.length > 1) {
+            memberServices = [memberServices.sort((a: any, b: any) => 
+              new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            )[0]]
+          }
+        } else if (memberServices.length === 1) {
+          // Remover duplicatas dentro do array de serviços selecionados
+          memberServices = [{
+            ...memberServices[0],
+            selected_services: [...new Set(memberServices[0].selected_services || [])] as string[]
+          }]
+        }
         
         return {
           id: profile.id,
@@ -219,8 +253,37 @@ export default function MembrosPage() {
     try {
       setSaving(true)
       
+      // Se não há serviços selecionados, remover todas as assinaturas de serviço
       if (editingServiceOptions.length === 0) {
-        toast.error('Selecione pelo menos um serviço')
+        // Buscar todas as assinaturas de serviço ativas para este usuário
+        const { data: existingServices, error: fetchError } = await (supabase as any)
+          .from('service_subscriptions')
+          .select('*')
+          .eq('user_id', memberId)
+          .in('status', ['active', 'trialing'])
+
+        if (fetchError) {
+          throw new Error(fetchError.message || 'Erro ao buscar assinaturas de serviço')
+        }
+
+        // Deletar todas as assinaturas de serviço
+        if (existingServices && existingServices.length > 0) {
+          const { error: deleteError } = await (supabase as any)
+            .from('service_subscriptions')
+            .delete()
+            .eq('user_id', memberId)
+            .in('status', ['active', 'trialing'])
+
+          if (deleteError) {
+            throw new Error(deleteError.message || 'Erro ao remover assinaturas de serviço')
+          }
+        }
+
+        toast.success('Serviços removidos com sucesso!')
+        setEditingServiceMember(null)
+        setEditingServiceOptions([])
+        setEditingServiceBillingCycle('monthly')
+        await loadMembers()
         return
       }
 
@@ -256,56 +319,56 @@ export default function MembrosPage() {
       // Remover duplicatas dos nomes de serviços
       const uniqueServiceNames = [...new Set(finalServiceNames)]
 
-      // Verificar se já existe uma assinatura de serviço para este usuário
-      const { data: existingService } = await (supabase as any)
+      // Buscar TODAS as assinaturas de serviço ativas para este usuário (pode haver duplicatas)
+      const { data: existingServices, error: fetchError } = await (supabase as any)
         .from('service_subscriptions')
         .select('*')
         .eq('user_id', memberId)
         .in('status', ['active', 'trialing'])
-        .maybeSingle()
 
-      let error
-      if (existingService) {
-        // Atualizar existente
-        const { error: updateError } = await (supabase as any)
+      if (fetchError) {
+        throw new Error(fetchError.message || 'Erro ao buscar assinaturas de serviço')
+      }
+
+      // Se existem múltiplas assinaturas, deletar todas e criar uma nova consolidada
+      if (existingServices && existingServices.length > 0) {
+        // Deletar todas as assinaturas existentes
+        const { error: deleteError } = await (supabase as any)
           .from('service_subscriptions')
-          .update({
-            selected_services: uniqueServiceNames,
-            billing_cycle: editingServiceBillingCycle,
-            current_period_start: now.toISOString(),
-            current_period_end: periodEnd.toISOString(),
-            updated_at: now.toISOString()
-          })
-          .eq('id', existingService.id)
-        error = updateError
-      } else {
-        // Criar novo
-        const insertData: any = {
-          user_id: memberId,
-          plan_id: 'gogh-agencia',
-          plan_name: 'Gogh Agency',
-          status: 'active',
-          billing_cycle: editingServiceBillingCycle,
-          stripe_subscription_id: null,
-          current_period_start: now.toISOString(),
-          current_period_end: periodEnd.toISOString(),
-          selected_services: uniqueServiceNames,
-          created_at: now.toISOString(),
-          updated_at: now.toISOString()
+          .delete()
+          .eq('user_id', memberId)
+          .in('status', ['active', 'trialing'])
+
+        if (deleteError) {
+          throw new Error(deleteError.message || 'Erro ao remover assinaturas duplicadas')
         }
-
-        const { error: insertError } = await (supabase as any)
-          .from('service_subscriptions')
-          .insert(insertData)
-        error = insertError
       }
 
-      if (error) {
-        console.error('Erro ao criar assinatura de serviço:', error)
-        throw new Error(error.message || 'Erro ao criar assinatura de serviço')
+      // Criar uma única assinatura consolidada
+      const insertData: any = {
+        user_id: memberId,
+        plan_id: 'gogh-agencia',
+        plan_name: 'Gogh Agency',
+        status: 'active',
+        billing_cycle: editingServiceBillingCycle,
+        stripe_subscription_id: null,
+        current_period_start: now.toISOString(),
+        current_period_end: periodEnd.toISOString(),
+        selected_services: uniqueServiceNames,
+        created_at: now.toISOString(),
+        updated_at: now.toISOString()
       }
 
-      toast.success('Serviço adicionado com sucesso!')
+      const { error: insertError } = await (supabase as any)
+        .from('service_subscriptions')
+        .insert(insertData)
+
+      if (insertError) {
+        console.error('Erro ao criar assinatura de serviço:', insertError)
+        throw new Error(insertError.message || 'Erro ao criar assinatura de serviço')
+      }
+
+      toast.success('Serviços atualizados com sucesso!')
       setEditingServiceMember(null)
       setEditingServiceOptions([])
       setEditingServiceBillingCycle('monthly')
