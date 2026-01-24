@@ -85,10 +85,9 @@ export function NavigationTabs({ variant, pricingEnabled = true, className }: Na
     
     // Adicionar tab de conta com título dinâmico
     if (!loading) {
-      if (isAuthenticated && hasActiveSubscription) {
+      if (isAuthenticated) {
+        // Sempre mostrar "Minha Conta" para usuários autenticados
         tabs.push({ title: 'Minha Conta', icon: User })
-      } else if (isAuthenticated) {
-        tabs.push({ title: 'Assinar', icon: User })
       } else {
         tabs.push({ title: 'Entrar', icon: User })
       }

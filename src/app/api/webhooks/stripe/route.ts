@@ -135,6 +135,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
 
     console.log(`Serviço criado para usuário ${profile.id}`)
+    
+    // Nota: Não podemos disparar eventos do lado do servidor para o cliente
+    // O cliente precisará verificar automaticamente ou recarregar
     return
   }
 

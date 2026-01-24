@@ -154,10 +154,24 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
     const handleFocus = () => {
       checkServiceSubscriptions()
     }
+    
+    // Atualizar quando receber evento de atualização de serviço
+    const handleServiceUpdate = () => {
+      checkServiceSubscriptions()
+    }
+    
+    // Atualizar periodicamente (a cada 5 segundos) para pegar mudanças manuais
+    const interval = setInterval(() => {
+      checkServiceSubscriptions()
+    }, 5000)
+    
     window.addEventListener('focus', handleFocus)
+    window.addEventListener('service-subscription-updated', handleServiceUpdate)
     
     return () => {
       window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('service-subscription-updated', handleServiceUpdate)
+      clearInterval(interval)
     }
   }, [user, supabase])
 
@@ -184,18 +198,32 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
   }
 
   // Páginas que podem ser acessadas sem assinatura ativa
-  const publicMemberPages = ['/membro/conta']
+  const publicMemberPages = ['/membro/conta', '/membro/servicos']
   const isPublicPage = publicMemberPages.some(page => pathname === page || pathname.startsWith(page + '/'))
+  
+  // Verificar se pode acessar a página atual
+  const canAccessPage = hasActiveSubscription || isPublicPage || hasServiceSubscriptions
 
   // Verificar autenticação e assinatura
   useEffect(() => {
     // Aguardar um pouco para garantir que a sessão foi carregada
     if (!loading) {
       // Pequeno delay para garantir que cookies foram atualizados
-      const checkAuth = setTimeout(() => {
+      const checkAuth = setTimeout(async () => {
         if (!isAuthenticated) {
           router.push('/login?redirect=' + encodeURIComponent(pathname))
-        } else if (!hasActiveSubscription && !isPublicPage) {
+          return
+        }
+        
+        // Se está tentando acessar /membro/servicos, verificar se tem service subscriptions
+        if (pathname === '/membro/servicos' || pathname.startsWith('/membro/servicos/')) {
+          // Permitir acesso à página de serviços mesmo sem assinatura ativa
+          // A página em si vai mostrar uma mensagem se não houver serviços
+          return
+        }
+        
+        // Para outras páginas, verificar se tem assinatura ou está em página pública
+        if (!hasActiveSubscription && !isPublicPage) {
           // Se não tem assinatura e não está em página pública, redirecionar para conta
           router.push('/membro/conta')
         }
@@ -203,7 +231,7 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
       
       return () => clearTimeout(checkAuth)
     }
-  }, [loading, isAuthenticated, hasActiveSubscription, router, pathname, isPublicPage])
+  }, [loading, isAuthenticated, hasActiveSubscription, hasServiceSubscriptions, router, pathname, isPublicPage])
 
   // Loading state
   if (loading) {
@@ -223,7 +251,7 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
   }
 
   // Sem assinatura em página que requer assinatura - aguardar redirecionamento
-  if (!hasActiveSubscription && !isPublicPage) {
+  if (!canAccessPage) {
     return null
   }
 

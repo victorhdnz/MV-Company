@@ -108,10 +108,24 @@ export default function ServicosPage() {
     const handleFocus = () => {
       loadServiceSubscriptions()
     }
+    
+    // Atualizar quando receber evento de atualização de serviço
+    const handleServiceUpdate = () => {
+      loadServiceSubscriptions()
+    }
+    
+    // Atualizar periodicamente (a cada 3 segundos) para pegar mudanças manuais
+    const interval = setInterval(() => {
+      loadServiceSubscriptions()
+    }, 3000)
+    
     window.addEventListener('focus', handleFocus)
+    window.addEventListener('service-subscription-updated', handleServiceUpdate)
     
     return () => {
       window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('service-subscription-updated', handleServiceUpdate)
+      clearInterval(interval)
     }
   }, [user, supabase])
 

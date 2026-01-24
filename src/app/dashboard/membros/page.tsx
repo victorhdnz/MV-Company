@@ -374,6 +374,9 @@ export default function MembrosPage() {
       setEditingServiceBillingCycle('monthly')
       
       await loadMembers()
+      
+      // Disparar evento para atualizar o layout do usuário se ele estiver logado
+      window.dispatchEvent(new CustomEvent('service-subscription-updated'))
     } catch (error: any) {
       console.error('Error saving service:', error)
       toast.error(error?.message || 'Erro ao salvar serviço')
