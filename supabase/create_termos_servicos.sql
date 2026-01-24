@@ -73,13 +73,13 @@ Os prazos de entrega variam conforme o serviço contratado e serão comunicados 
 ### 5.2. Atrasos
 Em caso de atraso na entrega, a Gogh Lab se compromete a comunicar o cliente com antecedência e propor soluções alternativas quando possível.
 
-## 6. Revisões e Alterações
+## 6. Custos e Investimentos em Campanhas
 
-### 6.1. Solicitações de Alteração
-O cliente pode solicitar alterações e revisões nos serviços contratados, respeitando os limites e condições estabelecidas para cada tipo de serviço.
+### 6.1. Créditos de Tráfego Pago
+Para o serviço de Marketing (Tráfego Pago), os créditos utilizados nas campanhas publicitárias serão de responsabilidade do cliente. A Gogh Lab não se responsabiliza pelo pagamento de créditos ou investimentos em plataformas de publicidade (Google Ads, Meta Ads, etc.). O cliente deve fornecer acesso às contas de publicidade e será responsável por todos os custos relacionados aos créditos utilizados nas campanhas.
 
-### 6.2. Alterações Substanciais
-Alterações substanciais que alterem o escopo original do serviço podem resultar em ajuste de preço ou prazo, mediante acordo prévio entre as partes.
+### 6.2. Gestão e Otimização
+A Gogh Lab se responsabiliza pela criação, gestão e otimização das campanhas, mas não pelos custos de créditos publicitários, que são de total responsabilidade do cliente.
 
 ## 7. Cancelamento e Reembolso
 

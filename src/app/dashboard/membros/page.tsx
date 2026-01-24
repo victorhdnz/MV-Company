@@ -263,7 +263,6 @@ export default function MembrosPage() {
         current_period_start: now.toISOString(),
         current_period_end: periodEnd.toISOString(),
         selected_services: finalServiceNames,
-        total_price: 0, // Pode ser calculado depois se necessário
         created_at: now.toISOString(),
         updated_at: now.toISOString()
       }

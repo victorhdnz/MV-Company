@@ -420,7 +420,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                 size="lg"
                 aria-label={`Select ${plan.name} plan for ${currentPrice} ${priceSuffix}`}
               >
-                {plan.planType === 'service' ? 'Adquirir' : (plan.buttonLabel || 'Assinar')}
+                {plan.buttonLabel || (plan.planType === 'service' ? 'Adquirir' : 'Assinar')}
               </Button>
             </CardFooter>
           </Card>
@@ -439,41 +439,48 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
       .sort((a, b) => a.order - b.order)
   }, [featureCategories])
 
+  // Separar planos de assinatura e serviços
+  const subscriptionPlans = plans.filter(p => p.planType !== 'service')
+  const servicePlans = plans.filter(p => p.planType === 'service')
+
   const ComparisonTable = (
-    <div className="mt-16 hidden md:block border border-[#F7C948]/30 rounded-lg overflow-x-auto shadow-sm bg-white">
-      <table className="min-w-full divide-y divide-[#F7C948]/20">
-        <thead>
-          <tr className="bg-[#F7C948]/10">
-            <th scope="col" className="px-6 py-4 text-left text-sm font-semibold text-[#0A0A0A] w-[200px] whitespace-nowrap">
-              Recurso
-            </th>
-            {plans.map((plan) => (
-              <th
-                key={`th-${plan.id}`}
-                scope="col"
-                className={cn(
-                  "px-6 py-4 text-center text-sm font-semibold text-[#0A0A0A] whitespace-nowrap",
-                  plan.isPopular && "bg-[#F7C948]/20"
-                )}
-              >
-                {plan.name}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[#F7C948]/10 bg-white">
-          {sortedCategories.length > 0 ? (
-            // Renderizar categorias
-            sortedCategories.map((category, index) => {
-              // Verificar valores de cada plano para esta categoria
-              const planValues = plans.map(plan => {
-                const categoryValue = (plan.category_values || []).find(cv => cv.category_id === category.id)
-                return {
-                  plan,
-                  hasCategory: !!(categoryValue?.text && categoryValue.text.trim() !== ''),
-                  text: categoryValue?.text || ''
-                }
-              })
+    <div className="mt-16 hidden md:block">
+      {/* Tabela de Planos de Assinatura */}
+      {subscriptionPlans.length > 0 && (
+        <div className="border border-[#F7C948]/30 rounded-lg overflow-x-auto shadow-sm bg-white mb-8">
+          <table className="min-w-full divide-y divide-[#F7C948]/20">
+            <thead>
+              <tr className="bg-[#F7C948]/10">
+                <th scope="col" className="px-6 py-4 text-left text-sm font-semibold text-[#0A0A0A] w-[200px] whitespace-nowrap">
+                  Recurso
+                </th>
+                {subscriptionPlans.map((plan) => (
+                  <th
+                    key={`th-${plan.id}`}
+                    scope="col"
+                    className={cn(
+                      "px-6 py-4 text-center text-sm font-semibold text-[#0A0A0A] whitespace-nowrap",
+                      plan.isPopular && "bg-[#F7C948]/20"
+                    )}
+                  >
+                    {plan.name}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#F7C948]/10 bg-white">
+              {sortedCategories.length > 0 ? (
+                // Renderizar categorias
+                sortedCategories.map((category, index) => {
+                  // Verificar valores de cada plano de assinatura para esta categoria
+                  const planValues = subscriptionPlans.map(plan => {
+                    const categoryValue = (plan.category_values || []).find(cv => cv.category_id === category.id)
+                    return {
+                      plan,
+                      hasCategory: !!(categoryValue?.text && categoryValue.text.trim() !== ''),
+                      text: categoryValue?.text || ''
+                    }
+                  })
               
               const allHaveCategory = planValues.every(pv => pv.hasCategory)
 
@@ -534,7 +541,7 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
                   <td className="px-6 py-3 text-left text-sm font-medium text-[#0A0A0A]">
                     {categoryName}
                   </td>
-                  {plans.map((plan) => {
+                  {subscriptionPlans.map((plan) => {
                     const category = featureCategories.find(c => c.name === categoryName)
                     const categoryValue = category ? (plan.category_values || []).find(cv => cv.category_id === category.id) : null
                     const isIncluded = !!(categoryValue?.text && categoryValue.text.trim() !== '')
@@ -558,14 +565,62 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
+                <td colSpan={subscriptionPlans.length + 1} className="px-6 py-4 text-center text-sm text-gray-500">
                   Nenhuma categoria configurada
                 </td>
               </tr>
             )
           )}
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Tabela de Serviços Personalizados */}
+      {servicePlans.length > 0 && servicePlans[0].serviceOptions && servicePlans[0].serviceOptions.length > 0 && (
+        <div className="border border-[#F7C948]/30 rounded-lg overflow-x-auto shadow-sm bg-white">
+          <h3 className="text-lg font-semibold text-[#0A0A0A] px-6 py-4 bg-[#F7C948]/10 border-b border-[#F7C948]/20">
+            Serviços Disponíveis
+          </h3>
+          <table className="min-w-full divide-y divide-[#F7C948]/20">
+            <thead>
+              <tr className="bg-[#F7C948]/10">
+                <th scope="col" className="px-6 py-4 text-left text-sm font-semibold text-[#0A0A0A]">
+                  Serviço
+                </th>
+                <th scope="col" className="px-6 py-4 text-left text-sm font-semibold text-[#0A0A0A]">
+                  Descrição
+                </th>
+                <th scope="col" className="px-6 py-4 text-center text-sm font-semibold text-[#0A0A0A]">
+                  Preço Mensal
+                </th>
+                <th scope="col" className="px-6 py-4 text-center text-sm font-semibold text-[#0A0A0A]">
+                  Preço Anual
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#F7C948]/10 bg-white">
+              {servicePlans[0].serviceOptions.map((service, index) => (
+                <tr key={service.id} className={cn("transition-colors hover:bg-[#F7C948]/5", index % 2 === 0 ? "bg-white" : "bg-[#F5F1E8]/50")}>
+                  <td className="px-6 py-3 text-left text-sm font-medium text-[#0A0A0A]">
+                    {service.name}
+                  </td>
+                  <td className="px-6 py-3 text-left text-sm text-gray-600">
+                    {service.description || '—'}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-semibold text-[#0A0A0A]">
+                    R$ {service.priceMonthly.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-semibold text-[#0A0A0A]">
+                    R$ {service.priceAnnually.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    <span className="block text-xs text-green-600 mt-1">Economia de 20%</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 
