@@ -203,11 +203,23 @@ export default function PricingEditorPage() {
           const dbPlans = pricing.pricing_plans || []
           const plans = ensureAgencyPlan(dbPlans.length > 0 ? dbPlans : prev.pricing_plans)
           
+          // Garantir que o plano de serviço tenha textos padrão se não tiver
+          const plansWithDefaults = plans.map(plan => {
+            if (plan.planType === 'service' && (!plan.category_values || plan.category_values.length === 0)) {
+              // Se não tem category_values, usar os padrões do defaultAgencyPlan
+              return {
+                ...plan,
+                category_values: defaultAgencyPlan.category_values || []
+              }
+            }
+            return plan
+          })
+          
           return {
             ...prev,
             ...pricing,
             pricing_annual_discount: pricing.pricing_annual_discount || prev.pricing_annual_discount || 20,
-            pricing_plans: plans,
+            pricing_plans: plansWithDefaults,
           }
         })
       }
@@ -795,22 +807,42 @@ export default function PricingEditorPage() {
                     {featureCategories.length > 0 ? (
                       <div className="border-t pt-4 mt-4">
                         <h4 className="font-semibold mb-3">Textos das Categorias de Comparação</h4>
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                          <p className="text-sm text-blue-800 mb-2">
-                            <strong>💡 Como funciona:</strong>
-                          </p>
-                          <ul className="text-xs text-blue-800 space-y-1 ml-4 list-disc">
-                            <li><strong>Nome da categoria:</strong> Aparece como título principal na tabela</li>
-                            <li><strong>Quando TODOS os planos têm texto:</strong> A tabela mostra ✓ + o texto específico de cada plano lado a lado</li>
-                            <li><strong>Quando APENAS ALGUNS planos têm:</strong> Mostra ✓ + texto para quem tem, e ✗ para quem não tem</li>
-                            <li><strong>Se deixar vazio:</strong> Aparecerá como ✗ na tabela, indicando que o plano não tem essa categoria</li>
-                          </ul>
-                        </div>
+                        {plan.planType === 'service' ? (
+                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                            <p className="text-sm text-amber-800 mb-2">
+                              <strong>⚠️ Importante:</strong> Este é um plano de serviços personalizados. Os textos aqui são <strong>independentes</strong> dos outros planos e não espelham automaticamente. Configure textos específicos para serviços de agência.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <p className="text-sm text-blue-800 mb-2">
+                              <strong>💡 Como funciona:</strong>
+                            </p>
+                            <ul className="text-xs text-blue-800 space-y-1 ml-4 list-disc">
+                              <li><strong>Nome da categoria:</strong> Aparece como título principal na tabela</li>
+                              <li><strong>Quando TODOS os planos têm texto:</strong> A tabela mostra ✓ + o texto específico de cada plano lado a lado</li>
+                              <li><strong>Quando APENAS ALGUNS planos têm:</strong> Mostra ✓ + texto para quem tem, e ✗ para quem não tem</li>
+                              <li><strong>Se deixar vazio:</strong> Aparecerá como ✗ na tabela, indicando que o plano não tem essa categoria</li>
+                            </ul>
+                          </div>
+                        )}
                         
                         {/* Mostrar categorias com campo de texto */}
                         <div className="space-y-4">
                           {featureCategories.map((category) => {
                             const currentText = getPlanCategoryText(planIndex, category.id)
+                            // Para planos de serviço, se não tiver texto, tentar usar o padrão do defaultAgencyPlan
+                            let placeholderText = `Digite o texto para ${category.name} neste plano (deixe vazio se não tiver)`
+                            if (plan.planType === 'service' && !currentText) {
+                              // Buscar texto padrão do defaultAgencyPlan
+                              const defaultText = defaultAgencyPlan.category_values?.find(
+                                cv => cv.category_id === category.id
+                              )?.text
+                              if (defaultText) {
+                                placeholderText = `Texto padrão: "${defaultText}" (edite ou deixe vazio)`
+                              }
+                            }
+                            
                             return (
                               <div key={category.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                                 <h5 className="font-semibold text-gray-900 mb-3">{category.name}</h5>
@@ -818,10 +850,26 @@ export default function PricingEditorPage() {
                                   <textarea
                                     value={currentText}
                                     onChange={(e) => updatePlanCategoryValue(planIndex, category.id, e.target.value)}
-                                    placeholder={`Digite o texto para ${category.name} neste plano (deixe vazio se não tiver)`}
+                                    placeholder={placeholderText}
                                     rows={3}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                   />
+                                  {plan.planType === 'service' && !currentText && (
+                                    <button
+                                      onClick={() => {
+                                        // Preencher com texto padrão do defaultAgencyPlan se existir
+                                        const defaultText = defaultAgencyPlan.category_values?.find(
+                                          cv => cv.category_id === category.id
+                                        )?.text
+                                        if (defaultText) {
+                                          updatePlanCategoryValue(planIndex, category.id, defaultText)
+                                        }
+                                      }}
+                                      className="text-xs text-amber-600 hover:text-amber-800 underline"
+                                    >
+                                      Usar texto padrão para serviços
+                                    </button>
+                                  )}
                                   {currentText && (
                                     <p className="text-xs text-green-600">
                                       ✓ Esta categoria aparecerá na tabela de comparação

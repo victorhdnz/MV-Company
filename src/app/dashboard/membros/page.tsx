@@ -819,16 +819,6 @@ export default function MembrosPage() {
                                 ))}
                               </div>
                             )}
-                            <button
-                              onClick={() => {
-                                setEditingServiceMember(member.id)
-                                setEditingServiceOptions([])
-                                setEditingServiceBillingCycle('monthly')
-                              }}
-                              className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline"
-                            >
-                              {member.serviceSubscriptions && member.serviceSubscriptions.length > 0 ? 'Editar' : 'Adicionar serviço'}
-                            </button>
                           </div>
                         )}
                       </td>
@@ -874,13 +864,29 @@ export default function MembrosPage() {
                             </button>
                           </div>
                         ) : (
-                          <button
-                            onClick={() => handleEditPlan(member)}
-                            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-                            title="Editar plano"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleEditPlan(member)}
+                              className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                              title="Editar assinatura"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingServiceMember(member.id)
+                                // Se já tem serviços, carregar os selecionados
+                                const existingServices = member.serviceSubscriptions?.[0]?.selected_services || []
+                                setEditingServiceOptions(Array.isArray(existingServices) ? existingServices : [])
+                                const existingCycle = member.serviceSubscriptions?.[0]?.billing_cycle || 'monthly'
+                                setEditingServiceBillingCycle(existingCycle as 'monthly' | 'annual')
+                              }}
+                              className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                              title="Editar serviços personalizados"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
