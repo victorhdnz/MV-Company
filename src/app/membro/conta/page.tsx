@@ -348,21 +348,23 @@ export default function AccountPage() {
     { id: 'plan' as TabType, label: 'Plano & Uso', icon: CreditCard },
   ]
 
-  const planFeatures = hasActiveSubscription ? (
-    isPro ? [
-      { text: '20 interações por dia', icon: MessageSquare },
-      { text: 'Todos os agentes', icon: Sparkles },
-      { text: 'Todos os cursos', icon: BookOpen },
-      { text: 'Canva Pro', icon: Palette },
-      { text: 'CapCut Pro', icon: Scissors },
-    ] : [
-      { text: '8 interações por dia', icon: MessageSquare },
-      { text: 'Agentes básicos', icon: Sparkles },
-      { text: 'Cursos de Canva e CapCut', icon: BookOpen },
-      { text: 'Canva Pro', icon: Palette },
-      { text: 'CapCut Pro', icon: Scissors },
-    ]
-  ) : []
+  const planFeatures = hasActiveSubscription
+    ? (isPro
+      ? [
+          { text: '20 interações por dia', icon: MessageSquare },
+          { text: 'Todos os agentes', icon: Sparkles },
+          { text: 'Todos os cursos', icon: BookOpen },
+          { text: 'Canva Pro', icon: Palette },
+          { text: 'CapCut Pro', icon: Scissors },
+        ]
+      : [
+          { text: '8 interações por dia', icon: MessageSquare },
+          { text: 'Agentes básicos', icon: Sparkles },
+          { text: 'Cursos de Canva e CapCut', icon: BookOpen },
+          { text: 'Canva Pro', icon: Palette },
+          { text: 'CapCut Pro', icon: Scissors },
+        ])
+    : []
 
   return (
     <div className="max-w-4xl mx-auto">
