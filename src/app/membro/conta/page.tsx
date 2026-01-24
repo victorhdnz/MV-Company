@@ -308,9 +308,9 @@ export default function AccountPage() {
       // Verificar status da resposta
       if (!response.ok) {
         // Se for assinatura manual, mostrar mensagem informativa (não é erro)
-        if (data.isManual) {
-          toast('Esta assinatura foi criada manualmente. Para gerenciar sua assinatura, entre em contato com o suporte através do WhatsApp.', {
-            duration: 6000,
+        if (data.isManual || response.status === 400) {
+          toast('Esta assinatura foi liberada manualmente e não pode ser gerenciada através do portal do Stripe. Para gerenciar sua assinatura, entre em contato com o suporte através do WhatsApp.', {
+            duration: 8000,
             icon: 'ℹ️',
             style: {
               background: '#fef3c7',
@@ -472,34 +472,20 @@ export default function AccountPage() {
               </div>
 
               <div className="text-center py-6">
-                {(hasActiveSubscription && subscription) || (hasServiceSubscriptions && hasStripeServiceSubscription) ? (
+                {hasActiveSubscription && subscription ? (
                   <>
-                    {hasActiveSubscription && subscription ? (
-                      <>
-                        <div className={`
-                          inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4
-                          ${isPro ? 'bg-amber-100 text-amber-700' : 'bg-gogh-yellow/20 text-gogh-black'}
-                        `}>
-                          <Crown className="w-5 h-5" />
-                          <span className="font-bold">
-                            {isPro ? 'Gogh Pro' : 'Gogh Essencial'}
-                          </span>
-                        </div>
-                        <p className="text-gogh-grayDark mb-6">
-                          Você está aproveitando todos os recursos do seu plano.
-                        </p>
-                      </>
-                    ) : hasServiceSubscriptions ? (
-                      <>
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gogh-yellow/20 text-gogh-black rounded-full mb-4">
-                          <Wrench className="w-5 h-5" />
-                          <span className="font-bold">Serviços Personalizados</span>
-                        </div>
-                        <p className="text-gogh-grayDark mb-6">
-                          Você tem serviços personalizados contratados. Gerencie sua assinatura para cancelar ou alterar.
-                        </p>
-                      </>
-                    ) : null}
+                    <div className={`
+                      inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4
+                      ${isPro ? 'bg-amber-100 text-amber-700' : 'bg-gogh-yellow/20 text-gogh-black'}
+                    `}>
+                      <Crown className="w-5 h-5" />
+                      <span className="font-bold">
+                        {isPro ? 'Gogh Pro' : 'Gogh Essencial'}
+                      </span>
+                    </div>
+                    <p className="text-gogh-grayDark mb-6">
+                      Você está aproveitando todos os recursos do seu plano.
+                    </p>
                     <button
                       onClick={handleManageSubscription}
                       disabled={openingPortal}
@@ -525,15 +511,25 @@ export default function AccountPage() {
                       <span className="font-bold">Serviços Personalizados</span>
                     </div>
                     <p className="text-gogh-grayDark mb-6">
-                      Você tem serviços personalizados contratados. Acesse a aba "Meus Serviços" para mais detalhes.
+                      Você tem serviços personalizados contratados. Gerencie sua assinatura para cancelar ou alterar.
                     </p>
-                    <Link
-                      href="/membro/servicos"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-gogh-yellow text-gogh-black font-medium rounded-xl hover:bg-gogh-yellow/90 transition-colors"
+                    <button
+                      onClick={handleManageSubscription}
+                      disabled={openingPortal}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-gogh-black text-white font-medium rounded-xl hover:bg-gogh-black/90 transition-colors disabled:opacity-50"
                     >
-                      Ver Meus Serviços
-                      <ExternalLink className="w-4 h-4" />
-                    </Link>
+                      {openingPortal ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Abrindo...
+                        </>
+                      ) : (
+                        <>
+                          Gerenciar Assinatura
+                          <ExternalLink className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
                   </>
                 ) : (
                   <>
