@@ -285,68 +285,8 @@ export const PricingComponent: React.FC<PricingComponentProps> = ({
               </div>
             </CardHeader>
             <CardContent className="flex-grow p-6 pt-0">
-              <h4 className="text-sm font-semibold mb-2 mt-4 text-gray-600">Recursos Incluídos:</h4>
-              <ul className="list-none space-y-0">
-                {featureCategories.length > 0 ? (
-                  // Usar categorias - mostrar apenas as que têm texto preenchido
-                  (() => {
-                    const availableCategories = featureCategories.filter((category) => {
-                      const categoryValue = (plan.category_values || []).find(cv => cv.category_id === category.id)
-                      return !!(categoryValue?.text && categoryValue.text.trim() !== '')
-                    })
-                    
-                    if (availableCategories.length === 0) {
-                      return (
-                        <li className="text-sm text-gray-500 py-2">
-                          Nenhuma categoria configurada
-                        </li>
-                      )
-                    }
-                    
-                    return (
-                      <>
-                        {availableCategories.slice(0, 5).map((category) => (
-                          <li key={category.id} className="flex items-start space-x-3 py-2">
-                            <Check className="h-4 w-4 flex-shrink-0 mt-0.5 text-[#F7C948]" aria-hidden="true" />
-                            <span className="text-sm text-[#0A0A0A]">{category.name}</span>
-                          </li>
-                        ))}
-                        {availableCategories.length > 5 && (
-                          <li className="text-sm text-[#F7C948] font-medium mt-2">
-                            +{availableCategories.length - 5} Categorias
-                          </li>
-                        )}
-                      </>
-                    )
-                  })()
-                ) : (
-                  // Fallback para features antigas (compatibilidade) - mostrar apenas as incluídas
-                  (() => {
-                    const includedFeatures = plan.features.filter(f => f.isIncluded)
-                    if (includedFeatures.length === 0) {
-                      return (
-                        <li className="text-sm text-gray-500 py-2">
-                          Nenhum recurso configurado
-                        </li>
-                      )
-                    }
-                    return (
-                      <>
-                        {includedFeatures.slice(0, 5).map((feature) => (
-                          <FeatureItem key={feature.name} feature={feature} />
-                        ))}
-                        {includedFeatures.length > 5 && (
-                          <li className="text-sm text-[#F7C948] font-medium mt-2">
-                            +{includedFeatures.length - 5} Recursos
-                          </li>
-                        )}
-                      </>
-                    )
-                  })()
-                )}
-              </ul>
               {plan.planType === 'service' && plan.serviceOptions && plan.serviceOptions.length > 0 && (
-                <div className="mt-6 border-t border-[#F7C948]/20 pt-4">
+                <div className="mt-4">
                   <h4 className="text-sm font-semibold mb-3 text-gray-700">Serviços inclusos na sua escolha:</h4>
                   <div className="space-y-2">
                     {plan.serviceOptions.map(option => {
