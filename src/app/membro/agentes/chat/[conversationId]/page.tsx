@@ -63,6 +63,7 @@ export default function ChatPage() {
   const [shouldSendNicheContext, setShouldSendNicheContext] = useState(false)
   const [isSendingNicheContext, setIsSendingNicheContext] = useState(false)
   const nicheContextSentRef = useRef(false)
+  const hasQuotaErrorRef = useRef(false) // Flag para evitar recarregamentos quando há erro de saldo
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -217,8 +218,17 @@ export default function ChatPage() {
       })
 
       if (!response.ok) {
-        // Se for erro de assinatura, não mostrar como erro de autenticação
-        if (response.status === 403) {
+        // Verificar se é erro de saldo/quota
+        const isQuotaError = data.code === 'OPENAI_INSUFFICIENT_QUOTA' || 
+                            data.error?.includes('insufficient_quota') ||
+                            data.error?.includes('muitas solicitações') ||
+                            response.status === 402
+        
+        if (isQuotaError) {
+          hasQuotaErrorRef.current = true
+          setError('Estamos recebendo muitas solicitações no momento. Por favor, tente novamente mais tarde.')
+          console.error('[Niche Context] Erro de saldo detectado, evitando novas tentativas')
+        } else if (response.status === 403) {
           setError('Assinatura não encontrada. Configure sua assinatura para usar os agentes de IA.')
         } else if (response.status === 401) {
           setError('Erro de autenticação. Faça login novamente.')
@@ -258,6 +268,12 @@ export default function ChatPage() {
 
   // Buscar dados da conversa
   useEffect(() => {
+    // Não recarregar se houver erro de saldo (quota)
+    if (hasQuotaErrorRef.current) {
+      console.log('[Chat] Erro de saldo detectado, evitando recarregamento')
+      return
+    }
+
     const fetchConversation = async () => {
       if (!user || !conversationId) return
       setIsLoading(true)
@@ -362,8 +378,9 @@ export default function ChatPage() {
     }
 
     fetchConversation()
-    // Resetar flag quando a conversa mudar
+    // Resetar flags quando a conversa mudar
     nicheContextSentRef.current = false
+    hasQuotaErrorRef.current = false // Resetar flag de erro de saldo quando mudar de conversa
   }, [conversationId, user, subscription, isNicheProfileComplete, sendInitialNicheContext, authLoading, isPro, supabase, router])
 
   // Verificar perfil quando a página ganha foco (usuário voltou de outra página)
@@ -398,6 +415,24 @@ export default function ChatPage() {
     window.addEventListener('focus', handleFocus)
     return () => window.removeEventListener('focus', handleFocus)
   }, [user, nicheProfileLoaded, messages.length, isNicheProfileComplete, supabase])
+
+  // Resetar flag de erro de saldo quando a página perde/ganha foco
+  // Isso permite que o usuário tente novamente quando voltar
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Quando a página perde foco, limpar erro e resetar flag
+        // Assim quando voltar, se tentar novamente e ainda houver erro, aparecerá novamente
+        if (hasQuotaErrorRef.current) {
+          hasQuotaErrorRef.current = false
+          setError(null)
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
 
   // Scroll quando mensagens mudam
   useEffect(() => {
@@ -533,6 +568,11 @@ export default function ChatPage() {
         data.assistantMessage
       ])
 
+      // Se a mensagem foi enviada com sucesso, resetar flag de erro de saldo
+      // Isso permite que o usuário tente novamente se o saldo foi restaurado
+      hasQuotaErrorRef.current = false
+      setError(null) // Limpar qualquer erro anterior
+
       // Atualizar uso após envio bem-sucedido
       if (usageInfo) {
         const newUsage = usageInfo.current + 1
@@ -545,7 +585,21 @@ export default function ChatPage() {
       }
     } catch (error: any) {
       console.error('Error sending message:', error)
-      setError(error.message || 'Erro ao enviar mensagem')
+      
+      // Verificar se é erro de saldo/quota da OpenAI
+      const isQuotaError = error.message?.includes('insufficient_quota') || 
+                          error.message?.includes('muitas solicitações') ||
+                          error.message?.includes('OPENAI_INSUFFICIENT_QUOTA') ||
+                          error.code === 'OPENAI_INSUFFICIENT_QUOTA'
+      
+      if (isQuotaError) {
+        // Marcar flag para evitar recarregamentos
+        hasQuotaErrorRef.current = true
+        setError('Estamos recebendo muitas solicitações no momento. Por favor, tente novamente mais tarde.')
+      } else {
+        setError(error.message || 'Erro ao enviar mensagem')
+      }
+      
       // Remover mensagem temporária em caso de erro
       setMessages(prev => prev.filter(m => !m.id.startsWith('temp-')))
     } finally {
@@ -836,16 +890,29 @@ export default function ChatPage() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mx-4 mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2"
+          className="mx-4 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg"
         >
-          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-          <p className="text-sm text-red-700 flex-1">{error}</p>
-          <button
-            onClick={() => setError(null)}
-            className="text-red-500 hover:text-red-700"
-          >
-            ✕
-          </button>
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm text-red-700 mb-2">{error}</p>
+              {hasQuotaErrorRef.current && (
+                <p className="text-xs text-red-600 mt-2">
+                  Você pode tentar novamente mais tarde. Se o problema persistir, entre em contato com o suporte.
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                hasQuotaErrorRef.current = false
+                setError(null)
+              }}
+              className="text-red-500 hover:text-red-700 flex-shrink-0"
+              aria-label="Fechar mensagem de erro"
+            >
+              ✕
+            </button>
+          </div>
         </motion.div>
       )}
 
