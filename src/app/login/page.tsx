@@ -91,7 +91,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gogh-black via-gogh-grayDark to-gogh-yellow/20 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gogh-beige via-white to-gogh-beige flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -109,7 +109,7 @@ export default function LoginPage() {
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-xl border border-gogh-grayLight overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-gogh-black to-gogh-grayDark p-8 text-center">
+          <div className="bg-gradient-to-r from-gogh-black via-gogh-yellow/30 to-gogh-black p-8 text-center">
             {siteLogo ? (
               <div className="w-20 h-20 mx-auto mb-4 relative">
                 <Image
