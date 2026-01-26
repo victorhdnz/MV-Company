@@ -52,7 +52,13 @@ async function getSiteSettings() {
     const dataTyped = data as SiteSettingsData | null
 
     if (error) {
-      console.error('Error fetching site settings:', error)
+      console.error('[Homepage] Erro ao buscar site_settings:', error)
+      console.error('[Homepage] Detalhes do erro:', JSON.stringify(error, null, 2))
+      return null
+    }
+
+    if (!dataTyped) {
+      console.warn('[Homepage] Nenhum dado encontrado em site_settings para key="general"')
       return null
     }
 
